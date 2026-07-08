@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { ApiError } from "@/lib/api-error";
 
 export async function getSession() {
   const supabase = await createClient();
@@ -15,7 +16,7 @@ export async function requireAuth() {
   const user = await getSession();
 
   if (!user) {
-    throw new Error("No autenticado");
+    throw new ApiError(401, "No autenticado");
   }
 
   return user;
