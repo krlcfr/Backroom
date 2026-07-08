@@ -10,3 +10,13 @@ export async function getSession() {
 
   return data.user;
 }
+
+export async function requireAuth() {
+  const user = await getSession();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  return user;
+}
