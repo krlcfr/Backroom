@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BackRoom
 
-## Getting Started
+Plataforma web colaborativa de estudio y organización del conocimiento. Crea espacios (BackRooms), organiza salas temáticas, comparte recursos académicos y controla permisos de acceso.
 
-First, run the development server:
+## Stack
+
+| Capa | Tecnología |
+|------|-----------|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, Tailwind CSS v4 |
+| Lenguaje | TypeScript 5 |
+| Base de datos | Supabase PostgreSQL |
+| Autenticación | Supabase Auth + `@supabase/ssr` |
+| Almacenamiento | Supabase Storage |
+| Despliegue | Railway o Render |
+
+## Requisitos
+
+- Node.js 20+
+- npm
+- Cuenta en Supabase (plan gratuito)
+
+## Configuración inicial
+
+1. Clonar el repositorio:
+   ```bash
+   git clone <repo-url>
+   cd backroom
+   ```
+
+2. Instalar dependencias:
+   ```bash
+   npm install
+   ```
+
+3. Crear archivo `.env.local` a partir del ejemplo:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+4. Completar las variables en `.env.local` con los valores de tu proyecto Supabase.
+
+5. Iniciar el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
+
+6. Abrir [http://localhost:3000](http://localhost:3000).
+
+## Seed del SuperAdmin
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run seed
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts disponibles
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm start` | Iniciar servidor de producción |
+| `npm run lint` | Ejecutar ESLint |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Estructura del proyecto
 
-## Learn More
+```
+app/
+├── api/           # Route Handlers (API REST)
+├── (auth)/        # Login, registro, recuperar contraseña
+├── dashboard/     # Dashboard principal
+├── backrooms/     # BackRooms, salas, recursos
+├── admin/         # Panel SuperAdmin
+├── _components/   # Componentes reutilizables
+└── _lib/          # Lógica compartida (Supabase client, utils)
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Despliegue
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+El proyecto está configurado para desplegarse en Railway o Render como Node.js standalone (no Vercel, debido a límites de tamaño de archivos en el plan gratuito).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Documentación
 
-## Deploy on Vercel
+La documentación completa del proyecto (análisis, diseño, decisiones técnicas) se encuentra en el repositorio de documentación.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Licencia
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Uso educativo — Proyecto de grado.
