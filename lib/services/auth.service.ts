@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ApiError } from "@/lib/api-error";
-import type { RegisterInput } from "@/lib/validations/schemas";
+import type { RegisterInput, LoginInput } from "@/lib/validations/schemas";
 
 export class AuthService {
   static async register(input: RegisterInput) {
@@ -39,6 +39,20 @@ export class AuthService {
     return { id: authData.user.id, username: input.username, email: input.email };
   }
 
-  static async login() {}
+  static async login(input: LoginInput) {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: input.email,
+      password: input.password,
+    });
+
+    if (error || !data.user) {
+      throw new ApiError(401, "Correo o contrasena incorrectos");
+    }
+
+    return { id: data.user.id, email: data.user.email };
+  }
+
   static async logout() {}
 }
