@@ -55,7 +55,7 @@ export default function RecuperarPage() {
         tu contraseña.
       </p>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-1">
+        <label htmlFor="email" className="block text-sm font-medium mb-1 text-zinc-900">
           Correo electrónico
         </label>
         <input

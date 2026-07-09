@@ -38,7 +38,7 @@ export default function RegistroPage() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="username" className="block text-sm font-medium mb-1">
+        <label htmlFor="username" className="block text-sm font-medium mb-1 text-zinc-900">
           Nombre de usuario
         </label>
         <input
@@ -51,7 +51,7 @@ export default function RegistroPage() {
         />
       </div>
       <div>
-        <label htmlFor="nombre" className="block text-sm font-medium mb-1">
+        <label htmlFor="nombre" className="block text-sm font-medium mb-1 text-zinc-900">
           Nombre completo
         </label>
         <input
@@ -64,7 +64,7 @@ export default function RegistroPage() {
         />
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-1">
+        <label htmlFor="email" className="block text-sm font-medium mb-1 text-zinc-900">
           Correo electrónico
         </label>
         <input
@@ -77,7 +77,7 @@ export default function RegistroPage() {
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium mb-1">
+        <label htmlFor="password" className="block text-sm font-medium mb-1 text-zinc-900">
           Contraseña
         </label>
         <input

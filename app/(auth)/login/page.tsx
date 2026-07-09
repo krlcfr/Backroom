@@ -36,7 +36,7 @@ export default function LoginPage() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-1">
+        <label htmlFor="email" className="block text-sm font-medium mb-1 text-zinc-900">
           Correo electrónico
         </label>
         <input
@@ -49,7 +49,7 @@ export default function LoginPage() {
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium mb-1">
+        <label htmlFor="password" className="block text-sm font-medium mb-1 text-zinc-900">
           Contraseña
         </label>
         <input
