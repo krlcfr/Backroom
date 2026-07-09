@@ -54,5 +54,12 @@ export class AuthService {
     return { id: data.user.id, email: data.user.email };
   }
 
-  static async logout() {}
+  static async logout() {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      throw new ApiError(500, "No se pudo cerrar la sesion");
+    }
+  }
 }
