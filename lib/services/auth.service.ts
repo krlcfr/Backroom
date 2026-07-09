@@ -62,4 +62,19 @@ export class AuthService {
       throw new ApiError(500, "No se pudo cerrar la sesion");
     }
   }
+
+  static async getProfile(authId: string) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("usuarios")
+      .select("id, username, nombre_completo, correo, es_superadmin, activo, created_at")
+      .eq("auth_id", authId)
+      .single();
+
+    if (error || !data) {
+      throw new ApiError(404, "Perfil no encontrado");
+    }
+
+    return data;
+  }
 }
