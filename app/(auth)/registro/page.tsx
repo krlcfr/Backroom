@@ -7,7 +7,7 @@ import Link from "next/link"
 export default function RegistroPage() {
   const router = useRouter()
   const [username, setUsername] = useState("")
-  const [nombreCompleto, setNombreCompleto] = useState("")
+  const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -21,7 +21,7 @@ export default function RegistroPage() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, nombre_completo: nombreCompleto, email, password }),
+      body: JSON.stringify({ username, fullName, email, password }),
     })
 
     if (!res.ok) {
@@ -51,15 +51,15 @@ export default function RegistroPage() {
         />
       </div>
       <div>
-        <label htmlFor="nombre" className="block text-sm font-medium mb-1 text-zinc-900">
+        <label htmlFor="fullName" className="block text-sm font-medium mb-1 text-zinc-900">
           Nombre completo
         </label>
         <input
-          id="nombre"
+          id="fullName"
           type="text"
           required
-          value={nombreCompleto}
-          onChange={(e) => setNombreCompleto(e.target.value)}
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
           className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
         />
       </div>
