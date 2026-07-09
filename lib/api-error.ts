@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 
 export class ApiError extends Error {
   status: number;
@@ -12,6 +13,13 @@ export class ApiError extends Error {
 export function handleApiError(error: unknown) {
   if (error instanceof ApiError) {
     return NextResponse.json({ error: error.message }, { status: error.status });
+  }
+
+  if (error instanceof ZodError) {
+    return NextResponse.json(
+      { error: "Datos invalidos", detalles: error.flatten().fieldErrors },
+      { status: 400 }
+    );
   }
 
   console.error(error);
