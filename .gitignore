@@ -44,3 +44,6 @@ next-env.d.ts
 # documentacion del proyecto (vive en un repo/carpeta separada, no aplica aqui)
 docs/
 
+# configuracion local del editor
+.vscode/
+
