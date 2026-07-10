@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ApiError } from "@/lib/api-error";
-import type { RegisterInput, LoginInput } from "@/lib/validations/schemas";
+import type { RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from "@/lib/validations/schemas";
 
 export class AuthService {
   static async register(input: RegisterInput) {
@@ -76,5 +76,35 @@ export class AuthService {
     }
 
     return data;
+  }
+
+  static async forgotPassword(input: ForgotPasswordInput) {
+    const supabase = await createClient();
+    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL}/recuperar/confirmar`;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(input.email, { redirectTo });
+
+    if (error) {
+      throw new ApiError(400, error.message);
+    }
+  }
+
+  static async resetPassword(input: ResetPasswordInput) {
+    const supabase = await createClient();
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash: input.tokenHash,
+      type: "recovery",
+    });
+
+    if (verifyError) {
+      throw new ApiError(400, "El enlace de recuperacion es invalido o expiro");
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({ password: input.password });
+
+    if (updateError) {
+      throw new ApiError(500, "No se pudo actualizar la contrasena");
+    }
   }
 }
