@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   const isAuthPage =
     pathname.startsWith("/login") ||
     pathname.startsWith("/registro") ||
-    pathname.startsWith("/recuperar")
+    (pathname.startsWith("/recuperar") && pathname !== "/recuperar/confirmar")
 
   const isProtectedPage =
     pathname.startsWith("/dashboard") || pathname.startsWith("/admin")

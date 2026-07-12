@@ -92,6 +92,7 @@ export class AuthService {
 
   static async forgotPassword(input: ForgotPasswordInput) {
     const supabase = await createClient();
+
     const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL}/recuperar/confirmar`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(input.email, { redirectTo });
@@ -104,19 +105,22 @@ export class AuthService {
   static async resetPassword(input: ResetPasswordInput) {
     const supabase = await createClient();
 
-    const { error: verifyError } = await supabase.auth.verifyOtp({
-      token_hash: input.tokenHash,
-      type: "recovery",
-    });
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(input.code);
 
-    if (verifyError) {
+    if (exchangeError) {
       throw new ApiError(400, "El enlace de recuperación no es válido o ha expirado");
     }
 
     const { error: updateError } = await supabase.auth.updateUser({ password: input.password });
 
     if (updateError) {
-      throw new ApiError(500, "No se pudo actualizar la contraseña");
+      throw new ApiError(500, "No se pudo restablecer la contraseña");
+    }
+
+    const { error: signOutError } = await supabase.auth.signOut();
+
+    if (signOutError) {
+      throw new ApiError(500, "No se pudo cerrar la sesión");
     }
   }
 }

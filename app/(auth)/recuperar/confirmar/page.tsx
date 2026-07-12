@@ -7,19 +7,23 @@ import Link from "next/link"
 function ConfirmarForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const code = searchParams.get("code") ?? searchParams.get("token_hash")
-  const hasHashError = typeof window !== "undefined" && window.location.hash.includes("error=")
+  const code = searchParams.get("code")
 
-  const [error, setError] = useState(
-    hasHashError ? "El enlace de recuperación no es válido o ha expirado" : code ? "" : "El enlace de recuperación no es válido o ha expirado"
-  )
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
+  const [error, setError] = useState(
+    !code ? "El enlace de recuperación no es válido o ha expirado" : ""
+  )
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError("")
+
+    if (!code) {
+      setError("El enlace de recuperación no es válido o ha expirado")
+      return
+    }
 
     if (password !== confirm) {
       setError("Las contraseñas no coinciden")
@@ -36,7 +40,7 @@ function ConfirmarForm() {
     const res = await fetch("/api/auth/reset-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tokenHash: code, password }),
+      body: JSON.stringify({ code, password }),
     })
 
     if (!res.ok) {
@@ -50,7 +54,7 @@ function ConfirmarForm() {
     router.refresh()
   }
 
-  if (error) {
+  if (!code) {
     return (
       <div className="space-y-4 text-center">
         <p className="text-sm text-red-600">{error}</p>
