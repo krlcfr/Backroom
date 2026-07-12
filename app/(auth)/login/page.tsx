@@ -1,11 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const reset = searchParams.get("reset")
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -35,6 +38,11 @@ export default function LoginPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {reset === "exito" && (
+        <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+          Contraseña actualizada. Iniciá sesión con tu nueva contraseña.
+        </p>
+      )}
       <div>
         <label htmlFor="email" className="block text-sm font-medium mb-1 text-zinc-900">
           Correo electrónico
@@ -81,5 +89,13 @@ export default function LoginPage() {
         </Link>
       </div>
     </form>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<p className="text-sm text-zinc-500">Cargando…</p>}>
+      <LoginForm />
+    </Suspense>
   )
 }
