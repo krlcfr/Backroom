@@ -27,7 +27,7 @@ function LoginForm() {
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error || "Error al iniciar sesión")
+      setError(data.error || "No se pudo iniciar sesión")
       setLoading(false)
       return
     }

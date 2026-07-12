@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ApiError } from "@/lib/api-error";
 import type { RegisterInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from "@/lib/validations/schemas";
 
 export class AuthService {
   static async register(input: RegisterInput) {
     const supabase = await createClient();
+    const supabaseAdmin = createAdminClient();
 
     const { data: existingUsername } = await supabase
       .from("usuarios")
@@ -13,7 +15,17 @@ export class AuthService {
       .maybeSingle();
 
     if (existingUsername) {
-      throw new ApiError(409, "El nombre de usuario ya esta en uso");
+      throw new ApiError(409, "El nombre de usuario ingresado ya se encuentra en uso");
+    }
+
+    const { data: existingEmail } = await supabase
+      .from("usuarios")
+      .select("id")
+      .eq("correo", input.email)
+      .maybeSingle();
+
+    if (existingEmail) {
+      throw new ApiError(409, "El correo electrónico ingresado ya se encuentra registrado");
     }
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -22,10 +34,10 @@ export class AuthService {
     });
 
     if (authError || !authData.user) {
-      throw new ApiError(400, authError?.message ?? "No se pudo crear la cuenta");
+      throw new ApiError(400, "No se pudo completar el registro");
     }
 
-    const { error: insertError } = await supabase.from("usuarios").insert({
+    const { error: insertError } = await supabaseAdmin.from("usuarios").insert({
       auth_id: authData.user.id,
       username: input.username,
       nombre_completo: input.fullName,
@@ -48,7 +60,7 @@ export class AuthService {
     });
 
     if (error || !data.user) {
-      throw new ApiError(401, "Correo o contrasena incorrectos");
+      throw new ApiError(401, "Correo electrónico o contraseña incorrectos");
     }
 
     return { id: data.user.id, email: data.user.email };
@@ -59,7 +71,7 @@ export class AuthService {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      throw new ApiError(500, "No se pudo cerrar la sesion");
+      throw new ApiError(500, "No se pudo cerrar la sesión");
     }
   }
 
@@ -85,7 +97,7 @@ export class AuthService {
     const { error } = await supabase.auth.resetPasswordForEmail(input.email, { redirectTo });
 
     if (error) {
-      throw new ApiError(400, error.message ?? "Error al enviar el correo de recuperacion");
+      throw new ApiError(400, "No se pudo enviar el correo de recuperación");
     }
   }
 
@@ -98,13 +110,13 @@ export class AuthService {
     });
 
     if (verifyError) {
-      throw new ApiError(400, "El enlace de recuperacion es invalido o expiro");
+      throw new ApiError(400, "El enlace de recuperación no es válido o ha expirado");
     }
 
     const { error: updateError } = await supabase.auth.updateUser({ password: input.password });
 
     if (updateError) {
-      throw new ApiError(500, "No se pudo actualizar la contrasena");
+      throw new ApiError(500, "No se pudo actualizar la contraseña");
     }
   }
 }

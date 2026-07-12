@@ -26,7 +26,7 @@ export default function RegistroPage() {
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error || "Error al registrarse")
+      setError(data.error || "No se pudo completar el registro")
       setLoading(false)
       return
     }

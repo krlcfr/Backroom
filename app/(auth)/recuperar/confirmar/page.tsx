@@ -7,11 +7,14 @@ import Link from "next/link"
 function ConfirmarForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const tokenHash = searchParams.get("token_hash")
+  const code = searchParams.get("code") ?? searchParams.get("token_hash")
+  const hasHashError = typeof window !== "undefined" && window.location.hash.includes("error=")
 
+  const [error, setError] = useState(
+    hasHashError ? "El enlace de recuperación no es válido o ha expirado" : code ? "" : "El enlace de recuperación no es válido o ha expirado"
+  )
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
-  const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -28,22 +31,17 @@ function ConfirmarForm() {
       return
     }
 
-    if (!tokenHash) {
-      setError("El enlace de recuperación no es válido")
-      return
-    }
-
     setLoading(true)
 
     const res = await fetch("/api/auth/reset-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tokenHash, password }),
+      body: JSON.stringify({ tokenHash: code, password }),
     })
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error || "Error al restablecer la contraseña")
+      setError(data.error || "No se pudo restablecer la contraseña")
       setLoading(false)
       return
     }
@@ -52,12 +50,10 @@ function ConfirmarForm() {
     router.refresh()
   }
 
-  if (!tokenHash) {
+  if (error) {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-sm text-red-600">
-          El enlace de recuperación no es válido o ya expiró.
-        </p>
+        <p className="text-sm text-red-600">{error}</p>
         <Link
           href="/recuperar"
           className="block text-sm text-zinc-500 hover:text-zinc-900"
