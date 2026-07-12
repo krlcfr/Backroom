@@ -85,7 +85,7 @@ export class AuthService {
     const { error } = await supabase.auth.resetPasswordForEmail(input.email, { redirectTo });
 
     if (error) {
-      throw new ApiError(400, error.message);
+      throw new ApiError(400, error.message ?? "Error al enviar el correo de recuperacion");
     }
   }
 
