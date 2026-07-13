@@ -35,6 +35,10 @@ yarn-error.log*
 # turbopack
 .turbo/
 
+# supabase cli (por si se usa en el futuro, ademas del dashboard web)
+supabase/.branches
+supabase/.temp
+
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
