@@ -42,4 +42,19 @@ export class BackroomsService {
 
     return backroom;
   }
+
+  static async listForUser() {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("backrooms")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new ApiError(500, "No se pudieron obtener las BackRooms");
+    }
+
+    return data;
+  }
 }
