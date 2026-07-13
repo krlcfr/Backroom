@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 
 type Permiso = "solo_visualizar" | "contribuir";
 
-async function getUsuarioInterno(authId: string) {
+export async function getUsuarioInterno(authId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("usuarios")
