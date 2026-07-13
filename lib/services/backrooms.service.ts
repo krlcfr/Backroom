@@ -3,6 +3,24 @@ import { getUsuarioInterno } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
 import type { CreateBackroomInput } from "@/lib/validations/schemas";
 
+function toBackroomResponse(row: {
+  id: string;
+  propietario_id: string;
+  nombre: string;
+  descripcion: string | null;
+  portada_url: string | null;
+  created_at: string;
+}) {
+  return {
+    id: row.id,
+    ownerId: row.propietario_id,
+    name: row.nombre,
+    description: row.descripcion,
+    coverUrl: row.portada_url,
+    createdAt: row.created_at,
+  };
+}
+
 export class BackroomsService {
   static async create(authId: string, input: CreateBackroomInput) {
     const usuario = await getUsuarioInterno(authId);
@@ -40,7 +58,7 @@ export class BackroomsService {
       throw new ApiError(500, "No se pudo crear la BackRoom");
     }
 
-    return backroom;
+    return toBackroomResponse(backroom);
   }
 
   static async listForUser() {
@@ -55,6 +73,6 @@ export class BackroomsService {
       throw new ApiError(500, "No se pudieron obtener las BackRooms");
     }
 
-    return data;
+    return data.map(toBackroomResponse);
   }
 }
