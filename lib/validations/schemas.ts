@@ -28,3 +28,11 @@ export const resetPasswordSchema = z.object({
 });
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const createBackroomSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().max(2000).optional(),
+  coverUrl: z.string().url().optional(),
+});
+
+export type CreateBackroomInput = z.infer<typeof createBackroomSchema>;
