@@ -75,4 +75,20 @@ export class BackroomsService {
 
     return data.map(toBackroomResponse);
   }
+
+  static async getById(backroomId: string) {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("backrooms")
+      .select("*")
+      .eq("id", backroomId)
+      .maybeSingle();
+
+    if (error || !data) {
+      throw new ApiError(404, "BackRoom no encontrada");
+    }
+
+    return toBackroomResponse(data);
+  }
 }
