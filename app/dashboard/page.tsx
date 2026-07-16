@@ -1,27 +1,5 @@
 import Link from "next/link"
-
-const MOCK_USER_ID = "user-1"
-
-const MOCK_BACKROOMS = [
-  {
-    id: "br-1",
-    nombre: "Matemáticas Discretas",
-    descripcion: "Apuntes y ejercicios de MD",
-    portada_url: null,
-    propietario_id: MOCK_USER_ID,
-    cant_salas: 3,
-    created_at: "2026-07-01",
-  },
-  {
-    id: "br-2",
-    nombre: "Programación Web",
-    descripcion: "Recursos de frontend y backend",
-    portada_url: null,
-    propietario_id: "user-2",
-    cant_salas: 5,
-    created_at: "2026-07-05",
-  },
-]
+import { createClient } from "@/lib/supabase/server"
 
 const PORTADA_COLORS = [
   "from-violet-500 to-purple-600",
@@ -31,9 +9,29 @@ const PORTADA_COLORS = [
   "from-rose-500 to-pink-600",
 ]
 
-export default function DashboardPage() {
-  const backrooms = MOCK_BACKROOMS
-  const currentUserId = MOCK_USER_ID
+interface Backroom {
+  id: string
+  ownerId: string
+  name: string
+  description: string | null
+  coverUrl: string | null
+  createdAt: string
+}
+
+async function getBackrooms() {
+  const res = await fetch("http://localhost:3000/api/backrooms", {
+    cache: "no-store",
+  })
+  if (!res.ok) return []
+  return res.json() as Promise<Backroom[]>
+}
+
+export default async function DashboardPage() {
+  const backrooms = await getBackrooms()
+
+  const supabase = await createClient()
+  const { data: sessionData } = await supabase.auth.getSession()
+  const currentUserId = sessionData.session?.user?.id ?? null
   const limite = 3
 
   return (
@@ -76,10 +74,10 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {backrooms.map((br, i) => {
+          {backrooms.map((br: Backroom, i: number) => {
             const gradient =
               PORTADA_COLORS[i % PORTADA_COLORS.length]
-            const esInvitado = br.propietario_id !== currentUserId
+            const esInvitado = currentUserId !== null && br.ownerId !== currentUserId
 
             return (
               <Link
@@ -98,10 +96,10 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-1 p-4">
                   <h2 className="font-semibold text-zinc-900 group-hover:underline">
-                    {br.nombre}
+                    {br.name}
                   </h2>
                   <p className="text-xs text-zinc-500">
-                    {br.cant_salas} sala{br.cant_salas !== 1 ? "s" : ""}
+                    {br.description ? "Con descripción" : "Sin descripción"}
                   </p>
                 </div>
               </Link>

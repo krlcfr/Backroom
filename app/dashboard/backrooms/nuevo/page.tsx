@@ -4,21 +4,6 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
-async function mockCreate(data: { nombre: string; descripcion?: string; portada_url?: string }) {
-  await new Promise((r) => setTimeout(r, 600))
-  return {
-    backroom: {
-      id: crypto.randomUUID(),
-      nombre: data.nombre,
-      descripcion: data.descripcion ?? null,
-      portada_url: data.portada_url ?? null,
-      propietario_id: "user-1",
-      cant_salas: 0,
-      created_at: new Date().toISOString(),
-    },
-  }
-}
-
 export default function NuevaBackRoomPage() {
   const router = useRouter()
   const [nombre, setNombre] = useState("")
@@ -40,16 +25,27 @@ export default function NuevaBackRoomPage() {
     setLoading(true)
 
     try {
-      const { backroom } = await mockCreate({
-        nombre: trimmed,
-        descripcion: descripcion.trim() || undefined,
-        portada_url: portadaUrl.trim() || undefined,
+      const res = await fetch("/api/backrooms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: trimmed,
+          description: descripcion.trim() || undefined,
+          coverUrl: portadaUrl.trim() || undefined,
+        }),
       })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "No se pudo crear la BackRoom")
+      }
+
+      const backroom = await res.json()
 
       router.push(`/dashboard/backrooms/${backroom.id}`)
       router.refresh()
-    } catch {
-      setError("No se pudo crear la BackRoom")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo crear la BackRoom")
       setLoading(false)
     }
   }
@@ -71,12 +67,13 @@ export default function NuevaBackRoomPage() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            disabled={loading}
           />
         </div>
 
         <div>
           <label htmlFor="descripcion" className="mb-1 block text-sm font-medium text-zinc-900">
-            Descripción
+            Descripción (opcional)
           </label>
           <textarea
             id="descripcion"
@@ -84,20 +81,22 @@ export default function NuevaBackRoomPage() {
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            disabled={loading}
           />
         </div>
 
         <div>
-          <label htmlFor="portada" className="mb-1 block text-sm font-medium text-zinc-900">
-            URL de portada
+          <label htmlFor="portadaUrl" className="mb-1 block text-sm font-medium text-zinc-900">
+            URL de portada (opcional)
           </label>
           <input
-            id="portada"
+            id="portadaUrl"
             type="url"
             value={portadaUrl}
             onChange={(e) => setPortadaUrl(e.target.value)}
             placeholder="https://ejemplo.com/imagen.jpg"
             className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            disabled={loading}
           />
         </div>
 

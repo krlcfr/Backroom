@@ -1,32 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 
-const MOCK_USER_ID = "user-1"
-
-const MOCK_SALAS = [
-  { id: "sala-1", nombre: "Parciales viejos", cant_recursos: 4 },
-  { id: "sala-2", nombre: "Resúmenes", cant_recursos: 7 },
-  { id: "sala-3", nombre: "Ejercicios prácticos", cant_recursos: 2 },
-]
-
-const MOCK_BACKROOMS: Record<string, { nombre: string; descripcion: string; propietario_id: string; propietario_nombre: string; salas: typeof MOCK_SALAS }> = {
-  "br-1": {
-    nombre: "Matemáticas Discretas",
-    descripcion: "Apuntes y ejercicios de MD",
-    propietario_id: MOCK_USER_ID,
-    propietario_nombre: "Vos",
-    salas: MOCK_SALAS,
-  },
-  "br-2": {
-    nombre: "Programación Web",
-    descripcion: "Recursos de frontend y backend",
-    propietario_id: "user-2",
-    propietario_nombre: "Carlos",
-    salas: [],
-  },
+interface Backroom {
+  id: string
+  name: string
+  description: string | null
+  coverUrl: string | null
+  ownerId: string
+  createdAt: string
 }
 
 export default function BackRoomPage() {
@@ -35,22 +19,70 @@ export default function BackRoomPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [backroom, setBackroom] = useState<Backroom | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const backroom = MOCK_BACKROOMS[id] ?? {
-    nombre: "BackRoom",
-    descripcion: "",
-    propietario_id: MOCK_USER_ID,
-    propietario_nombre: "Vos",
-    salas: [],
-  }
+  useEffect(() => {
+    async function fetchBackroom() {
+      try {
+        const res = await fetch(`/api/backrooms/${id}`)
+        if (!res.ok) {
+          throw new Error("No se pudo cargar la BackRoom")
+        }
+        const data = await res.json()
+        setBackroom(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error desconocido")
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (id) fetchBackroom()
+  }, [id])
 
-  const esPropietario = backroom.propietario_id === MOCK_USER_ID
+  const currentUserId = "user-1"
+  const esPropietario = backroom?.ownerId === currentUserId
 
   async function handleDelete() {
+    if (!id) return
     setDeleting(true)
-    await new Promise((r) => setTimeout(r, 600))
-    router.push("/dashboard")
-    router.refresh()
+    try {
+      const res = await fetch(`/api/backrooms/${id}`, {
+        method: "DELETE",
+      })
+      if (!res.ok) throw new Error("No se pudo eliminar")
+      router.push("/dashboard")
+      router.refresh()
+    } catch {
+      setError("No se pudo eliminar la BackRoom")
+      setDeleting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-zinc-200 rounded w-1/4" />
+          <div className="h-32 bg-zinc-200 rounded" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !backroom) {
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-8 text-center">
+        <p className="text-red-600">{error || "BackRoom no encontrada"}</p>
+        <Link
+          href="/dashboard"
+          className="mt-4 inline-block text-zinc-500 hover:text-zinc-900"
+        >
+          Volver al dashboard
+        </Link>
+      </div>
+    )
   }
 
   return (
@@ -60,16 +92,23 @@ export default function BackRoomPage() {
           Dashboard
         </Link>
         <span className="mx-2">›</span>
-        <span className="text-zinc-900">{backroom.nombre}</span>
+        <span className="text-zinc-900">{backroom.name}</span>
       </nav>
 
       <div className="mb-8 overflow-hidden rounded-lg border border-zinc-200">
-        <div className="flex h-32 items-end bg-gradient-to-br from-violet-500 to-purple-600 p-6">
-          <h1 className="text-2xl font-bold text-white">{backroom.nombre}</h1>
+        <div
+          className="flex h-32 items-end p-6 bg-cover bg-center"
+          style={
+            backroom.coverUrl
+              ? { backgroundImage: `url(${backroom.coverUrl})` }
+              : { backgroundImage: "linear-gradient(to bottom right, #8B5CF6, #7C3AED)" }
+          }
+        >
+          <h1 className="text-2xl font-bold text-white">{backroom.name}</h1>
         </div>
         <div className="flex items-center justify-between px-6 py-4">
           <p className="text-sm text-zinc-500">
-            Propietario: <span className="text-zinc-900">{backroom.propietario_nombre}</span>
+            Propietario: <span className="text-zinc-900">{esPropietario ? "Vos" : backroom.ownerId}</span>
           </p>
           {esPropietario && (
             <div className="relative">
@@ -100,6 +139,12 @@ export default function BackRoomPage() {
         </div>
       </div>
 
+      {backroom.description && (
+        <div className="mb-6 text-zinc-600">
+          <p>{backroom.description}</p>
+        </div>
+      )}
+
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Salas</h2>
         {esPropietario && (
@@ -112,36 +157,19 @@ export default function BackRoomPage() {
         )}
       </div>
 
-      {backroom.salas.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-zinc-300 py-12 text-center">
-          <p className="mb-4 text-sm text-zinc-500">
-            Esta BackRoom todavía no tiene salas.
-          </p>
-          {esPropietario && (
-            <button
-              disabled
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white opacity-50"
-            >
-              Crear primera sala
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {backroom.salas.map((sala) => (
-            <Link
-              key={sala.id}
-              href={`/dashboard/backrooms/${id}/salas/${sala.id}`}
-              className="rounded-lg border border-zinc-200 p-4 transition-shadow hover:shadow-md"
-            >
-              <h3 className="font-medium text-zinc-900">{sala.nombre}</h3>
-              <p className="mt-1 text-xs text-zinc-500">
-                {sala.cant_recursos} recurso{sala.cant_recursos !== 1 ? "s" : ""}
-              </p>
-            </Link>
-          ))}
-        </div>
-      )}
+      <div className="rounded-lg border border-dashed border-zinc-300 py-12 text-center">
+        <p className="mb-4 text-sm text-zinc-500">
+          Las salas se implementarán en el Módulo 3 (M-03).
+        </p>
+        {esPropietario && (
+          <button
+            disabled
+            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white opacity-50"
+          >
+            Crear primera sala (próximamente)
+          </button>
+        )}
+      </div>
 
       {confirmDelete && (
         <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/40">
