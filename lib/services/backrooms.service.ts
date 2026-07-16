@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getUsuarioInterno } from "@/lib/auth/rbac";
+import { getUsuarioInterno, isOwner } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
 import type { CreateBackroomInput } from "@/lib/validations/schemas";
 
@@ -90,5 +90,21 @@ export class BackroomsService {
     }
 
     return toBackroomResponse(data);
+  }
+
+  static async deleteById(authId: string, backroomId: string) {
+    const owns = await isOwner(authId, backroomId);
+
+    if (!owns) {
+      throw new ApiError(404, "BackRoom no encontrada");
+    }
+
+    const supabase = await createClient();
+
+    const { error } = await supabase.from("backrooms").delete().eq("id", backroomId);
+
+    if (error) {
+      throw new ApiError(500, "No se pudo eliminar la BackRoom");
+    }
   }
 }

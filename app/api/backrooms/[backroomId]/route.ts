@@ -19,6 +19,18 @@ export async function GET(
   }
 }
 
-export async function DELETE() {
-  return NextResponse.json({ message: "BE-15 Delete BackRoom — Pendiente" });
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ backroomId: string }> }
+) {
+  try {
+    const user = await requireAuth();
+    const { backroomId } = await params;
+
+    await BackroomsService.deleteById(user.id, backroomId);
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    return handleApiError(error);
+  }
 }
