@@ -47,3 +47,5 @@ docs/
 # configuracion local del editor
 .vscode/
 
+
+AGENTS.md
