@@ -10,10 +10,12 @@ function toBackroomResponse(row: {
   descripcion: string | null;
   portada_url: string | null;
   created_at: string;
-}) {
+  usuarios?: { auth_id: string; username: string } | null;
+}, ownerAuthIdOverride?: string) {
   return {
     id: row.id,
-    ownerId: row.propietario_id,
+    ownerId: ownerAuthIdOverride ?? row.usuarios?.auth_id ?? row.propietario_id,
+    ownerName: row.usuarios?.username ?? null,
     name: row.nombre,
     description: row.descripcion,
     coverUrl: row.portada_url,
@@ -58,7 +60,7 @@ export class BackroomsService {
       throw new ApiError(500, "No se pudo crear la BackRoom");
     }
 
-    return toBackroomResponse(backroom);
+    return toBackroomResponse(backroom, authId);
   }
 
   static async listForUser() {
@@ -66,14 +68,14 @@ export class BackroomsService {
 
     const { data, error } = await supabase
       .from("backrooms")
-      .select("*")
+      .select("*, usuarios(auth_id, username)")
       .order("created_at", { ascending: false });
 
     if (error) {
       throw new ApiError(500, "No se pudieron obtener las BackRooms");
     }
 
-    return data.map(toBackroomResponse);
+    return data.map((row) => toBackroomResponse(row));
   }
 
   static async getById(backroomId: string) {
@@ -81,7 +83,7 @@ export class BackroomsService {
 
     const { data, error } = await supabase
       .from("backrooms")
-      .select("*")
+      .select("*, usuarios(auth_id, username)")
       .eq("id", backroomId)
       .maybeSingle();
 

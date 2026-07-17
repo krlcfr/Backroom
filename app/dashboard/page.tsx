@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
+import { BackroomsService } from "@/lib/services/backrooms.service"
 
 const PORTADA_COLORS = [
   "from-violet-500 to-purple-600",
@@ -12,26 +13,25 @@ const PORTADA_COLORS = [
 interface Backroom {
   id: string
   ownerId: string
+  ownerName: string | null
   name: string
   description: string | null
   coverUrl: string | null
   createdAt: string
 }
 
-async function getBackrooms() {
-  const res = await fetch("http://localhost:3000/api/backrooms", {
-    cache: "no-store",
-  })
-  if (!res.ok) return []
-  return res.json() as Promise<Backroom[]>
-}
-
 export default async function DashboardPage() {
-  const backrooms = await getBackrooms()
-
   const supabase = await createClient()
   const { data: sessionData } = await supabase.auth.getSession()
   const currentUserId = sessionData.session?.user?.id ?? null
+
+  let backrooms: Backroom[] = []
+  try {
+    backrooms = await BackroomsService.listForUser()
+  } catch {
+    backrooms = []
+  }
+
   const limite = 3
 
   return (
@@ -86,11 +86,16 @@ export default async function DashboardPage() {
                 className="group overflow-hidden rounded-lg border border-zinc-200 transition-shadow hover:shadow-md"
               >
                 <div
-                  className={`flex h-28 items-end bg-gradient-to-br ${gradient} p-4`}
+                  className="flex h-28 items-end bg-cover bg-center p-4"
+                  style={
+                    br.coverUrl
+                      ? { backgroundImage: `url(${br.coverUrl})` }
+                      : { backgroundImage: `linear-gradient(to bottom right, ${gradient})` }
+                  }
                 >
                   {esInvitado && (
                     <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs font-medium text-zinc-700">
-                      Invitado
+                      {br.ownerName ?? "Invitado"}
                     </span>
                   )}
                 </div>

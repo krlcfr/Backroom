@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import { createBrowserClient } from "@supabase/ssr"
 
 interface Backroom {
   id: string
@@ -10,6 +11,7 @@ interface Backroom {
   description: string | null
   coverUrl: string | null
   ownerId: string
+  ownerName: string | null
   createdAt: string
 }
 
@@ -41,8 +43,18 @@ export default function BackRoomPage() {
     if (id) fetchBackroom()
   }, [id])
 
-  const currentUserId = "user-1"
-  const esPropietario = backroom?.ownerId === currentUserId
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const esPropietario = currentUserId !== null && backroom?.ownerId === currentUserId
+
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    supabase.auth.getSession().then(({ data }) => {
+      setCurrentUserId(data.session?.user?.id ?? null)
+    })
+  }, [])
 
   async function handleDelete() {
     if (!id) return
@@ -108,7 +120,7 @@ export default function BackRoomPage() {
         </div>
         <div className="flex items-center justify-between px-6 py-4">
           <p className="text-sm text-zinc-500">
-            Propietario: <span className="text-zinc-900">{esPropietario ? "Vos" : backroom.ownerId}</span>
+            Propietario: <span className="text-zinc-900">{backroom.ownerName ?? "Desconocido"}</span>
           </p>
           {esPropietario && (
             <div className="relative">
