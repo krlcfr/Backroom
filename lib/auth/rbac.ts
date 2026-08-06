@@ -52,3 +52,4 @@ export async function checkPermission(authId: string, backroomId: string, permis
 
   return miembro.permiso === "contribuir";
 }
+export type Role = Permiso;
