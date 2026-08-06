@@ -2,6 +2,10 @@
 
 Plataforma web colaborativa de estudio y organización del conocimiento. Crea espacios (BackRooms), organiza salas temáticas, comparte recursos académicos y controla permisos de acceso.
 
+## Mockup
+
+Mockup: https://stitch.withgoogle.com/projects/7610019985253129332?pli=1
+
 ## Stack
 
 | Capa | Tecnología |
