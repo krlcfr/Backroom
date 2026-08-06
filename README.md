@@ -8,7 +8,7 @@ Proyecto de grado — Tecnología en Análisis y Desarrollo de Software (ADSO), 
 
 El diseño de referencia de la interfaz se mantiene en Stitch:
 
-- **Mockup completo:** [https://stitch.withgoogle.com/projects/16836454301652292537](https://stitch.withgoogle.com/projects/16836454301652292537)
+- **Mockup completo:** [https://stitch.withgoogle.com/projects/7610019985253129332?pli=1](https://stitch.withgoogle.com/projects/7610019985253129332?pli=1)
 
 Es la fuente de verdad visual para las pantallas (login, registro, dashboard, salas, permisos, etc.). Las pantallas se van adaptando a código siguiendo el plan de mapeo mockup → UI → endpoint → página.
 
