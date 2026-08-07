@@ -10,11 +10,11 @@ type Role = 'admin' | 'editor' | 'viewer' | 'contribuir' | 'solo_visualizar';
 // Assign or update a role for a user in a backroom
 export async function POST(
   request: NextRequest,
-  { params }: { params: { backroomId: string; userId: string } }
+  { params }: { params: Promise<{ backroomId: string; userId: string }> }
 ) {
   try {
     const requester = await requireAuth();
-    const { backroomId, userId } = params;
+    const { backroomId, userId } = await params;
 
     // Solo el propietario (owner) puede cambiar roles
     const owner = await isOwner(requester.id, backroomId);
@@ -49,11 +49,11 @@ export async function POST(
 // Remove a user's role (i.e., revoke membership)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { backroomId: string; userId: string } }
+  { params }: { params: Promise<{ backroomId: string; userId: string }> }
 ) {
   try {
     const requester = await requireAuth();
-    const { backroomId, userId } = params;
+    const { backroomId, userId } = await params;
     const owner = await isOwner(requester.id, backroomId);
     if (!owner) {
       return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });

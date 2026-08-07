@@ -53,11 +53,12 @@ export async function GET(
     // Combinar en una matriz
     const matriz = miembros.map(m => {
       const p = permisos ? permisos.find(p => p.usuario_id === m.usuario_id) : undefined;
+      const u = Array.isArray(m.usuarios) ? m.usuarios[0] : m.usuarios;
       return {
         usuario_id: m.usuario_id,
-        username: m.usuarios?.username,
-        nombre_completo: m.usuarios?.nombre_completo,
-        correo: m.usuarios?.correo,
+        username: u?.username,
+        nombre_completo: u?.nombre_completo,
+        correo: u?.correo,
         rol_general: m.permiso, // 'contribuir' o 'solo_visualizar'
         permisos_especificos: p ? {
           salas_ver: p.salas_ver,
