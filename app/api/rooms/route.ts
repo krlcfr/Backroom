@@ -13,11 +13,7 @@ const createRoomSchema = z.object({
 });
 
 // POST /api/rooms — BE-33
-// Crea una sala dentro de un backroom.
-// Nota: la tabla `salas` aún NO tiene columnas `parent_id` ni `depth`.
-// TODO: ejecutar en Supabase SQL Editor:
-//   ALTER TABLE salas ADD COLUMN parent_id uuid REFERENCES salas(id) ON DELETE CASCADE;
-//   ALTER TABLE salas ADD COLUMN depth integer NOT NULL DEFAULT 0;
+// Crea una sala dentro de un backroom, opcionalmente con padre (árbol recursivo).
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
@@ -29,16 +25,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // Calcular profundidad (activo cuando existan parent_id y depth en la tabla)
+    // Calcular profundidad según el padre
     let depth = 0;
     if (input.parent_id) {
-      // TODO: descomentar tras migración de columnas
-      /*
       const { data: parent } = await supabase
-        .from("salas").select("depth").eq("id", input.parent_id).single();
+        .from("salas")
+        .select("depth")
+        .eq("id", input.parent_id)
+        .single();
       if (!parent) throw new ApiError(404, "Sala padre no encontrada.");
-      depth = parent.depth + 1;
-      */
+      depth = (parent.depth ?? 0) + 1;
     }
 
     const { data, error } = await supabase
@@ -47,8 +43,8 @@ export async function POST(request: NextRequest) {
         backroom_id: input.backroom_id,
         nombre: input.nombre,
         descripcion: input.descripcion ?? null,
-        // parent_id: input.parent_id ?? null, // TODO: activar tras migración
-        // depth,                              // TODO: activar tras migración
+        parent_id: input.parent_id ?? null,
+        depth,
       })
       .select()
       .single();

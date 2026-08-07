@@ -12,9 +12,6 @@ const createInvitationSchema = z.object({
 
 // POST /api/invitations — BE-49
 // Crea una invitación por email a un backroom. Solo el propietario puede invitar.
-// Nota: la tabla `invitaciones` en Supabase NO tiene columna `email`.
-// TODO: ejecutar en Supabase SQL Editor:
-//   ALTER TABLE invitaciones ADD COLUMN email varchar(255) NOT NULL DEFAULT '';
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
@@ -29,15 +26,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // Verificar que no exista ya una invitación activa para este email
+    // Verificar que no exista ya una invitación activa para este email en este backroom
     const { data: existing } = await supabase
       .from("invitaciones")
       .select("id")
       .eq("backroom_id", input.backroom_id)
+      .eq("email", input.email)
       .eq("activa", true)
       .maybeSingle();
 
-    if (existing) throw new ApiError(409, "Ya existe una invitación activa para este backroom.");
+    if (existing) throw new ApiError(409, "Ya existe una invitación activa para este email.");
 
     const codigo = `BR-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     const expira_en = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -47,10 +45,10 @@ export async function POST(request: NextRequest) {
       .insert({
         backroom_id: input.backroom_id,
         creado_por: usuario.id,
+        email: input.email,
         codigo,
         activa: true,
         expira_en,
-        // email: input.email, // TODO: descomentar tras migración
       })
       .select()
       .single();
