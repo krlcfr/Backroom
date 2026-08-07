@@ -46,6 +46,22 @@ export interface Sala {
   created_at: string;
 }
 
+export interface SalaPermiso {
+  id: string;
+  sala_id: string;
+  usuario_id: string;
+  salas_ver: boolean;
+  salas_acceder: boolean;
+  archivos_subir: boolean;
+  archivos_editar: boolean;
+  archivos_eliminar: boolean;
+  salas_crear: boolean;
+  salas_editar: boolean;
+  salas_eliminar: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // Sala con sus hijas (usada en árbol recursivo)
 export interface SalaConHijas extends Sala {
   children: SalaConHijas[];

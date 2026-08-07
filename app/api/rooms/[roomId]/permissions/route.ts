@@ -1,90 +1,157 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
+import { isOwner } from "@/lib/auth/rbac";
+import { createClient } from "@/lib/supabase/server";
 import { handleApiError, ApiError } from "@/lib/api-error";
-import { z } from "zod";
+import { updateRoomPermissionsSchema } from "@/lib/validations/room-permissions.schema";
 
-const PERMISSION_CODES = [
-  "salas.ver",
-  "salas.acceder",
-  "salas.crear",
-  "salas.editar",
-  "salas.eliminar",
-  "archivos.subir",
-  "archivos.editar",
-  "archivos.eliminar",
-] as const;
-
-const updatePermissionsSchema = z.object({
-  inherit_permissions: z.boolean().optional(),
-  assignments: z.array(
-    z.object({
-      user_id: z.string().uuid(),
-      permission_code: z.enum(PERMISSION_CODES),
-      granted: z.boolean(),
-    })
-  ),
-});
-
-// GET /api/rooms/[roomId]/permissions — BE-45
-// Devuelve la matriz de permisos de la sala (miembros × 8 códigos).
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     const { roomId } = await params;
-
-    // TODO: implementar cuando tabla `room_permissions` exista en Supabase
-    /*
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("room_permissions")
-      .select("user_id, permission_code, granted, usuarios(username)")
-      .eq("room_id", roomId);
-    if (error) throw new ApiError(500, "No se pudieron obtener los permisos.");
-    return NextResponse.json({ data: { room_id: roomId, permissions: data } }, { status: 200 });
-    */
 
-    return NextResponse.json(
-      { data: { message: "Endpoint listo — pendiente tabla `room_permissions` en Supabase.", roomId } },
-      { status: 501 }
-    );
+    // Obtener la sala para verificar pertenencia al backroom
+    const { data: sala, error: salaError } = await supabase
+      .from("salas")
+      .select("backroom_id")
+      .eq("id", roomId)
+      .single();
+
+    if (salaError || !sala) {
+      throw new ApiError(404, "Sala no encontrada");
+    }
+
+    // Solo el propietario puede ver la matriz de permisos
+    const esDueno = await isOwner(user.id, sala.backroom_id);
+    if (!esDueno) {
+      throw new ApiError(403, "No tienes permiso para gestionar permisos");
+    }
+
+    // Obtener miembros del backroom con su información de usuario
+    const { data: miembros, error: miembrosError } = await supabase
+      .from("backroom_miembros")
+      .select("usuario_id, permiso, usuarios(username, nombre_completo, correo)")
+      .eq("backroom_id", sala.backroom_id);
+
+    if (miembrosError) throw new ApiError(500, "Error al obtener miembros");
+
+    // Obtener permisos específicos de la sala
+    const { data: permisos, error: permisosError } = await supabase
+      .from("sala_permisos")
+      .select("*")
+      .eq("sala_id", roomId);
+
+    if (permisosError && permisosError.code !== '42P01') {
+       // 42P01 is relation does not exist, safe to ignore if migration not run yet
+       throw new ApiError(500, "Error al obtener permisos de sala");
+    }
+
+    // Combinar en una matriz
+    const matriz = miembros.map(m => {
+      const p = permisos ? permisos.find(p => p.usuario_id === m.usuario_id) : undefined;
+      return {
+        usuario_id: m.usuario_id,
+        username: m.usuarios?.username,
+        nombre_completo: m.usuarios?.nombre_completo,
+        correo: m.usuarios?.correo,
+        rol_general: m.permiso, // 'contribuir' o 'solo_visualizar'
+        permisos_especificos: p ? {
+          salas_ver: p.salas_ver,
+          salas_acceder: p.salas_acceder,
+          archivos_subir: p.archivos_subir,
+          archivos_editar: p.archivos_editar,
+          archivos_eliminar: p.archivos_eliminar,
+          salas_crear: p.salas_crear,
+          salas_editar: p.salas_editar,
+          salas_eliminar: p.salas_eliminar,
+        } : null,
+      };
+    });
+
+    return NextResponse.json({ data: matriz }, { status: 200 });
   } catch (error) {
     return handleApiError(error);
   }
 }
 
-// PATCH /api/rooms/[roomId]/permissions — BE-46
-// Actualiza permisos en batch para una sala.
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     const { roomId } = await params;
     const body = await request.json();
-    const input = updatePermissionsSchema.parse(body);
-
-    // TODO: implementar cuando tabla `room_permissions` exista en Supabase
-    /*
+    const input = updateRoomPermissionsSchema.parse(body);
     const supabase = await createClient();
-    const upserts = input.assignments.map(a => ({
-      room_id: roomId,
-      user_id: a.user_id,
-      permission_code: a.permission_code,
-      granted: a.granted,
-    }));
-    const { error } = await supabase.from("room_permissions").upsert(upserts);
-    if (error) throw new ApiError(500, "No se pudieron actualizar los permisos.");
-    return NextResponse.json({ data: { room_id: roomId, updated: input.assignments.length } }, { status: 200 });
-    */
 
-    return NextResponse.json(
-      { data: { message: "Endpoint listo — pendiente tabla `room_permissions` en Supabase.", roomId } },
-      { status: 501 }
-    );
+    const { data: sala } = await supabase
+      .from("salas")
+      .select("backroom_id, parent_id")
+      .eq("id", roomId)
+      .single();
+
+    if (!sala) throw new ApiError(404, "Sala no encontrada");
+
+    const esDueno = await isOwner(user.id, sala.backroom_id);
+    if (!esDueno) throw new ApiError(403, "No tienes permiso para gestionar permisos");
+
+    // Si pide heredar del padre
+    if (input.heredar_de_padre) {
+      if (!sala.parent_id) {
+        throw new ApiError(400, "La sala raíz no puede heredar permisos");
+      }
+      // Buscar permisos del padre
+      const { data: permisosPadre } = await supabase
+        .from("sala_permisos")
+        .select("*")
+        .eq("sala_id", sala.parent_id)
+        .eq("usuario_id", input.usuario_id)
+        .single();
+      
+      if (permisosPadre) {
+        input.permisos = {
+          salas_ver: permisosPadre.salas_ver,
+          salas_acceder: permisosPadre.salas_acceder,
+          archivos_subir: permisosPadre.archivos_subir,
+          archivos_editar: permisosPadre.archivos_editar,
+          archivos_eliminar: permisosPadre.archivos_eliminar,
+          salas_crear: permisosPadre.salas_crear,
+          salas_editar: permisosPadre.salas_editar,
+          salas_eliminar: permisosPadre.salas_eliminar,
+        };
+      }
+    }
+
+    // Upsert a la tabla sala_permisos
+    const { data, error } = await supabase
+      .from("sala_permisos")
+      .upsert({
+        sala_id: roomId,
+        usuario_id: input.usuario_id,
+        salas_ver: input.permisos.salas_ver ?? false,
+        salas_acceder: input.permisos.salas_acceder ?? false,
+        archivos_subir: input.permisos.archivos_subir ?? false,
+        archivos_editar: input.permisos.archivos_editar ?? false,
+        archivos_eliminar: input.permisos.archivos_eliminar ?? false,
+        salas_crear: input.permisos.salas_crear ?? false,
+        salas_editar: input.permisos.salas_editar ?? false,
+        salas_eliminar: input.permisos.salas_eliminar ?? false,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "sala_id, usuario_id" })
+      .select()
+      .single();
+
+    if (error) {
+       console.error(error);
+       throw new ApiError(500, "Error al actualizar permisos");
+    }
+
+    return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
     return handleApiError(error);
   }
