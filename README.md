@@ -4,7 +4,7 @@ Plataforma web colaborativa de estudio y organización del conocimiento. Crea es
 
 ## Mockup
 
-Mockup: https://stitch.withgoogle.com/projects/7610019985253129332?pli=1
+Mockup: https://stitch.withgoogle.com/projects/16836454301652292537
 
 ## Stack
 
