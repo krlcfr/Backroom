@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getUsuarioInterno, isOwner } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
-import type { CreateBackroomInput } from "@/lib/validations/schemas";
+import type { CreateBackroomInput, UpdateBackroomInput } from "@/lib/validations/schemas";
 
 function toBackroomResponse(row: {
   id: string;
@@ -108,5 +108,37 @@ export class BackroomsService {
     if (error) {
       throw new ApiError(500, "No se pudo eliminar la BackRoom");
     }
+  }
+
+  static async updateById(authId: string, backroomId: string, input: UpdateBackroomInput) {
+    const owns = await isOwner(authId, backroomId);
+
+    if (!owns) {
+      throw new ApiError(403, "Solo el propietario puede editar el BackRoom");
+    }
+
+    const supabase = await createClient();
+
+    const updateData: any = {};
+    if (input.name !== undefined) updateData.nombre = input.name;
+    if (input.description !== undefined) updateData.descripcion = input.description;
+    if (input.coverUrl !== undefined) updateData.portada_url = input.coverUrl;
+
+    if (Object.keys(updateData).length === 0) {
+      return this.getById(backroomId); // Nothing to update
+    }
+
+    const { data, error } = await supabase
+      .from("backrooms")
+      .update(updateData)
+      .eq("id", backroomId)
+      .select("*, usuarios(auth_id, username)")
+      .single();
+
+    if (error || !data) {
+      throw new ApiError(500, "No se pudo actualizar la BackRoom");
+    }
+
+    return toBackroomResponse(data);
   }
 }
