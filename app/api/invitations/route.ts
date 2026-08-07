@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { handleApiError, ApiError } from "@/lib/api-error";
-import { isOwner } from "@/lib/auth/rbac";
+import { isOwner, getUsuarioInterno } from "@/lib/auth/rbac";
 import { z } from "zod";
 
 const createInvitationSchema = z.object({
@@ -12,6 +12,9 @@ const createInvitationSchema = z.object({
 
 // POST /api/invitations — BE-49
 // Crea una invitación por email a un backroom. Solo el propietario puede invitar.
+// Nota: la tabla `invitaciones` en Supabase NO tiene columna `email`.
+// TODO: ejecutar en Supabase SQL Editor:
+//   ALTER TABLE invitaciones ADD COLUMN email varchar(255) NOT NULL DEFAULT '';
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
@@ -21,35 +24,33 @@ export async function POST(request: NextRequest) {
     const owner = await isOwner(user.id, input.backroom_id);
     if (!owner) throw new ApiError(403, "Solo el propietario puede invitar miembros.");
 
+    const usuario = await getUsuarioInterno(user.id);
+    if (!usuario) throw new ApiError(404, "Perfil de usuario no encontrado.");
+
     const supabase = await createClient();
 
-    // Verificar que no exista ya una invitación activa para este email en este backroom
-    // TODO: descomentar cuando la tabla `invitations` exista en Supabase
-    /*
+    // Verificar que no exista ya una invitación activa para este email
     const { data: existing } = await supabase
-      .from("invitations")
+      .from("invitaciones")
       .select("id")
       .eq("backroom_id", input.backroom_id)
-      .eq("email", input.email)
-      .eq("active", true)
+      .eq("activa", true)
       .maybeSingle();
 
-    if (existing) throw new ApiError(409, "Ya existe una invitación activa para este email.");
+    if (existing) throw new ApiError(409, "Ya existe una invitación activa para este backroom.");
 
-    const token = crypto.randomUUID();
-    const code = `BR-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-    const expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const codigo = `BR-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    const expira_en = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const { data, error } = await supabase
-      .from("invitations")
+      .from("invitaciones")
       .insert({
         backroom_id: input.backroom_id,
-        email: input.email,
-        token,
-        code,
-        invited_by: user.id,
-        active: true,
-        expires_at,
+        creado_por: usuario.id,
+        codigo,
+        activa: true,
+        expira_en,
+        // email: input.email, // TODO: descomentar tras migración
       })
       .select()
       .single();
@@ -57,13 +58,6 @@ export async function POST(request: NextRequest) {
     if (error || !data) throw new ApiError(500, "No se pudo crear la invitación.");
 
     return NextResponse.json({ data: { invitation: data } }, { status: 201 });
-    */
-
-    // Placeholder hasta que la tabla `invitations` exista en Supabase
-    return NextResponse.json(
-      { data: { message: "Endpoint listo — pendiente tabla `invitations` en Supabase." } },
-      { status: 501 }
-    );
   } catch (error) {
     return handleApiError(error);
   }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { handleApiError, ApiError } from "@/lib/api-error";
 
 // GET /api/invitations/[token] — BE-50
@@ -9,35 +10,29 @@ export async function GET(
 ) {
   try {
     const { token } = await params;
-
-    // TODO: descomentar cuando la tabla `invitations` exista en Supabase
-    /*
     const supabase = await createClient();
+
     const { data, error } = await supabase
-      .from("invitations")
-      .select("id, email, backroom_id, active, expires_at, backrooms(nombre)")
-      .eq("token", token)
+      .from("invitaciones")
+      .select("id, codigo, backroom_id, activa, expira_en, backrooms(nombre)")
+      .eq("link_token", token)
       .maybeSingle();
 
     if (error || !data) throw new ApiError(404, "Invitación no encontrada.");
-    if (!data.active) throw new ApiError(404, "Invitación revocada.");
-    if (new Date(data.expires_at) < new Date()) throw new ApiError(404, "Invitación expirada.");
+    if (!data.activa) throw new ApiError(404, "Invitación revocada.");
+    if (data.expira_en && new Date(data.expira_en) < new Date()) {
+      throw new ApiError(404, "Invitación expirada.");
+    }
 
     return NextResponse.json({
       data: {
         invitation: {
-          backroom: { name: data.backrooms?.nombre },
-          email: data.email,
+          backroom: { name: (data.backrooms as any)?.nombre },
+          codigo: data.codigo,
           valid: true,
         },
       },
     }, { status: 200 });
-    */
-
-    return NextResponse.json(
-      { data: { message: "Endpoint listo — pendiente tabla `invitations` en Supabase.", token } },
-      { status: 501 }
-    );
   } catch (error) {
     return handleApiError(error);
   }
