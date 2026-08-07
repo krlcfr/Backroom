@@ -98,6 +98,18 @@ export interface Plan {
   created_at: string;
 }
 
+export interface AuditLog {
+  id: string;
+  backroom_id: string; // FK -> backrooms.id
+  actor_id: string; // FK -> usuarios.id
+  action: string;
+  target_type: string;
+  target_id: string | null;
+  details: Record<string, any> | null;
+  ip_address: string | null;
+  created_at: string;
+}
+
 export interface Rol {
   id: string;
   nombre: string;
