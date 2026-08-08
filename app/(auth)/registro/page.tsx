@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import OAuthButtons from "@/components/oauth-buttons"
 
 type FieldErrors = Record<string, string>
 
@@ -115,6 +116,16 @@ export default function RegistroPage() {
       <div className="flex flex-col gap-1 text-center">
         <h1 className="text-[28px] font-semibold tracking-tight text-[#e2e2e2]">Crear cuenta</h1>
         <p className="text-sm text-[#ccc3d8]">Únete a la plataforma para gestionar tu espacio.</p>
+      </div>
+
+      <OAuthButtons />
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-[#4a4455]"></div>
+        <span className="text-[10px] font-medium uppercase tracking-wider text-[#ccc3d8]">
+          O registrarse con email
+        </span>
+        <div className="h-px flex-1 bg-[#4a4455]"></div>
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
