@@ -99,7 +99,7 @@ export default function RegistroPage() {
           setErrors(fieldMap)
           return
         }
-        setGlobalError(data.error || "No se pudo completar el registro")
+        setGlobalError(data.error?.message ?? data.error ?? "No se pudo completar el registro")
         return
       }
 

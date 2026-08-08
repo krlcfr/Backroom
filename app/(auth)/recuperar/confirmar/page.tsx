@@ -45,7 +45,7 @@ function ConfirmarForm() {
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error || "No se pudo restablecer la contraseña")
+      setError(data.error?.message ?? data.error ?? "No se pudo restablecer la contraseña")
       setLoading(false)
       return
     }
