@@ -22,7 +22,7 @@ export default function RecuperarPage() {
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error || "Error al enviar el correo")
+      setError(data.error?.message ?? data.error ?? "Error al enviar el correo")
       setLoading(false)
       return
     }
