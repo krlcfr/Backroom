@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 export default function DemoLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [email, setEmail] = useState<string | null>(null)
   const [loggingOut, setLoggingOut] = useState(false)
@@ -52,9 +53,27 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
         </div>
         <div className="flex items-center gap-6">
           <nav className="hidden md:flex gap-6 text-[14px]">
-            <a href="#" className="text-[#d2bbff] font-bold border-b-2 border-[#d2bbff] pb-1">Dashboard</a>
+            <Link
+              href="/demo/backroom"
+              className={
+                pathname === "/demo/backroom"
+                  ? "text-[#d2bbff] font-bold border-b-2 border-[#d2bbff] pb-1"
+                  : "text-[#ccc3d8] hover:text-[#d2bbff] transition-colors"
+              }
+            >
+              Dashboard
+            </Link>
             <a href="#" className="text-[#ccc3d8] hover:text-[#d2bbff] transition-colors">Logs</a>
-            <a href="#" className="text-[#ccc3d8] hover:text-[#d2bbff] transition-colors">Settings</a>
+            <Link
+              href="/demo/limites"
+              className={
+                pathname === "/demo/limites"
+                  ? "text-[#d2bbff] font-bold border-b-2 border-[#d2bbff] pb-1"
+                  : "text-[#ccc3d8] hover:text-[#d2bbff] transition-colors"
+              }
+            >
+              Settings
+            </Link>
           </nav>
           <div className="flex items-center gap-3">
             <Link
@@ -118,8 +137,8 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
         <nav className="flex-1 overflow-y-auto px-2 space-y-1">
           {[
             { icon: "home", label: "Home", active: false },
-            { icon: "account_tree", label: "Hierarchy", active: true },
-            { icon: "folder", label: "Storage", active: false },
+            { icon: "account_tree", label: "Hierarchy", active: pathname === "/demo/backroom" },
+            { icon: "folder", label: "Storage", active: pathname === "/demo/limites" },
             { icon: "key", label: "Permissions", active: false },
             { icon: "history", label: "History", active: false },
           ].map((item) => (

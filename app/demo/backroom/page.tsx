@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { barColor, formatBytes } from "@/lib/demo"
 
 interface SalaNode {
   id: string
@@ -50,14 +51,6 @@ const TIPO_ICON: Record<string, { icon: string; color: string }> = {
 
 const DEPTH_COLORS = ["text-amber-500", "text-blue-400", "text-purple-400", "text-green-400"]
 
-function formatBytes(bytes: number | null) {
-  if (bytes == null) return "—"
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
-}
-
 function formatDate(iso: string) {
   const d = new Date(iso)
   const now = new Date()
@@ -67,12 +60,6 @@ function formatDate(iso: string) {
   yesterday.setDate(now.getDate() - 1)
   if (d.toDateString() === yesterday.toDateString()) return `Ayer, ${time}`
   return d.toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" })
-}
-
-function barColor(pct: number) {
-  if (pct >= 100) return "bg-rose-500"
-  if (pct >= 80) return "bg-amber-500"
-  return "bg-[#7c3aed]"
 }
 
 function TreeNode({
