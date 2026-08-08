@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Panel de Límites - Modo Demo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Courier+Prime:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-high": "#282a2b",
+                        "on-tertiary": "#303037",
+                        "on-primary-fixed": "#25005a",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "surface-tint": "#d2bbff",
+                        "surface-container": "#1e2020",
+                        "surface-dim": "#121414",
+                        "outline": "#958da1",
+                        "background": "#121414",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-primary-container": "#ede0ff",
+                        "on-secondary-fixed-variant": "#47464a",
+                        "surface-container-low": "#1a1c1c",
+                        "primary": "#d2bbff",
+                        "tertiary-fixed": "#e3e1ea",
+                        "inverse-on-surface": "#2f3131",
+                        "on-tertiary-container": "#e7e4ed",
+                        "surface-container-lowest": "#0c0f0f",
+                        "on-tertiary-fixed": "#1b1b21",
+                        "on-tertiary-fixed-variant": "#46464d",
+                        "on-surface": "#e2e2e2",
+                        "on-secondary-container": "#b6b4b8",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#eaddff",
+                        "primary-container": "#7c3aed",
+                        "secondary": "#c8c5ca",
+                        "on-background": "#e2e2e2",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#d2bbff",
+                        "secondary-container": "#47464a",
+                        "on-error": "#690005",
+                        "surface": "#121414",
+                        "secondary-fixed-dim": "#c8c5ca",
+                        "outline-variant": "#4a4455",
+                        "inverse-surface": "#e2e2e2",
+                        "secondary-fixed": "#e4e1e6",
+                        "tertiary-fixed-dim": "#c7c5ce",
+                        "tertiary": "#c7c5ce",
+                        "on-secondary-fixed": "#1b1b1e",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#333535",
+                        "surface-variant": "#333535",
+                        "inverse-primary": "#732ee4",
+                        "surface-bright": "#38393a",
+                        "on-primary": "#3f008e",
+                        "tertiary-container": "#66666d",
+                        "on-secondary": "#303033"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "header-height": "64px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "sidebar-width": "260px",
+                        "margin-desktop": "32px"
+                    },
+                    fontFamily: {
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "mono-label": ["Courier Prime"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "display": ["36px", { lineHeight: "44px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "label-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "500" }],
+                        "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "mono-label": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+                        "headline-lg-mobile": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "headline-md": ["20px", { lineHeight: "28px", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 h-header-height bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-margin-desktop mx-auto max-w-[1440px]">
+<div class="flex items-center gap-6">
+<span class="text-headline-md font-headline-md font-bold text-primary">BackRoom</span>
+<div class="hidden md:flex gap-4">
+<a class="text-on-surface-variant font-body-md hover:text-primary transition-colors cursor-pointer active:opacity-80" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-body-md hover:text-primary transition-colors cursor-pointer active:opacity-80" href="#">Logs</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 cursor-pointer active:opacity-80" href="#">Settings</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full cursor-pointer">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full cursor-pointer">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small, circular avatar image of a generic user profile placeholder, rendered in a minimalist, flat design style suitable for a dark-mode enterprise application header. It features subtle, low-contrast grayscale tones with a crisp outline." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCikWA4obEVjesHtztKS329zX9abZ8jAj6UObjZBe3HVGFduUqO4YUMVlYcJYLc_VZZ52SoU9TBXzndjaeEdxg6WGIyfgszwIpVUHrsXUkXG_l2i6Es6Z32S-4Cczs-R8oU1BZoAIm7f1bQCaHWahwvsQmavXn2zNYG03_-ztEu_suTzyNSer3gjgcCf0YlVScxtVKPQ4GxJ3488AHPJYDa6oSAfjVgW690hCxrreZegZnuxgDoPttytg"/>
+</div>
+</nav>
+<!-- Side Navigation Bar -->
+<aside class="hidden md:flex fixed left-0 top-header-height h-[calc(100vh-64px)] w-sidebar-width bg-surface-container-low dark:bg-surface-container-low border-r border-outline-variant flex-col py-4 gap-2 z-40">
+<div class="px-6 mb-6">
+<div class="flex items-center gap-3 mb-2">
+<img alt="Organization Logo" class="w-10 h-10 rounded-lg object-cover bg-surface-variant border border-outline-variant" data-alt="A highly stylized, minimalist logo for 'Acme Corp', featuring sharp geometric shapes and a monochrome palette with a subtle metallic sheen. The design is compact and highly legible against a dark background, evoking a sense of corporate security and advanced technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJUmJaeLj5rBC3sR-o2A_5g1w06LjrQU-6SADvCBNp25j1Gyjp_U5ju1aKht1ld047zksZsxUt9BJ5pjYaR8xji7rwTuRMGugffBSOVSJmSXyznaiF2wvlCqbVwmu7Lv_pgzF7eDYWI8DcYVDRgvwWq-OV2T5tWG02XhgGgw5JT2Cs7eGfDQqNRTyNd-nc15vhn39tLHfaXBJwaK2jpi5f9KJlYI7LwIIjKS7KuEBPZ9uZXJULLoR1_A"/>
+<div>
+<h2 class="font-headline-md text-on-surface">Acme Corp</h2>
+<p class="font-label-sm text-on-surface-variant">Enterprise Plan</p>
+</div>
+</div>
+<button class="w-full mt-4 bg-primary-container text-on-primary-container font-label-sm text-label-sm py-2 rounded-md hover:bg-[#8B5CF6] transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span> New Room
+            </button>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-all rounded-md cursor-pointer active:scale-[0.98] font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span> Home
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-all rounded-md cursor-pointer active:scale-[0.98] font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span> Hierarchy
+            </a>
+<a class="flex items-center gap-3 bg-primary-container/10 text-primary border-l-2 border-primary px-4 py-2 hover:bg-surface-container-high transition-all rounded-r-md cursor-pointer active:scale-[0.98] font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined" data-icon="folder">folder</span> Storage
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-all rounded-md cursor-pointer active:scale-[0.98] font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined" data-icon="key">key</span> Permissions
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-all rounded-md cursor-pointer active:scale-[0.98] font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span> History
+            </a>
+</nav>
+<div class="mt-auto flex flex-col gap-1 px-2 pt-4 border-t border-outline-variant/50">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-all rounded-md cursor-pointer active:scale-[0.98] font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span> Docs
+            </a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-2 hover:bg-surface-container-high transition-all rounded-md cursor-pointer active:scale-[0.98] font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span> Support
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 pt-header-height md:pl-sidebar-width transition-all duration-300 overflow-x-hidden">
+<div class="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop py-12 flex flex-col items-center">
+<!-- Header Section -->
+<div class="text-center mb-10 w-full max-w-2xl">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-variant border border-outline-variant rounded-full mb-6">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-mono-label text-mono-label text-on-surface-variant uppercase tracking-wider">Modo Demo Activo</span>
+</div>
+<h1 class="font-display text-display md:text-[42px] leading-tight text-on-surface mb-4">Límites de Arquitectura</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Estás operando en un entorno restringido. Monitorea el consumo de recursos a continuación o desbloquea la capacidad total del sistema para despliegues en producción.</p>
+</div>
+<!-- Bento Grid - Resource Limits -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12">
+<!-- Storage Card -->
+<div class="bg-[#27272A] border border-[#3F3F46] rounded-xl p-6 relative overflow-hidden group hover:border-outline transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-surface-variant rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="dns">dns</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Almacenamiento</h3>
+</div>
+<span class="font-mono-label text-mono-label text-on-surface-variant bg-surface-dim px-2 py-1 rounded">2 / 100 MB</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Capacidad total para documentos encriptados y configuraciones de sala. El límite impide subidas masivas.</p>
+<div class="w-full bg-surface-dim h-2 rounded-full overflow-hidden border border-outline-variant/30">
+<div class="bg-primary-container h-full rounded-full transition-all duration-1000 ease-out w-[2%]" style="width: 2%;"></div>
+</div>
+</div>
+<!-- Members Card -->
+<div class="bg-[#27272A] border border-[#3F3F46] rounded-xl p-6 relative overflow-hidden group hover:border-outline transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-surface-variant rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="group">group</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Miembros Activos</h3>
+</div>
+<span class="font-mono-label text-mono-label text-on-surface-variant bg-surface-dim px-2 py-1 rounded">1 / 4</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Usuarios con acceso concurrente al ecosistema de salas. Restringido para evaluación individual.</p>
+<div class="w-full bg-surface-dim h-2 rounded-full overflow-hidden border border-outline-variant/30">
+<div class="bg-primary-container h-full rounded-full transition-all duration-1000 ease-out w-[25%]" style="width: 25%;"></div>
+</div>
+</div>
+<!-- Hierarchy Levels Card -->
+<div class="bg-[#27272A] border border-[#3F3F46] rounded-xl p-6 relative overflow-hidden group hover:border-outline transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-surface-variant rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Niveles de Sala</h3>
+</div>
+<span class="font-mono-label text-mono-label text-on-surface-variant bg-surface-dim px-2 py-1 rounded">1 / 3</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Profundidad de la estructura jerárquica permitida. Impide la creación de topologías complejas.</p>
+<div class="w-full bg-surface-dim h-2 rounded-full overflow-hidden border border-outline-variant/30">
+<div class="bg-primary-container h-full rounded-full transition-all duration-1000 ease-out w-[33%]" style="width: 33%;"></div>
+</div>
+</div>
+<!-- Resources Card -->
+<div class="bg-[#27272A] border border-[#3F3F46] rounded-xl p-6 relative overflow-hidden group hover:border-outline transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-surface-variant rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="token">token</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Recursos de API</h3>
+</div>
+<span class="font-mono-label text-mono-label text-on-surface-variant bg-surface-dim px-2 py-1 rounded">3 / 10</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Llamadas y conexiones a endpoints externos (webhooks, integraciones). Limitado para prevenir saturación.</p>
+<div class="w-full bg-surface-dim h-2 rounded-full overflow-hidden border border-outline-variant/30">
+<div class="bg-primary-container h-full rounded-full transition-all duration-1000 ease-out w-[30%]" style="width: 30%;"></div>
+</div>
+</div>
+</div>
+<!-- Call to Action -->
+<div class="w-full max-w-xl bg-surface-container-high border border-outline-variant rounded-2xl p-8 text-center relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-primary-container/10 to-transparent pointer-events-none"></div>
+<span class="material-symbols-outlined text-primary text-[48px] mb-4 block" data-icon="rocket_launch">rocket_launch</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">Despliega tu Entorno Productivo</h2>
+<p class="font-body-md text-body-md text-[#A1A1AA] mb-8">Elimina todas las restricciones estructurales. Escala tu organización sin cuellos de botella técnicos.</p>
+<button class="w-full py-4 bg-primary-container text-[#FAFAFA] rounded-lg font-headline-md text-headline-md hover:bg-[#8B5CF6] transition-all transform active:scale-[0.98] shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] border border-[#8B5CF6]/50">
+                    Crear mi organización ahora
+                </button>
+</div>
+</div>
+</main>
+</body></html>
