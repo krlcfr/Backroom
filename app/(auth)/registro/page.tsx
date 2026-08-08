@@ -112,152 +112,156 @@ export default function RegistroPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-[28px] font-semibold tracking-tight text-[#e2e2e2]">Crear cuenta</h1>
-        <p className="text-sm text-[#ccc3d8]">Únete a la plataforma para gestionar tu espacio.</p>
+    <>
+      <div className="p-8 pb-6 text-center border-b border-[#4a4455]/50">
+        <h1 className="text-[28px] font-semibold leading-9 text-[#d2bbff] tracking-tight mb-2">Crear cuenta</h1>
+        <p className="text-[14px] leading-5 text-[#ccc3d8]">Únete a la plataforma para gestionar tu espacio.</p>
       </div>
 
-      <OAuthButtons />
+      <div className="p-8 flex flex-col gap-6">
+        <OAuthButtons />
 
-      <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-[#4a4455]"></div>
-        <span className="text-[10px] font-medium uppercase tracking-wider text-[#ccc3d8]">
-          O registrarse con email
-        </span>
-        <div className="h-px flex-1 bg-[#4a4455]"></div>
-      </div>
-
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="fullName" className="text-xs font-medium text-[#ccc3d8]">
-            Nombre completo
-          </label>
-          <input
-            id="fullName"
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Ej. Jane Doe"
-            className={`${inputBase} ${errors.fullName ? inputError : inputNormal}`}
-          />
-          {errors.fullName && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.fullName}</p>}
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-[#4a4455]"></div>
+          <span className="text-[10px] font-medium uppercase tracking-wider text-[#ccc3d8]">
+            O registrarse con email
+          </span>
+          <div className="h-px flex-1 bg-[#4a4455]"></div>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="username" className="text-xs font-medium text-[#ccc3d8]">
-            Nombre de usuario
-          </label>
-          <div
-            className={`flex items-center overflow-hidden rounded-lg border bg-[#0c0f0f] focus-within:ring-2 focus-within:ring-[#A78BFA]/20 ${
-              errors.username ? "border-[#ffb4ab]/60" : "border-[#4a4455]"
-            }`}
-          >
-            <span className="pl-3 text-sm text-[#ccc3d8]/50">@</span>
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="fullName" className="text-xs font-medium text-[#ccc3d8]">
+              Nombre completo
+            </label>
             <input
-              id="username"
+              id="fullName"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="janedoe"
-              className="w-full bg-transparent px-2 py-2 text-sm font-mono text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Ej. Jane Doe"
+              className={`${inputBase} ${errors.fullName ? inputError : inputNormal}`}
             />
+            {errors.fullName && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.fullName}</p>}
           </div>
-          {errors.username && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.username}</p>}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-xs font-medium text-[#ccc3d8]">
-            Correo electrónico
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="jane@example.com"
-            className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
-          />
-          {errors.email && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.email}</p>}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-xs font-medium text-[#ccc3d8]">
-            Contraseña
-          </label>
-          <div
-            className={`flex items-center overflow-hidden rounded-lg border bg-[#0c0f0f] pr-2 focus-within:ring-2 focus-within:ring-[#A78BFA]/20 ${
-              errors.password ? "border-[#ffb4ab]/60" : "border-[#4a4455]"
-            }`}
-          >
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent px-3 py-2 text-sm tracking-widest text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="cursor-pointer p-1 text-[#ccc3d8] hover:text-[#e2e2e2]"
-              aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+  
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="username" className="text-xs font-medium text-[#ccc3d8]">
+              Nombre de usuario
+            </label>
+            <div
+              className={`flex items-center overflow-hidden rounded-lg border bg-[#0c0f0f] focus-within:ring-2 focus-within:ring-[#A78BFA]/20 ${
+                errors.username ? "border-[#ffb4ab]/60" : "border-[#4a4455]"
+              }`}
             >
-              {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-            </button>
+              <span className="pl-3 text-sm text-[#ccc3d8]/50">@</span>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="janedoe"
+                className="w-full bg-transparent px-2 py-2 text-sm font-mono text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
+              />
+            </div>
+            {errors.username && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.username}</p>}
           </div>
-          {errors.password && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.password}</p>}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="confirmPassword" className="text-xs font-medium text-[#ccc3d8]">
-            Confirmar contraseña
-          </label>
-          <div
-            className={`flex items-center overflow-hidden rounded-lg border bg-[#0c0f0f] pr-2 focus-within:ring-2 focus-within:ring-[#A78BFA]/20 ${
-              errors.confirmPassword ? "border-[#ffb4ab]/60" : "border-[#4a4455]"
-            }`}
-          >
+  
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="email" className="text-xs font-medium text-[#ccc3d8]">
+              Correo electrónico
+            </label>
             <input
-              id="confirmPassword"
-              type={showConfirm ? "text" : "password"}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-transparent px-3 py-2 text-sm tracking-widest text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="jane@example.com"
+              className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirm((v) => !v)}
-              className="cursor-pointer p-1 text-[#ccc3d8] hover:text-[#e2e2e2]"
-              aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
-            >
-              {showConfirm ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-            </button>
+            {errors.email && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.email}</p>}
           </div>
-          {errors.confirmPassword && (
-            <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.confirmPassword}</p>
-          )}
-        </div>
+  
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="password" className="text-xs font-medium text-[#ccc3d8]">
+              Contraseña
+            </label>
+            <div
+              className={`flex items-center overflow-hidden rounded-lg border bg-[#0c0f0f] pr-2 focus-within:ring-2 focus-within:ring-[#A78BFA]/20 ${
+                errors.password ? "border-[#ffb4ab]/60" : "border-[#4a4455]"
+              }`}
+            >
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-transparent px-3 py-2 text-sm tracking-widest text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="cursor-pointer p-1 text-[#ccc3d8] hover:text-[#e2e2e2]"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.password && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.password}</p>}
+          </div>
+  
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="confirmPassword" className="text-xs font-medium text-[#ccc3d8]">
+              Confirmar contraseña
+            </label>
+            <div
+              className={`flex items-center overflow-hidden rounded-lg border bg-[#0c0f0f] pr-2 focus-within:ring-2 focus-within:ring-[#A78BFA]/20 ${
+                errors.confirmPassword ? "border-[#ffb4ab]/60" : "border-[#4a4455]"
+              }`}
+            >
+              <input
+                id="confirmPassword"
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full bg-transparent px-3 py-2 text-sm tracking-widest text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((v) => !v)}
+                className="cursor-pointer p-1 text-[#ccc3d8] hover:text-[#e2e2e2]"
+                aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showConfirm ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.confirmPassword}</p>
+            )}
+          </div>
+  
+          {globalError && <p className="text-sm text-[#ffb4ab]">{globalError}</p>}
+  
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#7c3aed] px-4 py-2.5 text-sm font-medium text-[#ede0ff] hover:bg-[#8B5CF6] disabled:opacity-50"
+          >
+            {loading ? "Registrando…" : "Crear cuenta"}
+            {!loading && <ArrowIcon className="h-3.5 w-3.5" />}
+          </button>
+          </form>
+      </div>
 
-        {globalError && <p className="text-sm text-[#ffb4ab]">{globalError}</p>}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#7c3aed] px-4 py-2.5 text-sm font-medium text-[#ede0ff] hover:bg-[#8B5CF6] disabled:opacity-50"
-        >
-          {loading ? "Registrando…" : "Crear cuenta"}
-          {!loading && <ArrowIcon className="h-3.5 w-3.5" />}
-        </button>
-      </form>
-
-      <p className="mt-2 text-center text-[13px] text-[#ccc3d8]">
-        ¿Ya tenés cuenta?{" "}
-        <Link href="/login" className="ml-1 text-xs font-medium text-[#d2bbff] hover:underline">
-          Inicia sesión
-        </Link>
-      </p>
-    </div>
+      <div className="p-6 bg-[#282a2b]/50 border-t border-[#4a4455] rounded-b-xl text-center">
+        <p className="text-[14px] text-[#ccc3d8]">
+          ¿Ya tenés cuenta?{" "}
+          <Link href="/login" className="text-[#d2bbff] hover:text-[#7c3aed] font-semibold transition-colors">
+            Inicia sesión
+          </Link>
+        </p>
+      </div>
+    </>
   )
 }
 
