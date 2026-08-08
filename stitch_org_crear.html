@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Crear Organización - BackRoom</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Courier+Prime&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#282a2b",
+                        "on-tertiary": "#303037",
+                        "on-primary-fixed": "#25005a",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "surface-tint": "#d2bbff",
+                        "surface-container": "#1e2020",
+                        "surface-dim": "#121414",
+                        "outline": "#958da1",
+                        "background": "#121414",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-primary-container": "#ede0ff",
+                        "on-secondary-fixed-variant": "#47464a",
+                        "surface-container-low": "#1a1c1c",
+                        "primary": "#d2bbff",
+                        "tertiary-fixed": "#e3e1ea",
+                        "inverse-on-surface": "#2f3131",
+                        "on-tertiary-container": "#e7e4ed",
+                        "surface-container-lowest": "#0c0f0f",
+                        "on-tertiary-fixed": "#1b1b21",
+                        "on-tertiary-fixed-variant": "#46464d",
+                        "on-surface": "#e2e2e2",
+                        "on-secondary-container": "#b6b4b8",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#eaddff",
+                        "primary-container": "#7c3aed",
+                        "secondary": "#c8c5ca",
+                        "on-background": "#e2e2e2",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed-dim": "#d2bbff",
+                        "secondary-container": "#47464a",
+                        "on-error": "#690005",
+                        "surface": "#18181B", /* Adjusted for prompt request */
+                        "secondary-fixed-dim": "#c8c5ca",
+                        "outline-variant": "#4a4455",
+                        "inverse-surface": "#e2e2e2",
+                        "secondary-fixed": "#e4e1e6",
+                        "tertiary-fixed-dim": "#c7c5ce",
+                        "tertiary": "#c7c5ce",
+                        "on-secondary-fixed": "#1b1b1e",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#333535",
+                        "surface-variant": "#333535",
+                        "inverse-primary": "#732ee4",
+                        "surface-bright": "#38393a",
+                        "on-primary": "#3f008e",
+                        "tertiary-container": "#66666d",
+                        "on-secondary": "#303033"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "header-height": "64px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "sidebar-width": "260px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "mono-label": ["Courier Prime"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "mono-label": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #18181B; /* Enforcing prompt bg color */
+            color: #e2e2e2;
+        }
+        .form-input-custom {
+            background-color: #18181B;
+            border: 1px solid #3F3F46;
+        }
+        .form-input-custom:focus {
+            border-color: #A78BFA;
+            box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+            outline: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center font-body-md p-margin-mobile md:p-margin-desktop">
+<!-- TopNavBar Suppressed as this is a transactional "Creation" flow (Linear/Task-Focused) -->
+<main class="w-full max-w-lg">
+<div class="mb-8 text-center">
+<h1 class="font-headline-lg text-headline-lg md:font-display md:text-display text-on-surface mb-2">Crear Organización</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Configura el entorno base para tu equipo y proyectos.</p>
+</div>
+<form class="bg-[#27272A] border border-[#3F3F46] rounded-xl p-6 md:p-8 flex flex-col gap-6 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)]">
+<!-- Logo Selector -->
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm text-on-surface">Logo de la organización</label>
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg bg-surface-container border border-outline-variant flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-outline text-3xl">image</span>
+</div>
+<button class="px-4 py-2 font-label-sm text-label-sm border border-[#3F3F46] rounded-lg hover:bg-[#27272A] text-on-surface transition-colors bg-transparent" type="button">
+                        Subir imagen
+                    </button>
+</div>
+</div>
+<!-- Name Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm text-on-surface" for="orgName">Nombre de la organización</label>
+<input class="form-input-custom rounded-lg w-full px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 transition-all" id="orgName" placeholder="Ej. Acme Corp" type="text"/>
+</div>
+<!-- Description Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-sm text-label-sm text-on-surface" for="orgDesc">Descripción técnica</label>
+<textarea class="form-input-custom rounded-lg w-full px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 transition-all resize-none" id="orgDesc" placeholder="Describe brevemente el propósito o dominio técnico..." rows="3"></textarea>
+</div>
+<!-- Warning Notice -->
+<div class="bg-primary-container/10 border border-primary/30 rounded-lg p-4 flex items-start gap-3 mt-2">
+<span class="material-symbols-outlined text-primary mt-0.5" style="font-variation-settings: 'FILL' 1;">info</span>
+<div>
+<h4 class="font-label-sm text-label-sm text-primary mb-1">Aviso de Permisos</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Al crear esta organización, te convertirás en el <strong>Propietario único</strong>. Podrás invitar a otros miembros y asignar roles más adelante.</p>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex justify-end gap-4 mt-4 pt-6 border-t border-[#3F3F46]">
+<button class="px-5 py-2.5 font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+                    Cancelar
+                </button>
+<button class="px-6 py-2.5 bg-primary-container hover:bg-[#8B5CF6] text-[#FAFAFA] font-label-sm text-label-sm rounded-lg transition-colors flex items-center gap-2" type="submit">
+                    Crear organización
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</form>
+</main>
+</body></html>
