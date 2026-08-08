@@ -4,6 +4,14 @@ Plataforma web colaborativa de estudio y organización del conocimiento. Crea es
 
 Proyecto de grado — Tecnología en Análisis y Desarrollo de Software (ADSO), SENA.
 
+## Mockup (Stitch)
+
+El diseño de referencia de la interfaz se mantiene en Stitch:
+
+- **Mockup completo:** [https://stitch.withgoogle.com/projects/16836454301652292537](https://stitch.withgoogle.com/projects/16836454301652292537)
+
+Es la fuente de verdad visual para las pantallas (login, registro, dashboard, salas, permisos, etc.). Las pantallas se van adaptando a código siguiendo el plan de mapeo mockup → UI → endpoint → página.
+
 ## Stack
 
 | Capa | Tecnología |
