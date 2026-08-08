@@ -28,16 +28,11 @@ function LoginForm() {
 
     if (!res.ok) {
       const data = await res.json()
-      // En caso de credenciales incorrectas o rate limit, mostramos el error que viene de la API.
-      // El backend ya se encarga de devolver un mensaje genérico para credenciales ("Credenciales incorrectas")
-      // y un mensaje específico para Rate Limit ("Demasiados intentos. Inténtalo más tarde.").
       setError(data.error?.message || "No se pudo iniciar sesión")
       setLoading(false)
       return
     }
 
-    // Usamos window.location.href para forzar recarga completa y que el middleware evalúe 
-    // el rol (SuperAdmin vs Demo vs Org) y redirija automáticamente
     window.location.href = "/"
   }
 
@@ -68,159 +63,209 @@ function LoginForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-sm border border-zinc-200">
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-zinc-900">Bienvenido de nuevo</h1>
-        <p className="text-sm text-zinc-500 mt-1">Inicia sesión en tu cuenta</p>
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Subtle glow effect for focused inputs */
+        .input-glow:focus-within {
+            box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+        }
+
+        /* Toast animation */
+        @keyframes slideIn {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast-enter {
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .toast-exit {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+      `}} />
+
+      {/* Ambient Background Effect (Subtle) */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-20">
+        <div className="w-[800px] h-[800px] bg-[#d2bbff] rounded-full blur-[150px] opacity-10"></div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {reset === "exito" && (
-          <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
-            Contraseña actualizada. Iniciá sesión con tu nueva contraseña.
-          </p>
-        )}
-        
-        {error && <p className="text-sm text-red-600 bg-red-50 p-2 rounded-md">{error}</p>}
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1 text-zinc-900">
-            Correo electrónico
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
-          />
+      {/* Error Toast 429 */}
+      {error && (
+        <div className="toast-enter fixed top-6 right-6 z-50 flex items-center gap-3 bg-[#93000a] border border-[#ffb4ab]/20 p-4 rounded-lg shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] max-w-sm w-full">
+          <span className="material-symbols-outlined text-[#ffdad6]" style={{fontVariationSettings: "'FILL' 1"}}>warning</span>
+          <div className="flex-1">
+            <p className="text-[12px] leading-4 font-bold text-[#ffdad6] tracking-wide">Error</p>
+            <p className="text-[14px] leading-5 text-[#ffdad6]/90">{error}</p>
+          </div>
+          <button 
+            type="button"
+            className="text-[#ffdad6]/70 hover:text-[#ffdad6] transition-colors p-1 rounded hover:bg-[#ffdad6]/10" 
+            onClick={() => setError("")}
+          >
+            <span className="material-symbols-outlined text-[20px]">close</span>
+          </button>
         </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1 text-zinc-900">
-            Contraseña
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
-            />
-            <button
+      )}
+
+      {/* Main Login Card */}
+      <main className="w-full max-w-[420px] bg-[#1e2020] border border-[#4a4455] rounded-xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.7)] relative z-10 flex flex-col backdrop-blur-xl">
+        {/* Header */}
+        <div className="p-8 pb-6 text-center border-b border-[#4a4455]/50">
+          <h1 className="text-[28px] font-semibold leading-9 text-[#d2bbff] tracking-tight mb-2">BackRoom</h1>
+          <p className="text-[14px] leading-5 text-[#ccc3d8]">Accede a tu espacio de control</p>
+        </div>
+
+        {/* Body */}
+        <div className="p-8 flex flex-col gap-6">
+          {/* OAuth Providers */}
+          <div className="flex flex-col gap-3">
+            <button 
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 px-3 flex items-center text-zinc-500 hover:text-zinc-700 focus:outline-none"
+              onClick={() => handleOAuth("google")}
+              disabled={loading || oauthLoading !== null}
+              className="flex items-center justify-center gap-3 w-full p-3 rounded-lg border border-[#4a4455] bg-transparent hover:bg-[#282a2b] transition-colors text-[#e2e2e2] text-[12px] font-medium tracking-wide active:scale-[0.98] disabled:opacity-50"
             >
-              {showPassword ? (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              )}
+              <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24">
+                <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335"></path>
+                <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4"></path>
+                <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05"></path>
+                <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.26537 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853"></path>
+              </svg>
+              {oauthLoading === "google" ? "Conectando..." : "Continuar con Google"}
+            </button>
+            <button 
+              type="button"
+              onClick={() => handleOAuth("github")}
+              disabled={loading || oauthLoading !== null}
+              className="flex items-center justify-center gap-3 w-full p-3 rounded-lg border border-[#4a4455] bg-transparent hover:bg-[#282a2b] transition-colors text-[#e2e2e2] text-[12px] font-medium tracking-wide active:scale-[0.98] disabled:opacity-50"
+            >
+              <svg aria-hidden="true" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
+              </svg>
+              {oauthLoading === "github" ? "Conectando..." : "Continuar con GitHub"}
             </button>
           </div>
-        </div>
 
-        <div className="flex items-center justify-end">
-          <Link href="/recuperar" className="text-sm text-zinc-600 hover:text-zinc-900 font-medium">
-            ¿Olvidaste tu contraseña?
-          </Link>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || oauthLoading !== null}
-          className="w-full flex justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 transition-colors"
-        >
-          {loading ? "Ingresando…" : "Iniciar sesión"}
-        </button>
-      </form>
-
-      <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-zinc-300" />
+          {/* Divider */}
+          <div className="flex items-center gap-4 py-2">
+            <div className="h-px bg-[#4a4455] flex-1"></div>
+            <span className="text-[12px] font-medium tracking-wide text-[#ccc3d8] uppercase">o con tu correo</span>
+            <div className="h-px bg-[#4a4455] flex-1"></div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-2 text-zinc-500">O continuar con</span>
-          </div>
+
+          {/* Form */}
+          <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+            {reset === "exito" && (
+              <p className="rounded-md bg-green-900/30 px-3 py-2 text-[14px] text-green-400">
+                Contraseña actualizada. Iniciá sesión con tu nueva contraseña.
+              </p>
+            )}
+
+            {/* Email Input */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[12px] font-medium tracking-wide text-[#e2e2e2]" htmlFor="email">
+                Correo electrónico
+              </label>
+              <div className="relative input-glow rounded-lg transition-shadow">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#ccc3d8] text-[20px]">
+                  mail
+                </span>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@empresa.com"
+                  className="w-full bg-[#121414] border border-[#4a4455] rounded-lg py-2.5 pl-10 pr-4 text-[#e2e2e2] text-[14px] placeholder:text-[#ccc3d8]/50 focus:border-[#7c3aed] focus:ring-0 transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Password Input */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex justify-between items-center">
+                <label className="text-[12px] font-medium tracking-wide text-[#e2e2e2]" htmlFor="password">
+                  Contraseña
+                </label>
+                <Link href="/recuperar" className="text-[12px] font-medium tracking-wide text-[#d2bbff] hover:text-[#7c3aed] transition-colors">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+              <div className="relative input-glow rounded-lg transition-shadow">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#ccc3d8] text-[20px]">
+                  lock
+                </span>
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-[#121414] border border-[#4a4455] rounded-lg py-2.5 pl-10 pr-10 text-[#e2e2e2] text-[14px] placeholder:text-[#ccc3d8]/50 focus:border-[#7c3aed] focus:ring-0 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-[20px]">
+                    {showPassword ? "visibility" : "visibility_off"}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading || oauthLoading !== null}
+              className="mt-2 w-full bg-[#7c3aed] text-[#ede0ff] hover:bg-[#7c3aed]/90 text-[12px] font-bold tracking-wide py-3 px-4 rounded-lg transition-all active:scale-[0.98] shadow-[0_4px_12px_rgba(124,58,237,0.2)] flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading ? "Ingresando..." : "Iniciar sesión"}
+              {!loading && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
+            </button>
+          </form>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            disabled={loading || oauthLoading !== null}
-            onClick={() => handleOAuth("google")}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 disabled:opacity-50 transition-colors"
-          >
-            {oauthLoading === "google" ? "Conectando..." : (
-              <>
-                <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
-                  <path
-                    d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.25024 6.65L5.27028 9.765C6.22028 6.665 9.03028 4.75 12.0003 4.75Z"
-                    fill="#EA4335"
-                  />
-                  <path
-                    d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M5.26498 14.235C5.02498 13.505 4.88501 12.725 4.88501 11.925C4.88501 11.125 5.01998 10.345 5.26498 9.615L1.23999 6.5C0.439987 8.1 0 9.945 0 11.925C0 13.905 0.444985 15.75 1.23999 17.35L5.26498 14.235Z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C9.03037 19.245 6.22037 17.33 5.26538 14.23L1.24036 17.345C3.25536 21.305 7.31037 24.0001 12.0004 24.0001Z"
-                    fill="#34A853"
-                  />
-                </svg>
-                Google
-              </>
-            )}
-          </button>
-
-          <button
-            type="button"
-            disabled={loading || oauthLoading !== null}
-            onClick={() => handleOAuth("github")}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 disabled:opacity-50 transition-colors"
-          >
-            {oauthLoading === "github" ? "Conectando..." : (
-              <>
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fillRule="evenodd"
-                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                GitHub
-              </>
-            )}
-          </button>
+        {/* Footer */}
+        <div className="p-6 bg-[#282a2b]/50 border-t border-[#4a4455] rounded-b-xl text-center">
+          <p className="text-[14px] text-[#ccc3d8]">
+            ¿No tienes una cuenta?{" "}
+            <Link href="/registro" className="text-[#d2bbff] hover:text-[#7c3aed] font-semibold transition-colors">
+              Crear una cuenta
+            </Link>
+          </p>
         </div>
-      </div>
-
-      <p className="mt-8 text-center text-sm text-zinc-600">
-        ¿No tienes una cuenta?{" "}
-        <Link href="/registro" className="font-semibold text-zinc-900 hover:underline">
-          Regístrate gratis
-        </Link>
-      </p>
-    </div>
+      </main>
+    </>
   )
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Suspense fallback={<p className="text-sm text-zinc-500 text-center">Cargando…</p>}>
+    <div className="bg-[#121414] text-[#e2e2e2] min-h-screen flex items-center justify-center p-4 selection:bg-[#7c3aed] selection:text-[#ede0ff] relative overflow-hidden font-sans">
+      <Suspense fallback={<p className="text-sm text-[#ccc3d8] text-center">Cargando…</p>}>
         <LoginForm />
       </Suspense>
     </div>
