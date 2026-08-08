@@ -1,8 +1,7 @@
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <div className="w-full max-w-sm rounded-md border border-zinc-200 bg-white p-8">
-        <h1 className="mb-6 text-center text-xl font-bold tracking-tight text-zinc-900">BackRoom</h1>
+    <div className="flex min-h-screen items-center justify-center bg-[#18181B] p-4 md:p-8">
+      <div className="w-full max-w-[420px] rounded-xl border border-[#4a4455] bg-[#282a2b] p-6 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] md:p-8">
         {children}
       </div>
     </div>
