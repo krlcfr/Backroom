@@ -264,7 +264,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="bg-[#121414] text-[#e2e2e2] min-h-screen flex items-center justify-center p-4 selection:bg-[#7c3aed] selection:text-[#ede0ff] relative overflow-hidden font-sans">
+    <div className="bg-[#121414] text-[#e2e2e2] min-h-screen flex items-center justify-center p-4 selection:bg-[#7c3aed] selection:text-[#ede0ff] relative overflow-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Suspense fallback={<p className="text-sm text-[#ccc3d8] text-center">Cargando…</p>}>
         <LoginForm />
       </Suspense>
