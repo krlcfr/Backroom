@@ -77,7 +77,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
           </nav>
           <div className="flex items-center gap-3">
             <Link
-              href="/dashboard"
+              href="/org/crear"
               className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-[12px] font-medium hover:bg-[#8B5CF6] transition-colors flex items-center gap-2"
             >
               Crear mi organización

@@ -181,7 +181,7 @@ export default function DemoLimitesPage() {
             Elimina los límites de la Demo y empieza a construir tu BackRoom con tu propio equipo.
           </p>
           <Link
-            href="/dashboard"
+            href="/org/crear"
             className="mt-6 inline-flex items-center gap-2 bg-[#7c3aed] text-white px-6 py-3 rounded-lg text-[14px] font-medium hover:bg-[#8B5CF6] transition-colors shadow-[0_0_20px_rgba(124,58,237,0.4)]"
           >
             Crear mi organización ahora

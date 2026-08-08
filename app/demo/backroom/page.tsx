@@ -451,7 +451,7 @@ export default function DemoBackroomPage() {
                     Actualiza a una organización completa para eliminar los límites de almacenamiento y usuarios.
                   </p>
                   <Link
-                    href="/dashboard"
+                    href="/org/crear"
                     className="w-full block bg-[#7c3aed] text-white py-2 rounded-lg text-[12px] font-medium hover:bg-[#8B5CF6] transition-colors"
                   >
                     Crear Organización
@@ -474,7 +474,7 @@ export default function DemoBackroomPage() {
             </p>
             <div className="flex flex-col gap-2">
               <Link
-                href="/dashboard"
+                href="/org/crear"
                 className="w-full bg-[#7c3aed] text-white py-2.5 rounded-lg text-[12px] font-medium hover:bg-[#8B5CF6] transition-colors"
               >
                 Crear mi organización
