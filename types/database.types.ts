@@ -17,6 +17,26 @@ export interface Usuario {
   created_at: string;
 }
 
+export interface Organizacion {
+  id: string;
+  owner_id: string; // FK → usuarios.id (Propietario, RN-01)
+  name: string;
+  description: string | null;
+  logo_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrganizacionMiembro {
+  id: string;
+  organization_id: string; // FK → organizations.id
+  user_id: string;         // FK → usuarios.id
+  role: RolOrg;            // admin | member (Propietario vía owner_id, R-09)
+  status: EstadoMiembro;   // active | pending
+  joined_at: string | null;
+  created_at: string;
+}
+
 export interface BackRoom {
   id: string;
   propietario_id: string; // FK → usuarios.id
@@ -119,6 +139,12 @@ export interface Rol {
 
 /** Permisos disponibles en backroom_miembros */
 export type Permiso = "solo_visualizar" | "contribuir";
+
+/** Roles fijos de organización (R-09): admin | member. Propietario vía owner_id */
+export type RolOrg = "admin" | "member";
+
+/** Estado de membresía en organización */
+export type EstadoMiembro = "active" | "pending";
 
 /** Tipos de recurso permitidos */
 export type TipoRecurso = "docx" | "pptx" | "mp3" | "mp4" | "enlace";
