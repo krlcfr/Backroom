@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { BackroomsService } from "@/lib/services/backrooms.service"
+import { OrganizationsService } from "@/lib/services/organizations.service"
+import { getUsuarioInterno } from "@/lib/auth/rbac"
 
 const PORTADA_COLORS = [
   "from-violet-500 to-purple-600",
@@ -20,10 +22,76 @@ interface Backroom {
   createdAt: string
 }
 
+interface Org {
+  id: string
+  ownerId: string
+  name: string
+  description: string | null
+  logoUrl: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: sessionData } = await supabase.auth.getSession()
-  const currentUserId = sessionData.session?.user?.id ?? null
+  const authId = sessionData.session?.user?.id ?? null
+
+  let org: Org | null = null
+  let usuarioInternoId: string | null = null
+  if (authId) {
+    try {
+      org = await OrganizationsService.getOrgForUser(authId)
+      const perfil = await getUsuarioInterno(authId)
+      usuarioInternoId = perfil?.id ?? null
+    } catch {
+      org = null
+    }
+  }
+
+  const esPropietario = org !== null && org.ownerId === usuarioInternoId
+
+  if (org) {
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Mi organización</h1>
+          <span
+            className={
+              esPropietario
+                ? "rounded-full bg-zinc-900 px-3 py-1 text-xs font-medium text-white"
+                : "rounded-full bg-zinc-200 px-3 py-1 text-xs font-medium text-zinc-700"
+            }
+          >
+            {esPropietario ? "Propietario" : "Miembro"}
+          </span>
+        </div>
+
+        <div className="mb-8 flex items-center gap-4 rounded-lg border border-zinc-200 p-6">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-900 text-lg font-semibold text-white">
+            {org.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={org.logoUrl} alt={`Logo de ${org.name}`} className="h-full w-full object-cover" />
+            ) : (
+              <span>{org.name.charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-900">{org.name}</h2>
+            <p className="text-sm text-zinc-500">
+              {org.description ? org.description : "Sin descripción"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-zinc-300 py-16">
+          <p className="max-w-md text-center text-sm text-zinc-500">
+            Tu organización está lista. La gestión de BackRooms de la organización estará disponible en la próxima actualización.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   let backrooms: Backroom[] = []
   try {
@@ -32,6 +100,7 @@ export default async function DashboardPage() {
     backrooms = []
   }
 
+  const currentUserId = authId
   const limite = 3
 
   return (

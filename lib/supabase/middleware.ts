@@ -52,6 +52,14 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
       }
 
+      // Si el usuario tiene organización, mandarlo al dashboard org (RLS restringe al owner/miembro activo)
+      const { data: org } = await supabase.from('organizations').select('id').limit(1).maybeSingle()
+
+      if (org) {
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
+      }
+
       const { data: member } = await supabase.from('backroom_miembros').select('backroom_id').eq('usuario_id', profile?.id).limit(1).maybeSingle()
       const { data: owner } = await supabase.from('backrooms').select('id').eq('propietario_id', profile?.id).limit(1).maybeSingle()
 
