@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 
 export default function DemoLayout({ children }: { children: React.ReactNode }) {
@@ -9,6 +10,8 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [email, setEmail] = useState<string | null>(null)
+  const [nombreCompleto, setNombreCompleto] = useState<string | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [loggingOut, setLoggingOut] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -17,6 +20,8 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.email) setEmail(data.email)
+        if (data?.nombre_completo) setNombreCompleto(data.nombre_completo)
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url)
       })
       .catch(() => {})
   }, [])
@@ -92,12 +97,29 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
               <button
                 onClick={() => setUserMenuOpen((v) => !v)}
                 className="w-8 h-8 rounded-full bg-[#282a2b] border border-[#4a4455] overflow-hidden flex items-center justify-center text-[#e2e2e2] text-[14px] font-semibold"
+                aria-label="Menú de usuario"
               >
-                {email ? email.charAt(0).toUpperCase() : <span className="material-symbols-outlined text-[18px]">person</span>}
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt="Foto de perfil"
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : email ? (
+                  email.charAt(0).toUpperCase()
+                ) : (
+                  <span className="material-symbols-outlined text-[18px]">person</span>
+                )}
               </button>
               {userMenuOpen && (
-                <div className="absolute right-0 top-10 w-44 bg-[#1e2020] border border-[#4a4455] rounded-lg p-2 shadow-xl z-50">
-                  <p className="px-3 py-2 text-[12px] text-[#ccc3d8] truncate">{email ?? "Usuario Demo"}</p>
+                <div className="absolute right-0 top-10 w-48 bg-[#1e2020] border border-[#4a4455] rounded-lg p-2 shadow-xl z-50">
+                  <p className="px-3 py-2 text-[13px] text-[#e2e2e2] font-medium truncate">
+                    {nombreCompleto ?? "Usuario Demo"}
+                  </p>
+                  <p className="px-3 pb-2 text-[12px] text-[#ccc3d8] truncate">{email ?? ""}</p>
                   <div className="border-t border-[#4a4455] my-1" />
                   <button
                     onClick={handleLogout}
