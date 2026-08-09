@@ -40,72 +40,84 @@ CREATE INDEX IF NOT EXISTS idx_org_members_user ON organization_members(user_id)
 -- ============================================================
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 
+-- Funciones helper (SECURITY DEFINER → evitan recursión circular de RLS)
+CREATE OR REPLACE FUNCTION public.current_usuario_id()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT id FROM usuarios WHERE auth_id = auth.uid();
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_org_member(org uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM organization_members
+    WHERE organization_id = org
+      AND user_id = current_usuario_id()
+      AND status = 'active'
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_org_owner(org uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM organizations
+    WHERE id = org
+      AND owner_id = current_usuario_id()
+  );
+$$;
+
 -- SELECT: el propietario o un miembro activo de la organización
 CREATE POLICY organizations_select ON organizations FOR SELECT
-  USING (
-    owner_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid())
-    OR
-    id IN (
-      SELECT organization_id FROM organization_members
-      WHERE user_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid())
-        AND status = 'active'
-    )
-  );
+  USING (owner_id = current_usuario_id() OR is_org_member(id));
 
 -- INSERT: solo el creador (el Propietario, RN-01)
 CREATE POLICY organizations_insert ON organizations FOR INSERT
-  WITH CHECK (owner_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid()));
+  WITH CHECK (owner_id = current_usuario_id());
 
 -- UPDATE/DELETE: solo el Propietario
 CREATE POLICY organizations_update_owner ON organizations FOR UPDATE
-  USING (owner_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid()));
+  USING (owner_id = current_usuario_id());
 
 CREATE POLICY organizations_delete_owner ON organizations FOR DELETE
-  USING (owner_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid()));
+  USING (owner_id = current_usuario_id());
 
 -- ============================================================
 -- RLS — ORGANIZATION_MEMBERS
 -- ============================================================
 ALTER TABLE organization_members ENABLE ROW LEVEL SECURITY;
 
--- SELECT: propietario o miembro activo de la organización
+-- SELECT: propietario, miembro activo de la organización o el propio usuario
 CREATE POLICY org_members_select ON organization_members FOR SELECT
   USING (
-    organization_id IN (
-      SELECT id FROM organizations WHERE owner_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid())
-    )
-    OR
-    user_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid())
+    is_org_owner(organization_id)
+    OR is_org_member(organization_id)
+    OR user_id = current_usuario_id()
   );
 
--- INSERT: solo Propietario (o miembro activo) de la organización
+-- INSERT: solo el Propietario
 CREATE POLICY org_members_insert ON organization_members FOR INSERT
-  WITH CHECK (
-    organization_id IN (
-      SELECT id FROM organizations WHERE owner_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid())
-    )
-    OR
-    organization_id IN (
-      SELECT organization_id FROM organization_members
-      WHERE user_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid())
-        AND status = 'active'
-    )
-  );
+  WITH CHECK (is_org_owner(organization_id));
 
 -- UPDATE/DELETE: solo el Propietario (R-09)
 CREATE POLICY org_members_update_owner ON organization_members FOR UPDATE
-  USING (
-    organization_id IN (
-      SELECT id FROM organizations WHERE owner_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid())
-    )
-  );
+  USING (is_org_owner(organization_id));
 
 CREATE POLICY org_members_delete_owner ON organization_members FOR DELETE
-  USING (
-    organization_id IN (
-      SELECT id FROM organizations WHERE owner_id = (SELECT id FROM usuarios WHERE auth_id = auth.uid())
-    )
-  );
+  USING (is_org_owner(organization_id));
 
 -- ============================================================
 -- STORAGE — BUCKET org-logos (logo de organización, público)
