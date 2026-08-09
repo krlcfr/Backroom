@@ -44,3 +44,10 @@ export const updateBackroomSchema = z.object({
 });
 
 export type UpdateBackroomInput = z.infer<typeof updateBackroomSchema>;
+
+export const createOrganizationSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  description: z.string().trim().max(2000).optional().nullable(),
+});
+
+export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
