@@ -28,3 +28,26 @@ export const resetPasswordSchema = z.object({
 });
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const createBackroomSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().max(2000).optional().nullable(),
+  coverUrl: z.string().url().optional().nullable(),
+});
+
+export type CreateBackroomInput = z.infer<typeof createBackroomSchema>;
+
+export const updateBackroomSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional().nullable(),
+  coverUrl: z.string().url().optional().nullable(),
+});
+
+export type UpdateBackroomInput = z.infer<typeof updateBackroomSchema>;
+
+export const createOrganizationSchema = z.object({
+  name: z.string().trim().min(1).max(200),
+  description: z.string().trim().max(2000).optional().nullable(),
+});
+
+export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;

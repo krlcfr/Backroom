@@ -8,7 +8,13 @@ export async function GET() {
     const user = await requireAuth();
     const perfil = await AuthService.getProfile(user.id);
 
-    return NextResponse.json(perfil, { status: 200 });
+    return NextResponse.json(
+      {
+        ...perfil,
+        avatar_url: (user.user_metadata?.avatar_url as string) ?? null,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     return handleApiError(error);
   }
