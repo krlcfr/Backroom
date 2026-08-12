@@ -89,6 +89,21 @@ export default async function DashboardPage() {
             Tu organización está lista. La gestión de BackRooms de la organización estará disponible en la próxima actualización.
           </p>
         </div>
+
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Link
+            href="/dashboard/miembros"
+            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+          >
+            Gestionar miembros
+          </Link>
+          <Link
+            href="/dashboard/configuracion"
+            className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+          >
+            Configuración
+          </Link>
+        </div>
       </div>
     )
   }
