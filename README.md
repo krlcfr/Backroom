@@ -25,7 +25,7 @@ Es la fuente de verdad visual para las pantallas (login, registro, dashboard, sa
 | Correo transaccional | Resend (SMTP) |
 | Despliegue previsto | Railway o Render |
 
-La justificación de estas decisiones técnicas está en [`docs/JUSTIFICACION_TECNOLOGICA.md`](../docs/JUSTIFICACION_TECNOLOGICA.md).
+La justificación de estas decisiones técnicas y su historial están en [`docs/ESTADO_PROYECTO.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/ESTADO_PROYECTO.md) (secciones "Stack Tecnológico" y "Decisiones Técnicas") del [repositorio de documentación](#documentación).
 
 ## Requisitos
 
@@ -96,24 +96,42 @@ seeds/                       # Scripts de inicialización de datos (ej. SuperAdm
 Este proyecto está en desarrollo activo. Estado honesto, sin maquillar, al momento de este README:
 
 - ✅ Completo y probado: autenticación (registro, login, logout, recuperación de contraseña, perfil) y CRUD de BackRooms (crear, listar, ver detalle, eliminar).
-- ⬜ Pendiente: Salas, Recursos, Invitaciones, Permisos y Planes (ver `docs/PLAN_DE_IMPLEMENTACION.md` para el detalle completo por tarea).
+- ⬜ Pendiente: Salas, Recursos, Invitaciones, Permisos y Planes (ver [`docs/plan.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/plan.md) para el detalle completo por tarea).
 - ⬜ Pendiente: pruebas automatizadas, integración continua (CI/CD), contenerización, despliegue en servidor real, autenticación multifactor y límite de tasa de peticiones (rate limiting).
 
 ## Pruebas
 
-Actualmente el proyecto no cuenta con pruebas automatizadas. Es una limitación conocida y registrada, en proceso de corrección — ver `docs/ESTADO_PROYECTO.md`.
-
-## Uso de Inteligencia Artificial
-
-Este proyecto fue desarrollado con asistencia de herramientas de inteligencia artificial (Claude, de Anthropic) para generación de código, revisión y documentación. El detalle de qué se generó, cómo se supervisó y qué comprende cada integrante del equipo está declarado en [`docs/DECLARACION_USO_IA.md`](../docs/DECLARACION_USO_IA.md).
+Actualmente el proyecto no cuenta con pruebas automatizadas. Es una limitación conocida y registrada, en proceso de corrección — ver [`docs/ESTADO_PROYECTO.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/ESTADO_PROYECTO.md).
 
 ## Despliegue
 
-El proyecto está planeado para desplegarse en Railway o Render como Node.js standalone (no Vercel, debido a límites de tamaño de archivos en el plan gratuito frente al requerimiento de subida de recursos de hasta 50MB). Aún no desplegado — ver estado en `docs/ESTADO_PROYECTO.md`.
+El proyecto está planeado para desplegarse en Railway o Render como Node.js standalone (no Vercel, debido a límites de tamaño de archivos en el plan gratuito frente al requerimiento de subida de recursos de hasta 50MB). Aún no desplegado — ver estado en [`docs/ESTADO_PROYECTO.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/ESTADO_PROYECTO.md).
 
 ## Documentación
 
-La documentación completa del proyecto (análisis, diseño, arquitectura, decisiones técnicas, plan de implementación) vive en un repositorio de documentación separado (`docs/`), gestionado aparte del código fuente.
+La documentación completa del proyecto (análisis, diseño, arquitectura, decisiones técnicas, plan de implementación) vive en un repositorio separado, gestionado aparte del código fuente:
+
+- **Repositorio de documentación:** [https://github.com/cxcristian/BackRomm](https://github.com/cxcristian/BackRomm)
+
+### Documentos de referencia
+
+| Documento | Ubicación |
+|-----------|-----------|
+| Estado del proyecto (módulos IN/OUT, roles, decisiones técnicas) | [`docs/ESTADO_PROYECTO.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/ESTADO_PROYECTO.md) |
+| Acta de constitución | [`docs/analisis/acta.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/acta.md) |
+| Documento de alcance | [`docs/analisis/alcance.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/alcance.md) |
+| Requerimientos funcionales y no funcionales | [`docs/analisis/requerimientos.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/requerimientos.md) |
+| Historias de usuario | [`docs/analisis/historias.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/historias.md) |
+| Casos de uso | [`docs/analisis/casos_de_uso.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/casos_de_uso.md) |
+| Stakeholders y roles | [`docs/analisis/stakeholders.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/stakeholders.md) |
+| Arquitectura del software | [`docs/diseno/arquitectura.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/arquitectura.md) |
+| Modelo entidad-relación | [`docs/diseno/modelo_er.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/modelo_er.md) |
+| Diagramas UML | [`docs/diseno/diagramas_uml.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/diagramas_uml.md) |
+| Wireframes y mockups | [`docs/diseno/wireframes.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/wireframes.md) |
+| Sistema de diseño | [`docs/diseno/sistema_diseno.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/sistema_diseno.md) |
+| Catálogo de endpoints API | [`docs/diseno/endpoints_api.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/endpoints_api.md) |
+| Plan de implementación | [`docs/plan.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/plan.md) |
+| Asignación de tareas | [`docs/tareas.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/tareas.md) |
 
 ## Autores
 
