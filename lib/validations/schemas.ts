@@ -51,3 +51,16 @@ export const createOrganizationSchema = z.object({
 });
 
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
+
+export const updateOrganizationSchema = z.object({
+  name: z.string().trim().min(1).max(200).optional(),
+  description: z.string().trim().max(2000).nullable().optional(),
+});
+
+export type UpdateOrganizationInput = z.infer<typeof updateOrganizationSchema>;
+
+export const updateMemberRoleSchema = z.object({
+  role: z.enum(["admin", "member"]),
+});
+
+export type UpdateMemberRoleInput = z.infer<typeof updateMemberRoleSchema>;
