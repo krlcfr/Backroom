@@ -62,7 +62,6 @@ export default function RegistroPage() {
   const [loading, setLoading] = useState(false)
   const [acceptedLegal, setAcceptedLegal] = useState(false)
   const [showLegalModal, setShowLegalModal] = useState(false)
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const captchaRef = useRef<CaptchaWidgetHandle>(null)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -80,19 +79,27 @@ export default function RegistroPage() {
       return
     }
 
-    if (!captchaToken) {
-      setErrors({ captcha: "Completá la verificación \"No soy un robot\"." })
-      return
-    }
-
     setErrors({})
     setLoading(true)
+
+    let token: string | null = null
+    try {
+      token = await captchaRef.current?.execute() ?? null
+    } catch {
+      token = null
+    }
+
+    if (!token) {
+      setLoading(false)
+      setErrors({ captcha: "No se pudo completar la verificación de seguridad. Intentá de nuevo." })
+      return
+    }
 
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, captchaToken }),
+        body: JSON.stringify({ username, email, password, captchaToken: token }),
       })
 
       const data = await res.json()
@@ -268,7 +275,6 @@ export default function RegistroPage() {
           <CaptchaWidget
             ref={captchaRef}
             onChange={(token) => {
-              setCaptchaToken(token)
               if (token) setErrors((prev) => ({ ...prev, captcha: "" }))
             }}
           />
