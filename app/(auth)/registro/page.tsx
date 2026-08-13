@@ -4,18 +4,15 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import OAuthButtons from "@/components/oauth-buttons"
+import LegalModal from "@/components/legal-modal"
 
 type FieldErrors = Record<string, string>
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const USERNAME_RE = /^[a-zA-Z0-9_]+$/
 
-function validateClient(values: { username: string; fullName: string; email: string; password: string; confirmPassword: string }): FieldErrors {
+function validateClient(values: { username: string; email: string; password: string; confirmPassword: string }): FieldErrors {
   const errors: FieldErrors = {}
-
-  if (!values.fullName.trim()) {
-    errors.fullName = "El nombre completo es obligatorio."
-  }
 
   if (!values.username.trim()) {
     errors.username = "El nombre de usuario es obligatorio."
@@ -54,7 +51,6 @@ const inputNormal = "border-[#4a4455]"
 export default function RegistroPage() {
   const router = useRouter()
   const [username, setUsername] = useState("")
-  const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -63,12 +59,19 @@ export default function RegistroPage() {
   const [errors, setErrors] = useState<FieldErrors>({})
   const [globalError, setGlobalError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [acceptedLegal, setAcceptedLegal] = useState(false)
+  const [showLegalModal, setShowLegalModal] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setGlobalError("")
 
-    const clientErrors = validateClient({ username, fullName, email, password, confirmPassword })
+    if (!acceptedLegal) {
+      setGlobalError("Debes aceptar los Términos y Políticas para continuar.")
+      return
+    }
+
+    const clientErrors = validateClient({ username, email, password, confirmPassword })
     if (Object.keys(clientErrors).length > 0) {
       setErrors(clientErrors)
       return
@@ -80,7 +83,7 @@ export default function RegistroPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, fullName, email, password }),
+        body: JSON.stringify({ username, email, password }),
       })
 
       const data = await res.json()
@@ -112,12 +115,12 @@ export default function RegistroPage() {
 
   return (
     <>
-      <div className="p-8 pb-6 text-center border-b border-[#4a4455]/50">
-        <h1 className="text-[28px] font-semibold leading-9 text-[#d2bbff] tracking-tight mb-2">Crear cuenta</h1>
-        <p className="text-[14px] leading-5 text-[#ccc3d8]">Únete a la plataforma para gestionar tu espacio.</p>
+      <div className="p-6 pb-4 text-center border-b border-[#4a4455]/50">
+        <h1 className="text-[24px] font-semibold leading-8 text-[#d2bbff] tracking-tight mb-1.5">Crear cuenta</h1>
+        <p className="text-[13px] leading-5 text-[#ccc3d8]">Únete a la plataforma para gestionar tu espacio.</p>
       </div>
 
-      <div className="p-8 flex flex-col gap-6">
+      <div className="p-6 flex flex-col gap-5">
         <OAuthButtons />
 
         <div className="flex items-center gap-3">
@@ -128,22 +131,7 @@ export default function RegistroPage() {
           <div className="h-px flex-1 bg-[#4a4455]"></div>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="fullName" className="text-xs font-medium text-[#ccc3d8]">
-              Nombre completo
-            </label>
-            <input
-              id="fullName"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Ej. Jane Doe"
-              className={`${inputBase} ${errors.fullName ? inputError : inputNormal}`}
-            />
-            {errors.fullName && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.fullName}</p>}
-          </div>
-  
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3.5">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="username" className="text-xs font-medium text-[#ccc3d8]">
               Nombre de usuario
@@ -241,6 +229,32 @@ export default function RegistroPage() {
   
           {globalError && <p className="text-sm text-[#ffb4ab]">{globalError}</p>}
   
+          <div className="flex items-start gap-3 mt-1 mb-2">
+            <div className="relative flex items-center justify-center mt-0.5 cursor-pointer" onClick={() => !acceptedLegal && setShowLegalModal(true)}>
+              <input
+                type="checkbox"
+                checked={acceptedLegal}
+                onChange={() => {
+                  if (!acceptedLegal) setShowLegalModal(true)
+                }}
+                className="peer sr-only"
+              />
+              <div className={`h-5 w-5 rounded border bg-[#0c0f0f] transition-all flex items-center justify-center ${acceptedLegal ? 'border-[#7c3aed] bg-[#7c3aed]' : 'border-[#4a4455]'}`}>
+                <span className={`material-symbols-outlined text-[16px] text-white opacity-0 ${acceptedLegal ? 'opacity-100' : ''} transition-opacity`}>check</span>
+              </div>
+            </div>
+            <span className="text-[13px] text-[#ccc3d8] leading-tight">
+              Acepto los{" "}
+              <button type="button" onClick={() => setShowLegalModal(true)} className="font-semibold text-[#d2bbff] hover:underline">
+                Términos y Condiciones
+              </button>{" "}
+              y la{" "}
+              <button type="button" onClick={() => setShowLegalModal(true)} className="font-semibold text-[#d2bbff] hover:underline">
+                Política de Tratamiento de Datos
+              </button>
+            </span>
+          </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -252,14 +266,24 @@ export default function RegistroPage() {
           </form>
       </div>
 
-      <div className="p-6 bg-[#282a2b]/50 border-t border-[#4a4455] rounded-b-xl text-center">
-        <p className="text-[14px] text-[#ccc3d8]">
+      <div className="p-4 bg-[#282a2b]/50 border-t border-[#4a4455] rounded-b-xl text-center">
+        <p className="text-[13px] text-[#ccc3d8]">
           ¿Ya tenés cuenta?{" "}
           <Link href="/login" className="text-[#d2bbff] hover:text-[#7c3aed] font-semibold transition-colors">
             Inicia sesión
           </Link>
         </p>
       </div>
+
+      <LegalModal
+        isOpen={showLegalModal}
+        onClose={() => setShowLegalModal(false)}
+        onAccept={() => {
+          setAcceptedLegal(true)
+          setShowLegalModal(false)
+          setGlobalError("")
+        }}
+      />
     </>
   )
 }

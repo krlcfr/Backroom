@@ -40,7 +40,7 @@ export class AuthService {
     const { error: insertError } = await supabaseAdmin.from("usuarios").insert({
       auth_id: authData.user.id,
       username: input.username,
-      nombre_completo: input.fullName,
+      nombre_completo: input.username,
       correo: input.email,
     });
 

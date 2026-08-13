@@ -6,7 +6,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="w-[800px] h-[800px] bg-[#d2bbff] rounded-full blur-[150px] opacity-10"></div>
       </div>
       
-      <div className="w-full max-w-[420px] rounded-xl border border-[#4a4455] bg-[#1e2020] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.7)] relative z-10 flex flex-col backdrop-blur-xl">
+      <div className="w-full max-w-[520px] rounded-xl border border-[#4a4455] bg-[#1e2020] shadow-[0_20px_40px_-10px_rgba(0,0,0,0.7)] relative z-10 flex flex-col backdrop-blur-xl">
         {children}
       </div>
     </div>
