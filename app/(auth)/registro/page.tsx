@@ -103,8 +103,7 @@ export default function RegistroPage() {
         return
       }
 
-      router.push("/dashboard")
-      router.refresh()
+      router.push("/confirmar-correo")
     } catch {
       setLoading(false)
       setGlobalError("No se pudo completar el registro. Intentá de nuevo.")

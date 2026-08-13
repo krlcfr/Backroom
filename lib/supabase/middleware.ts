@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const url = request.nextUrl.clone()
-  const isAuthRoute = url.pathname.startsWith('/login') || url.pathname.startsWith('/registro') || url.pathname.startsWith('/recuperar')
+  const isAuthRoute = url.pathname.startsWith('/login') || url.pathname.startsWith('/registro') || url.pathname.startsWith('/recuperar') || url.pathname.startsWith('/confirmar-correo')
   const isProtectedRoute = url.pathname.startsWith('/dashboard') || url.pathname.startsWith('/admin') || url.pathname.startsWith('/demo/backroom') || url.pathname.startsWith('/demo/limites')
 
   // Si no hay usuario y es una ruta protegida, redirigir a login
