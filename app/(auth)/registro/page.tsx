@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import OAuthButtons from "@/components/oauth-buttons"
 import LegalModal from "@/components/legal-modal"
+import CaptchaWidget, { type CaptchaWidgetHandle } from "@/components/captcha-widget"
 
 type FieldErrors = Record<string, string>
 
@@ -61,6 +62,8 @@ export default function RegistroPage() {
   const [loading, setLoading] = useState(false)
   const [acceptedLegal, setAcceptedLegal] = useState(false)
   const [showLegalModal, setShowLegalModal] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const captchaRef = useRef<CaptchaWidgetHandle>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -76,6 +79,12 @@ export default function RegistroPage() {
       setErrors(clientErrors)
       return
     }
+
+    if (!captchaToken) {
+      setErrors({ captcha: "Completá la verificación \"No soy un robot\"." })
+      return
+    }
+
     setErrors({})
     setLoading(true)
 
@@ -83,13 +92,14 @@ export default function RegistroPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password, captchaToken }),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
         setLoading(false)
+        captchaRef.current?.reset()
         if (data.campo) {
           setErrors({ [data.campo]: data.error })
           return
@@ -228,7 +238,6 @@ export default function RegistroPage() {
           </div>
   
           {globalError && <p className="text-sm text-[#ffb4ab]">{globalError}</p>}
-  
           <div className="flex items-start gap-3 mt-1 mb-2">
             <div className="relative flex items-center justify-center mt-0.5 cursor-pointer" onClick={() => !acceptedLegal && setShowLegalModal(true)}>
               <input
@@ -254,6 +263,16 @@ export default function RegistroPage() {
               </button>
             </span>
           </div>
+
+          {/* Captcha */}
+          <CaptchaWidget
+            ref={captchaRef}
+            onChange={(token) => {
+              setCaptchaToken(token)
+              if (token) setErrors((prev) => ({ ...prev, captcha: "" }))
+            }}
+          />
+          {errors.captcha && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.captcha}</p>}
 
           <button
             type="submit"

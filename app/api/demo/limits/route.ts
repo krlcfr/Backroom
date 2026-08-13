@@ -11,10 +11,10 @@ export async function GET() {
     // y sum() en las tablas reales del usuario.
     // Para la Demo devolvemos el consumo simulado:
     const current_usage = {
-      storage_bytes: 1048576, // 1 MB (el documento de ejemplo)
-      members: 1,             // Solo el usuario actual
-      max_depth: 2,           // El árbol de ejemplo llega a profundidad 2
-      resources: 2,           // Dos recursos de ejemplo
+      storage_bytes: 2 * 1024 * 1024, // 2 MB (recursos de ejemplo)
+      members: 1,                     // Solo el usuario actual
+      max_depth: 0,                   // Las salas de ejemplo están en el nivel 1
+      resources: 3,                   // Tres recursos en la sala activa
     };
 
     const data = {
@@ -25,7 +25,7 @@ export async function GET() {
     };
 
     return NextResponse.json({ data }, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: { code: "UNAUTHORIZED", message: "Inicia sesión para ver los límites." } },
       { status: 401 }
