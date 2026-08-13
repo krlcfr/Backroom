@@ -8,6 +8,8 @@ interface SalaNode {
   id: string
   nombre: string
   descripcion?: string
+  acceso: "publico" | "restringido"
+  icono: string
   depth: number
   children: SalaNode[]
 }
@@ -42,14 +44,13 @@ interface LimitsData {
 }
 
 const TIPO_ICON: Record<string, { icon: string; color: string }> = {
+  pdf: { icon: "picture_as_pdf", color: "text-rose-400" },
   docx: { icon: "description", color: "text-amber-400" },
-  pptx: { icon: "slideshow", color: "text-rose-400" },
-  mp3: { icon: "music_note", color: "text-green-400" },
-  mp4: { icon: "movie", color: "text-blue-400" },
-  enlace: { icon: "link", color: "text-[#d2bbff]" },
+  pptx: { icon: "slideshow", color: "text-amber-500" },
+  mp3: { icon: "audio_file", color: "text-blue-400" },
+  mp4: { icon: "video_file", color: "text-purple-400" },
+  enlace: { icon: "link", color: "text-green-400" },
 }
-
-const DEPTH_COLORS = ["text-amber-500", "text-blue-400", "text-purple-400", "text-green-400"]
 
 function formatDate(iso: string) {
   const d = new Date(iso)
@@ -62,70 +63,12 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" })
 }
 
-function TreeNode({
-  node,
-  selectedId,
-  onSelect,
-  expanded,
-  onToggle,
-}: {
-  node: SalaNode
-  selectedId: string | null
-  onSelect: (id: string) => void
-  expanded: Set<string>
-  onToggle: (id: string) => void
-}) {
-  const hasChildren = node.children.length > 0
-  const isExpanded = expanded.has(node.id)
-  const isSelected = selectedId === node.id
-  const folderColor = DEPTH_COLORS[Math.min(node.depth, DEPTH_COLORS.length - 1)]
-
-  return (
-    <div className="space-y-2">
-      <div
-        onClick={() => {
-          onSelect(node.id)
-          if (hasChildren) onToggle(node.id)
-        }}
-        className={`flex items-center gap-2 cursor-pointer hover:text-[#d2bbff] transition-colors px-2 py-1 rounded-md ${
-          isSelected ? "bg-[#3B0764]/30 text-[#d2bbff] border-l-2 border-[#d2bbff]" : "text-[#ccc3d8]"
-        }`}
-        style={{ marginLeft: node.depth * 16 }}
-      >
-        <span className="material-symbols-outlined text-[18px]">
-          {hasChildren ? (isExpanded ? "expand_more" : "chevron_right") : "remove"}
-        </span>
-        <span className={`material-symbols-outlined text-[18px] ${folderColor}`}>
-          {isSelected ? "folder_open" : "folder"}
-        </span>
-        <span className="truncate">{node.nombre}</span>
-      </div>
-      {hasChildren && isExpanded && (
-        <div className="space-y-2 border-l border-[#3F3F46] ml-3 pl-1">
-          {node.children.map((child) => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              expanded={expanded}
-              onToggle={onToggle}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
 export default function DemoBackroomPage() {
   const [backroom, setBackroom] = useState<BackroomData | null>(null)
   const [limits, setLimits] = useState<LimitsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [search, setSearch] = useState("")
   const [limitsOpen, setLimitsOpen] = useState(true)
   const [modal, setModal] = useState(false)
 
@@ -146,15 +89,6 @@ export default function DemoBackroomPage() {
       const firstWithResources =
         brData.sample_resources.find((r) => brData.tree.some((s) => s.id === r.sala_id))?.sala_id ?? null
       setSelectedId(firstWithResources ?? brData.tree[0]?.id ?? null)
-      const exp = new Set<string>()
-      const walk = (nodes: SalaNode[]) => {
-        nodes.forEach((n) => {
-          if (n.children.length > 0) exp.add(n.id)
-          walk(n.children)
-        })
-      }
-      walk(brData.tree)
-      setExpanded(exp)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Error al cargar la Demo."
       setError(message)
@@ -172,27 +106,13 @@ export default function DemoBackroomPage() {
 
   const selectedSala = useMemo(() => {
     if (!backroom || !selectedId) return null
-    const walk = (nodes: SalaNode[]): SalaNode | null => {
-      for (const n of nodes) {
-        if (n.id === selectedId) return n
-        const found = walk(n.children)
-        if (found) return found
-      }
-      return null
-    }
-    return walk(backroom.tree)
+    return backroom.tree.find((s) => s.id === selectedId) ?? null
   }, [backroom, selectedId])
 
   const resources = useMemo(() => {
     if (!backroom || !selectedId) return []
     return backroom.sample_resources.filter((r) => r.sala_id === selectedId)
   }, [backroom, selectedId])
-
-  const filteredResources = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return resources
-    return resources.filter((r) => r.nombre.toLowerCase().includes(q))
-  }, [resources, search])
 
   const depthLevels = limits ? limits.limits.max_depth + 1 : 1
   const depthReached = limits ? Math.min(limits.current_usage.max_depth + 1, depthLevels) : 1
@@ -241,70 +161,31 @@ export default function DemoBackroomPage() {
         </button>
       </div>
 
-      {/* 3 Column Layout */}
+      {/* 2 Column Layout */}
       <div className="flex-1 flex overflow-hidden p-6 gap-6 max-w-[1440px] mx-auto w-full">
-        {/* Col 1: Room Tree */}
-        <div className="w-1/4 bg-[#27272A] border border-[#3F3F46] rounded-xl flex flex-col overflow-hidden min-w-[220px]">
-          <div className="p-4 border-b border-[#3F3F46]">
-            <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Estructura</h2>
-          </div>
-          <div className="p-4 overflow-y-auto flex-1 text-[14px] text-[#ccc3d8] space-y-2">
-            <div className="flex items-center gap-2 mb-2 text-[#ccc3d8]">
-              <span className="material-symbols-outlined text-[18px] text-amber-500">folder</span>
-              <span>{backroom.backroom.nombre}</span>
-            </div>
-            <div className="space-y-2">
-              {backroom.tree.map((node) => (
-                <TreeNode
-                  key={node.id}
-                  node={node}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  expanded={expanded}
-                  onToggle={(id) =>
-                    setExpanded((prev) => {
-                      const next = new Set(prev)
-                      if (next.has(id)) next.delete(id)
-                      else next.add(id)
-                      return next
-                    })
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Col 2: Room Content */}
-        <div className="flex-1 bg-[#27272A] border border-[#3F3F46] rounded-xl flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-[#3F3F46] flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-purple-400 text-[24px]">folder_open</span>
-              <h2 className="text-[20px] font-semibold text-[#e2e2e2]">
+        {/* Col 1: Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden gap-6">
+          {/* Header + Breadcrumb */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-[#ccc3d8] text-[12px] font-medium">
+              <span>Dashboard</span>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              <span>BackRoom Demo</span>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              <span className="text-[#d2bbff] font-medium">
                 {selectedSala?.nombre ?? backroom.backroom.nombre}
-              </h2>
+              </span>
             </div>
-            <div className="flex gap-2">
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-2 text-[#ccc3d8] text-[18px]">
-                  search
-                </span>
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar en sala..."
-                  className="bg-[#121414] border border-[#3F3F46] rounded-lg pl-9 pr-4 py-1.5 text-sm focus:border-[#d2bbff] focus:ring-1 focus:ring-[#d2bbff] w-48 text-[#e2e2e2] placeholder:text-[#ccc3d8]"
-                  type="text"
-                />
-              </div>
+            <div className="flex justify-between items-center">
+              <h1 className="text-[28px] font-semibold text-[#e2e2e2]">{backroom.backroom.nombre}</h1>
               <div className="relative group">
                 <button
                   type="button"
                   onClick={() => setModal(true)}
-                  className="bg-transparent border border-[#3F3F46] text-[#ccc3d8] px-3 py-1.5 rounded-lg text-sm hover:bg-[#121414] transition-colors flex items-center gap-2 opacity-50 cursor-not-allowed"
+                  className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-[12px] font-medium flex items-center gap-2 opacity-50 cursor-not-allowed"
                 >
                   <span className="material-symbols-outlined text-[18px]">upload</span>
-                  Subir
+                  Subir recurso
                 </button>
                 <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-[200px] bg-[#303036] text-white text-center text-[12px] rounded-md px-2 py-2 border border-[#3F3F46] shadow-lg z-50">
                   Disponible al crear tu organización
@@ -313,44 +194,103 @@ export default function DemoBackroomPage() {
             </div>
           </div>
 
-          {filteredResources.length === 0 ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-              <span className="material-symbols-outlined text-[#4a4455] text-[40px]">folder_open</span>
-              <p className="text-[14px] text-[#ccc3d8]">
-                {search ? "Sin resultados para la búsqueda." : "Sin recursos en esta sala."}
-              </p>
+          {/* Grid of Child Rooms */}
+          <div className="grid grid-cols-2 gap-4">
+            {backroom.tree.map((sala) => {
+              const isPublic = sala.acceso === "publico"
+              return (
+                <button
+                  key={sala.id}
+                  type="button"
+                  onClick={() => setSelectedId(sala.id)}
+                  className={`bg-[#27272A] border rounded-xl p-4 flex flex-col gap-3 hover:border-[#4a4455] transition-colors text-left group ${
+                    selectedId === sala.id
+                      ? "border-[#d2bbff] ring-1 ring-[#d2bbff]"
+                      : "border-[#3F3F46]"
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        isPublic ? "bg-[#3B0764]/30" : "bg-[#282a2b]"
+                      }`}
+                    >
+                      <span
+                        className={`material-symbols-outlined ${
+                          isPublic ? "text-[#d2bbff]" : "text-amber-400"
+                        }`}
+                      >
+                        {sala.icono}
+                      </span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-medium border ${
+                        isPublic
+                          ? "bg-[#282a2b] text-[#ccc3d8] border-[#4a4455]"
+                          : "bg-rose-900/30 text-rose-400 border-rose-900"
+                      }`}
+                    >
+                      {isPublic ? "Público" : "Restringido"}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-[16px] font-semibold text-[#e2e2e2] group-hover:text-[#d2bbff] transition-colors">
+                      {sala.nombre}
+                    </h3>
+                    {sala.descripcion && (
+                      <p className="text-sm text-[#ccc3d8] mt-1">{sala.descripcion}</p>
+                    )}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Recursos Recientes */}
+          <div className="bg-[#27272A] border border-[#3F3F46] rounded-xl flex flex-col flex-1 overflow-hidden">
+            <div className="p-4 border-b border-[#3F3F46]">
+              <h2 className="text-[18px] font-semibold text-[#e2e2e2]">Recursos Recientes</h2>
             </div>
-          ) : (
-            <div className="overflow-y-auto flex-1">
-              <table className="w-full text-left text-[14px]">
-                <thead className="sticky top-0 bg-[#27272A] border-b border-[#3F3F46] text-[#ccc3d8] text-[12px]">
-                  <tr>
-                    <th className="py-2 px-4 font-normal">Nombre</th>
-                    <th className="py-2 px-4 font-normal w-32">Tamaño</th>
-                    <th className="py-2 px-4 font-normal w-40">Modificado</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#3F3F46]">
-                  {filteredResources.map((r) => {
-                    const tipo = TIPO_ICON[r.tipo] ?? { icon: "description", color: "text-[#e2e2e2]" }
-                    return (
-                      <tr key={r.id} className="hover:bg-[#282a2b] transition-colors">
-                        <td className="py-3 px-4 flex items-center gap-3">
-                          <span className={`material-symbols-outlined ${tipo.color}`}>{tipo.icon}</span>
-                          <span className="truncate">{r.nombre}</span>
-                        </td>
-                        <td className="py-3 px-4 text-[#ccc3d8]">{formatBytes(r.tamano_bytes)}</td>
-                        <td className="py-3 px-4 text-[#ccc3d8]">{formatDate(r.created_at)}</td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+            {resources.length === 0 ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
+                <span className="material-symbols-outlined text-[#4a4455] text-[40px]">inbox</span>
+                <p className="text-[14px] text-[#ccc3d8]">Sin recursos en esta sala.</p>
+              </div>
+            ) : (
+              <div className="overflow-y-auto flex-1">
+                <table className="w-full text-left text-[14px]">
+                  <thead className="sticky top-0 bg-[#27272A] border-b border-[#3F3F46] text-[#ccc3d8] text-[12px] font-medium">
+                    <tr>
+                      <th className="py-3 px-4 font-normal w-12">TIPO</th>
+                      <th className="py-3 px-4 font-normal">NOMBRE</th>
+                      <th className="py-3 px-4 font-normal w-24">TAMAÑO</th>
+                      <th className="py-3 px-4 font-normal w-32">AUTOR</th>
+                      <th className="py-3 px-4 font-normal w-32">FECHA</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#3F3F46]">
+                    {resources.map((r) => {
+                      const tipo = TIPO_ICON[r.tipo] ?? { icon: "description", color: "text-[#e2e2e2]" }
+                      return (
+                        <tr key={r.id} className="hover:bg-[#282a2b] transition-colors cursor-pointer">
+                          <td className="py-3 px-4">
+                            <span className={`material-symbols-outlined ${tipo.color}`}>{tipo.icon}</span>
+                          </td>
+                          <td className="py-3 px-4 text-[#e2e2e2] font-medium">{r.nombre}</td>
+                          <td className="py-3 px-4 text-[#ccc3d8]">{formatBytes(r.tamano_bytes)}</td>
+                          <td className="py-3 px-4 text-[#ccc3d8]">{r.subido_por}</td>
+                          <td className="py-3 px-4 text-[#ccc3d8]">{formatDate(r.created_at)}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Col 3: Limits Panel (collapsible) */}
+        {/* Col 2: Limits Panel (collapsible) */}
         <div
           className={`bg-[#27272A] border border-[#3F3F46] rounded-xl flex flex-col overflow-hidden transition-all duration-300 ${
             limitsOpen ? "w-1/4 min-w-[240px]" : "w-12 min-w-12"

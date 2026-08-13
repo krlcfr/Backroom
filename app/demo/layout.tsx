@@ -160,7 +160,7 @@ export default function DemoLayout({ children }: { children: React.ReactNode }) 
           {[
             { icon: "home", label: "Home", active: false },
             { icon: "account_tree", label: "Hierarchy", active: pathname === "/demo/backroom" },
-            { icon: "folder", label: "Storage", active: pathname === "/demo/limites" },
+            { icon: "sd_storage", label: "Storage", active: pathname === "/demo/limites" },
             { icon: "key", label: "Permissions", active: false },
             { icon: "history", label: "History", active: false },
           ].map((item) => (
