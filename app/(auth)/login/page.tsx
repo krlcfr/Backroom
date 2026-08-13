@@ -15,6 +15,7 @@ function LoginForm() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const captchaRef = useRef<CaptchaWidgetHandle>(null)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -22,15 +23,8 @@ function LoginForm() {
     setError("")
     setLoading(true)
 
-    let token: string | null = null
-    try {
-      token = await captchaRef.current?.execute() ?? null
-    } catch {
-      token = null
-    }
-
-    if (!token) {
-      setError("No se pudo completar la verificación de seguridad. Intentá de nuevo.")
+    if (!captchaToken) {
+      setError("Completá la verificación \"No soy un robot\" para continuar.")
       setLoading(false)
       return
     }
@@ -38,7 +32,7 @@ function LoginForm() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, captchaToken: token }),
+      body: JSON.stringify({ email, password, captchaToken }),
     })
 
     if (!res.ok) {
@@ -249,6 +243,7 @@ function LoginForm() {
           <CaptchaWidget
             ref={captchaRef}
             onChange={(token) => {
+              setCaptchaToken(token)
               if (token) setError("")
             }}
           />
