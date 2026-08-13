@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, Suspense, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import CaptchaWidget, { type CaptchaWidgetHandle } from "@/components/captcha-widget"
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -14,22 +15,31 @@ function LoginForm() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState<string | null>(null)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const captchaRef = useRef<CaptchaWidgetHandle>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError("")
     setLoading(true)
 
+    if (!captchaToken) {
+      setError("Completá la verificación \"No soy un robot\".")
+      setLoading(false)
+      return
+    }
+
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, captchaToken }),
     })
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error?.message || "No se pudo iniciar sesión")
+      setError(typeof data.error === "string" ? data.error : data.error?.message || "No se pudo iniciar sesión")
       setLoading(false)
+      captchaRef.current?.reset()
       return
     }
 
@@ -56,8 +66,8 @@ function LoginForm() {
       if (data?.url) {
         window.location.href = data.url
       }
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al conectar con el proveedor")
       setOauthLoading(null)
     }
   }
@@ -228,6 +238,15 @@ function LoginForm() {
               </button>
             </div>
           </div>
+
+          {/* Captcha */}
+          <CaptchaWidget
+            ref={captchaRef}
+            onChange={(token) => {
+              setCaptchaToken(token)
+              if (token) setError("")
+            }}
+          />
 
           {/* Submit Button */}
           <button
