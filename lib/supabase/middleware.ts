@@ -49,6 +49,7 @@ export async function updateSession(request: NextRequest) {
       
       if (profile?.es_superadmin) {
         url.pathname = '/admin'
+        url.search = ''
         return NextResponse.redirect(url)
       }
 
@@ -57,6 +58,7 @@ export async function updateSession(request: NextRequest) {
 
       if (org) {
         url.pathname = '/dashboard'
+        url.search = ''
         return NextResponse.redirect(url)
       }
 
@@ -68,6 +70,7 @@ export async function updateSession(request: NextRequest) {
       } else {
         url.pathname = '/demo/backroom'
       }
+      url.search = ''
       return NextResponse.redirect(url)
     }
 
@@ -76,6 +79,7 @@ export async function updateSession(request: NextRequest) {
       const { data: profile } = await supabase.from('usuarios').select('es_superadmin').eq('auth_id', user.id).single()
       if (!profile?.es_superadmin) {
         url.pathname = '/dashboard' // o /forbidden
+        url.search = ''
         return NextResponse.redirect(url)
       }
     }
