@@ -27,6 +27,7 @@ export default forwardRef<CaptchaWidgetHandle, CaptchaWidgetProps>(function Capt
   { onChange },
   ref
 ) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<number | null>(null)
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
@@ -63,9 +64,10 @@ export default forwardRef<CaptchaWidgetHandle, CaptchaWidgetProps>(function Capt
         setTimeout(renderWidget, 250)
         return
       }
-      widgetIdRef.current = grecaptcha.render(document.createElement("div"), {
+      if (!containerRef.current) return
+      widgetIdRef.current = grecaptcha.render(containerRef.current, {
         sitekey: siteKey,
-        size: "invisible",
+        theme: "dark",
         callback: (token: string) => handleToken(token),
         "expired-callback": () => handleToken(null),
         "error-callback": () => handleToken(null),
@@ -150,7 +152,7 @@ export default forwardRef<CaptchaWidgetHandle, CaptchaWidgetProps>(function Capt
 
   return (
     <div className="mb-2 flex items-center justify-center rounded-lg border border-[#4a4455]/50 bg-[#121414]/50 p-3">
-      <p className="text-[11px] text-[#ccc3d8]/60">Protegido por reCAPTCHA</p>
+      <div ref={containerRef} />
     </div>
   )
 })
