@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Permiso, CodigoPermiso } from "@/types/database.types";
 
 export async function getUsuarioInterno(authId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data } = await supabase
     .from("usuarios")
     .select("id, es_superadmin")
