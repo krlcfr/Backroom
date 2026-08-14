@@ -1,6 +1,7 @@
 // Archivo autogenerado a partir de los documentos Markdown
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const MarkdownComponents = {
   h1: ({node, ...props}: any) => <h1 className="text-2xl font-bold text-[#e2e2e2] mb-6 mt-8" {...props} />,
@@ -13,11 +14,17 @@ const MarkdownComponents = {
   a: ({node, ...props}: any) => <a className="text-[#7c3aed] hover:underline" {...props} />,
   strong: ({node, ...props}: any) => <strong className="font-semibold text-[#e2e2e2]" {...props} />,
   blockquote: ({node, ...props}: any) => <blockquote className="border-l-4 border-[#7c3aed] pl-4 italic my-4 text-[#958da1]" {...props} />,
+  table: ({node, ...props}: any) => <table className="w-full mb-4 text-[13px] border-collapse overflow-hidden rounded-lg" {...props} />,
+  thead: ({node, ...props}: any) => <thead className="bg-[#282a2b]" {...props} />,
+  tbody: ({node, ...props}: any) => <tbody className="bg-[#121414]" {...props} />,
+  tr: ({node, ...props}: any) => <tr className="border-b border-[#4a4455]/50" {...props} />,
+  th: ({node, ...props}: any) => <th className="px-3 py-2 text-left font-semibold text-[#d2bbff]" {...props} />,
+  td: ({node, ...props}: any) => <td className="px-3 py-2 text-[#ccc3d8]" {...props} />,
 };
 
 export const TermsAndConditions = () => (
   <div className="w-full">
-    <ReactMarkdown components={MarkdownComponents}>
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
       {`
 # Términos y Condiciones de Uso — BackRoom
 
@@ -141,7 +148,7 @@ Para consultas, quejas o reclamaciones sobre estos Términos, escríbanos a **co
 
 export const PrivacyPolicy = () => (
   <div className="w-full">
-    <ReactMarkdown components={MarkdownComponents}>
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
       {`
 # Política de Tratamiento de Datos Personales — BackRoom
 
