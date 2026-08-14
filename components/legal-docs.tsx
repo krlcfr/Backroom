@@ -18,7 +18,123 @@ const MarkdownComponents = {
 export const TermsAndConditions = () => (
   <div className="w-full">
     <ReactMarkdown components={MarkdownComponents}>
-      {"# Términos y Condiciones de Uso — BackRoom\n\n**Última actualización:** [FECHA]\n**Versión:** 1.0\n\n> **Nota de alcance:** este documento es una plantilla estructurada para el proyecto académico BackRoom (SENA — Tecnología en Análisis y Desarrollo de Software). No sustituye asesoría legal profesional. Antes de un lanzamiento con usuarios reales, pagos reales o datos personales reales fuera del entorno de pruebas, debe ser revisado por un abogado.\n\n---\n\n## 1. Identificación del prestador del servicio\n\n| Campo | Valor |\n|---|---|\n| Nombre del proyecto/plataforma | BackRoom |\n| Naturaleza | Proyecto académico — Tecnología en Análisis y Desarrollo de Software (ADSO), SENA |\n| Responsables del proyecto | [NOMBRE COMPLETO INTEGRANTE 1], [NOMBRE COMPLETO INTEGRANTE 2] |\n| Correo de contacto | [CORREO DE CONTACTO] |\n| Domicilio / jurisdicción | República de Colombia |\n\n## 2. Objeto y ámbito de aplicación\n\nLos presentes Términos y Condiciones (\"los Términos\") regulan el acceso y uso de la plataforma BackRoom (en adelante, \"la Plataforma\"), un servicio web de espacios colaborativos de estudio, organización de recursos académicos y gestión de permisos entre usuarios.\n\nEstos Términos aplican a cualquier persona que se registre, acceda o use la Plataforma (en adelante, \"el Usuario\"), sea en su versión gratuita/demo o en cualquier plan de pago disponible.\n\n## 3. Aceptación de los términos\n\nEl acceso y uso de la Plataforma implica la aceptación plena y sin reservas de estos Términos. Si el Usuario no está de acuerdo con alguna disposición aquí contenida, debe abstenerse de usar la Plataforma.\n\nLa aceptación se registra de forma explícita durante el proceso de registro, mediante una casilla de verificación que el Usuario debe marcar activamente — no se presume aceptación por defecto.\n\n## 4. Definiciones\n\n| Término | Definición |\n|---|---|\n| **BackRoom** | Espacio colaborativo creado por un Usuario, que agrupa salas y recursos académicos. |\n| **Sala** | Subdivisión temática dentro de una BackRoom. |\n| **Recurso** | Archivo o enlace compartido dentro de una sala (documento, presentación, audio, video, etc.). |\n| **Usuario Propietario** | Quien crea una BackRoom y tiene control total sobre ella. |\n| **Usuario Miembro** | Quien participa en una BackRoom mediante invitación, con permisos definidos por el Propietario. |\n| **Plan Gratuito/Demo** | Nivel de acceso sin costo, con límites de uso definidos en la sección 7. |\n| **Plan de Pago** | Nivel de acceso con funcionalidades ampliadas, sujeto a pago periódico mediante pasarela de pagos. |\n\n## 5. Registro y cuenta de usuario\n\n5.1. Para usar la Plataforma, el Usuario debe registrarse proporcionando: nombre de usuario, nombre completo, correo electrónico y contraseña.\n\n5.2. El Usuario es responsable de mantener la confidencialidad de sus credenciales de acceso y de toda actividad realizada desde su cuenta.\n\n5.3. El Usuario declara que la información proporcionada en el registro es veraz, exacta y actualizada.\n\n5.4. La Plataforma se reserva el derecho de suspender o eliminar cuentas que proporcionen información falsa, o que se usen de forma contraria a estos Términos.\n\n5.5. Está prohibido el registro de menores de edad sin la autorización expresa de sus padres o representantes legales, conforme a la legislación colombiana vigente.\n\n## 6. Uso aceptable de la plataforma\n\nEl Usuario se compromete a NO utilizar la Plataforma para:\n\n- Subir, compartir o distribuir contenido ilegal, difamatorio, que infrinja derechos de autor, o que viole derechos de terceros.\n- Suplantar la identidad de otra persona o entidad.\n- Intentar acceder sin autorización a cuentas, sistemas o datos de otros Usuarios.\n- Realizar ingeniería inversa, extraer datos masivamente (scraping) o interferir con el funcionamiento normal de la Plataforma.\n- Usar la Plataforma con fines comerciales no autorizados ajenos a su propósito de colaboración académica.\n\nEl incumplimiento de esta sección puede resultar en la suspensión o terminación inmediata de la cuenta, sin perjuicio de las acciones legales a que haya lugar.\n\n## 7. Planes, pagos y facturación\n\n7.1. La Plataforma ofrece un **Plan Gratuito/Demo** con límites de uso (número de BackRooms, salas, tamaño de almacenamiento) y **Planes de Pago** con funcionalidades y límites ampliados.\n\n7.2. Los pagos se procesan a través de una pasarela de pagos externa ([WOMPI / PSE — nombre del proveedor definitivo]). La Plataforma no almacena directamente los datos completos de tarjetas de crédito o débito del Usuario; dicha información es procesada exclusivamente por el proveedor de la pasarela de pagos, conforme a sus propias políticas de seguridad y cumplimiento (PCI-DSS).\n\n7.3. Los precios de los planes de pago se muestran en pesos colombianos (COP) y pueden estar sujetos a cambios, los cuales serán notificados al Usuario con antelación razonable.\n\n7.4. **[Borrador — pendiente de confirmación final del equipo]** Política de reembolsos propuesta: el Usuario puede solicitar el reembolso completo de un plan de pago dentro de los primeros 7 días calendario posteriores a la contratación, siempre que no haya excedido significativamente los límites del plan gratuito durante ese periodo. Pasado este plazo, los pagos realizados no son reembolsables, sin perjuicio de que el Usuario pueda cancelar la renovación futura del plan en cualquier momento.\n\n7.5. La falta de pago oportuno en un plan de pago puede resultar en la suspensión del acceso a las funcionalidades ampliadas, con reversión automática al Plan Gratuito/Demo, sin eliminación de los datos ya creados por el Usuario, salvo que excedan los límites del plan gratuito.\n\n## 8. Propiedad intelectual\n\n8.1. El Usuario conserva la propiedad intelectual de los contenidos y recursos que sube a la Plataforma.\n\n8.2. Al subir contenido, el Usuario otorga a la Plataforma una licencia limitada, no exclusiva, para almacenar, mostrar y transmitir dicho contenido únicamente con el propósito de prestar el servicio (por ejemplo, mostrarlo a los demás miembros de la BackRoom correspondiente).\n\n8.3. El software, diseño, marca y demás elementos propios de la Plataforma son propiedad de sus desarrolladores y están protegidos por las leyes de propiedad intelectual aplicables.\n\n## 9. Privacidad y tratamiento de datos personales\n\n9.1. La Plataforma recolecta y trata datos personales del Usuario (nombre de usuario, nombre completo, correo electrónico, y en caso de planes de pago, información de facturación) conforme a la **Ley 1581 de 2012** y el **Decreto 1377 de 2013** de la República de Colombia sobre Protección de Datos Personales.\n\n9.2. El Usuario tiene derecho a conocer, actualizar, rectificar y solicitar la eliminación de sus datos personales, así como a revocar la autorización otorgada para su tratamiento, mediante solicitud al correo de contacto indicado en la sección 1.\n\n9.3. La Plataforma no vende ni comparte los datos personales del Usuario con terceros para fines comerciales ajenos a la prestación del servicio, salvo obligación legal o con proveedores estrictamente necesarios para el funcionamiento del servicio (por ejemplo, el proveedor de la pasarela de pagos, o el proveedor de infraestructura en la nube).\n\n9.4. Para el detalle completo del tratamiento de datos personales, ver el documento independiente **`POLITICA_TRATAMIENTO_DATOS.md`**, exigido por la Ley 1581 de 2012.\n\n## 10. Limitación de responsabilidad\n\n10.1. La Plataforma se ofrece \"tal cual\" (as is), sin garantías de disponibilidad ininterrumpida o libre de errores, dado su carácter de proyecto académico en desarrollo activo.\n\n10.2. Los desarrolladores no serán responsables por pérdidas de datos, lucro cesante, o daños indirectos derivados del uso o imposibilidad de uso de la Plataforma, salvo en los casos en que la ley colombiana disponga lo contrario de forma imperativa.\n\n10.3. El Usuario es responsable del contenido que sube y comparte a través de la Plataforma.\n\n## 11. Suspensión y terminación\n\n11.1. La Plataforma puede suspender o eliminar cuentas que incumplan estos Términos, previa notificación cuando sea razonablemente posible.\n\n11.2. El Usuario puede solicitar en cualquier momento la eliminación de su cuenta y datos asociados, sujeto a los procedimientos de la sección 9.2.\n\n## 12. Modificaciones a los términos\n\nLa Plataforma se reserva el derecho de modificar estos Términos en cualquier momento. Los cambios sustanciales serán notificados a los Usuarios registrados mediante correo electrónico o aviso dentro de la Plataforma, con antelación razonable antes de su entrada en vigor.\n\n## 13. Ley aplicable y jurisdicción\n\nEstos Términos se rigen por las leyes de la República de Colombia. Cualquier controversia derivada de su interpretación o aplicación se someterá a los jueces y tribunales competentes de Colombia.\n\n## 14. Contacto\n\nPara preguntas, solicitudes relacionadas con datos personales, o reportes de incumplimiento de estos Términos, contactar a: [CORREO DE CONTACTO]\n\n---\n\n## Registro de cambios\n\n| Versión | Fecha | Descripción |\n|---|---|---|\n| 1.0 | [FECHA] | Versión inicial del documento. |\n"}
+      {`
+# Términos y Condiciones de Uso — BackRoom
+
+**Última actualización:** [FECHA]
+**Versión:** 2.0
+
+> **Nota de alcance:** este documento corresponde a un proyecto académico (SENA — Tecnología en Análisis y Desarrollo de Software) y se elabora como plantilla de referencia. **No sustituye asesoría legal profesional.** Antes de un lanzamiento con usuarios reales, pagos reales o datos personales reales fuera del entorno de pruebas, estos Términos y la Política de Tratamiento de Datos Personales deben ser revisados y aprobados por un abogado con conocimiento del régimen de protección de datos y del consumidor colombiano.
+
+---
+
+## 1. Identificación del prestador del servicio
+
+| Campo | Valor |
+|---|---|
+| Nombre del proyecto/plataforma | BackRoom |
+| Naturaleza | Proyecto académico — Tecnología en Análisis y Desarrollo de Software (ADSO), SENA |
+| Responsables del proyecto | [NOMBRE COMPLETO INTEGRANTE 1], [NOMBRE COMPLETO INTEGRANTE 2] |
+| Correo de contacto | [CORREO DE CONTACTO] |
+| Domicilio / jurisdicción | República de Colombia |
+
+## 2. Objeto y ámbito de aplicación
+
+Los presentes Términos y Condiciones ("los Términos") regulan el acceso y uso de la plataforma BackRoom ("la Plataforma"), un servicio web de espacios colaborativos de estudio y trabajo académico, organización de recursos, gestión de salas, permisos y registro de auditoría entre usuarios.
+
+Estos Términos aplican a toda persona natural o jurídica que se registre, acceda o use la Plataforma ("el Usuario"), en cualquiera de sus modalidades: versión de demostración ("Demo") o, en el futuro, planes de pago. Forman parte integral de los Términos la Política de Tratamiento de Datos Personales y demás políticas que la Plataforma publique.
+
+## 3. Aceptación de los Términos
+
+El acceso y uso de la Plataforma implica la aceptación plena y sin reservas de estos Términos y de la Política de Tratamiento de Datos Personales. Si el Usuario no está de acuerdo con alguna de sus disposiciones, debe abstenerse de registrarse y de usar la Plataforma.
+
+La aceptación se registra de forma explícita y activa durante el proceso de registro, mediante una casilla de verificación que el Usuario debe marcar voluntariamente. **No se presume aceptación por defecto.** El uso continuado de la Plataforma después de publicarse modificaciones a estos Términos constituye aceptación de las mismas (art. 12, Decreto 1377 de 2013, aplicable por remisión).
+
+## 4. Definiciones
+
+| Término | Definición |
+|---|---|
+| **BackRoom** | Espacio colaborativo creado por un Usuario, que agrupa salas y recursos con permisos de acceso configurables. |
+| **Organización** | Entidad creada por un Usuario (Propietario) que agrupa BackRooms, miembros e invitaciones. |
+| **Sala** | Nodo jerárquico dentro de un BackRoom en el que se organizan recursos. |
+| **Recurso** | Documento, presentación, audio, video o enlace externo almacenado o referenciado en una Sala. |
+| **Modo Demo** | Versión de prueba gratuita con límites funcionales definidos en la sección 9. |
+| **Contenido del Usuario** | Todo contenido que el Usuario suba, publique o genere en la Plataforma. |
+| **Cuenta Demo / Planes** | Modalidades de uso vigentes o futuras de la Plataforma. |
+
+## 5. Registro y requisitos de la cuenta
+
+1. El Usuario debe proporcionar información **veraz, completa y actualizada** al momento del registro.
+2. El registro y el uso de la Plataforma están restringidos a personas que acrediten la mayoría de edad (18 años) o, en el caso de menores de edad, que cuenten con la autorización previa, expresa e informada de sus padres o representantes legales, conforme al artículo 7 de la Ley 1581 de 2012 y a la normativa que lo reglamente.
+3. La cuenta es personal e intransferible. El Usuario es responsable de mantener la confidencialidad de sus credenciales y de **todas las actividades** realizadas con su cuenta.
+4. El Usuario debe notificar de inmediato cualquier uso no autorizado de su cuenta a [CORREO DE CONTACTO].
+5. Está prohibido crear cuentas falsas, suplantar a otra persona o crear cuentas en nombre de terceros sin autorización.
+
+## 6. Licencia de uso y conducta permitida
+
+La Plataforma otorga al Usuario una licencia **limitada, no exclusiva, intransferible y revocable** de acceso y uso, exclusivamente para fines académicos, educativos y personales, de conformidad con estos Términos y con la ley colombiana.
+
+Se prohíbe expresamente al Usuario:
+
+1. Utilizar la Plataforma para actividades ilícitas o contrarias a la ley, la moral, el orden público o los derechos de terceros.
+2. Subir, almacenar o difundir contenido que viole la propiedad intelectual de terceros, que sea difamatorio, fraudulento, discriminatorio, amenazante, violento o que vulnere la protección de datos personales de terceros.
+3. Subir software malicioso, virus, gusanos, troyanos o cualquier código dañino (art. 269A y siguientes del Código Penal colombiano — Ley 1273 de 2009).
+4. Intentar acceder, vulnerar o interferir con la seguridad, los sistemas, los datos o las cuentas de otros usuarios.
+5. Realizar extracción automatizada de datos ("scraping"), minería de datos o ingeniería inversa sobre la Plataforma.
+6. Suplantar la identidad de otra persona, entidad o del propio proyecto BackRoom.
+7. Comercializar, revender o explotar económicamente la Plataforma o su contenido sin autorización previa y escrita.
+
+## 7. Propiedad intelectual
+
+1. **De la Plataforma:** todo el código fuente, diseño, interfaces, marcas, logotipos, textos y demás elementos que componen BackRoom son titularidad de sus desarrolladores o de sus licenciantes. Queda prohibida su reproducción, modificación o uso no autorizado.
+2. **Del Contenido del Usuario:** el Usuario conserva la titularidad de su Contenido. Al usarlo en la Plataforma, otorga a BackRoom una licencia limitada y revocable para almacenarlo, procesarlo y mostrarlo con la única finalidad de prestar el servicio.
+3. BackRoom podrá eliminar o bloquear cualquier Contenido del Usuario que, a su criterio razonable, infrinja estos Términos, la ley o derechos de terceros.
+
+## 8. Protección de datos personales
+
+El tratamiento de datos personales de los Usuarios se rige por la **Ley 1581 de 2012**, sus decretos reglamentarios (Decreto 1377 de 2013, Decreto 1074 de 2015, Decreto 2555 de 2022) y por la **Política de Tratamiento de Datos Personales** de la Plataforma, que hace parte integral de estos Términos. Al registrarse, el Usuario autoriza el tratamiento de sus datos conforme a dicha política.
+
+## 9. Modo Demo y límites
+
+1. El Modo Demo es gratuito y tiene límites funcionales (a la fecha: 100 MB de almacenamiento, 4 miembros, 3 niveles de profundidad de salas y 10 recursos por sala). Estos límites pueden cambiar en cualquier momento.
+2. Al crear una Organización, los límites del Modo Demo dejan de aplicar, sujeto a las condiciones del plan aplicable.
+3. La superación de un límite puede impedir realizar determinadas acciones dentro de la Plataforma.
+
+## 10. Disponibilidad y suspensión del servicio
+
+1. La Plataforma se presta "tal cual" y "según disponibilidad", sin garantía de disponibilidad continua o ininterrumpida, salvo las obligaciones legales imperativas aplicables.
+2. BackRoom podrá suspender temporal o definitivamente el acceso de un Usuario que incumpla estos Términos, la ley o que ponga en riesgo la seguridad o integridad de la Plataforma o de otros usuarios, sin perjuicio de las acciones legales a que haya lugar.
+3. BackRoom no será responsable por interrupciones atribuibles a proveedores de infraestructura (hosting, nube, conectividad), mantenimientos programados, caso fortuito o fuerza mayor.
+
+## 11. Limitación de responsabilidad
+
+1. En la máxima medida permitida por la ley colombiana, BackRoom y sus desarrolladores no serán responsables por daños indirectos, incidentales, especiales o consecuenciales derivados del uso o la imposibilidad de uso de la Plataforma.
+2. La responsabilidad por el Contenido del Usuario corresponde exclusivamente al Usuario que lo publique.
+3. La Plataforma no se hace responsable por el contenido de sitios externos a los que se acceda mediante enlaces publicados por los Usuarios.
+4. Nada en estos Términos excluye o limita responsabilidades que la ley colombiana no permita excluir o limitar (por ejemplo, las derivadas de la Ley 1480 de 2011 cuando resulten aplicables a la relación de consumo).
+
+## 12. Enlaces y contenido de terceros
+
+La Plataforma puede contener enlaces a sitios o servicios de terceros. Estos enlaces se ofrecen únicamente por conveniencia y no implican aprobación, respaldo o control sobre su contenido. Su uso se rige por los términos y políticas del sitio respectivo.
+
+## 13. Terminación
+
+1. El Usuario podrá solicitar el cierre de su cuenta en cualquier momento, en cuyo caso se dará de baja el acceso conforme a la Política de Tratamiento de Datos Personales.
+2. BackRoom podrá suspender o eliminar la cuenta de un Usuario ante el incumplimiento de estos Términos o de la ley.
+3. Las disposiciones sobre propiedad intelectual, limitación de responsabilidad, ley aplicable y las que por su naturaleza deban subsistir, sobrevivirán a la terminación de estos Términos.
+
+## 14. Modificaciones a los Términos
+
+BackRoom podrá modificar estos Términos en cualquier momento. Las modificaciones se notificarán por la Plataforma (por ejemplo, mediante aviso en el sitio o al correo de contacto del Usuario) con antelación razonable. El uso continuado de la Plataforma tras la entrada en vigencia de la modificación implica su aceptación.
+
+## 15. Ley aplicable y jurisdicción
+
+Estos Términos se rigen por las leyes de la **República de Colombia**. Para la solución de controversias relacionadas con la protección de datos personales, será competente la **Superintendencia de Industria y Comercio (SIC)**. Las demás controversias se someterán a la jurisdicción ordinaria de [CIUDAD, COLOMBIA].
+
+## 16. Contacto y quejas
+
+Para consultas, quejas o reclamaciones sobre estos Términos, escríbanos a **[CORREO DE CONTACTO]** indicando el asunto y los datos de la cuenta. Atenderemos su solicitud en los términos previstos por la ley.
+      `}
     </ReactMarkdown>
   </div>
 );
@@ -26,7 +142,139 @@ export const TermsAndConditions = () => (
 export const PrivacyPolicy = () => (
   <div className="w-full">
     <ReactMarkdown components={MarkdownComponents}>
-      {"# Política de Tratamiento de Datos Personales — BackRoom\n\n**Última actualización:** [FECHA]\n**Versión:** 1.0 (borrador — pendiente de ajuste final)\n\n> **Nota de alcance:** documento borrador para el proyecto académico BackRoom. Cumple la estructura exigida por la Ley 1581 de 2012 y el Decreto 1377 de 2013 de Colombia, pero los contenidos marcados con `[CORCHETES]` son decisiones pendientes del equipo y deben confirmarse antes de tratarlo como versión definitiva. No sustituye asesoría legal profesional.\n\n---\n\n## 1. Responsable del tratamiento\n\n| Campo | Valor |\n|---|---|\n| Nombre del proyecto/plataforma | BackRoom |\n| Responsables | [NOMBRE COMPLETO INTEGRANTE 1], [NOMBRE COMPLETO INTEGRANTE 2] |\n| Correo de contacto para temas de datos personales | [CORREO DE CONTACTO] |\n| Domicilio | República de Colombia |\n\n## 2. Marco normativo\n\nEsta política se rige por:\n- **Ley 1581 de 2012** — Régimen General de Protección de Datos Personales.\n- **Decreto 1377 de 2013** — reglamenta parcialmente la Ley 1581 de 2012.\n- Demás normas que las modifiquen, adicionen o sustituyan.\n\n## 3. Finalidad del tratamiento de datos\n\nLos datos personales recolectados por BackRoom se tratan con las siguientes finalidades:\n\n- Crear y administrar la cuenta del Usuario en la Plataforma.\n- Permitir el acceso, autenticación y gestión de sesiones de forma segura.\n- Habilitar la funcionalidad colaborativa de la Plataforma (identificar quién crea una BackRoom, quién es miembro de cuál, quién sube qué recurso).\n- Procesar pagos, en caso de que el Usuario contrate un plan de pago (a través del proveedor de la pasarela de pagos).\n- Enviar comunicaciones transaccionales necesarias para el servicio (confirmación de cuenta, recuperación de contraseña, notificaciones de actividad relevante).\n- Cumplir obligaciones legales aplicables.\n\nBackRoom **no** trata datos personales con fines de mercadeo, publicidad a terceros, ni venta de información, salvo que el Usuario otorgue una autorización distinta y explícita para ello.\n\n## 4. Datos personales que se recolectan\n\n| Dato | Momento de recolección | Finalidad específica |\n|---|---|---|\n| Nombre de usuario | Registro | Identificación dentro de la Plataforma |\n| Nombre completo | Registro | Identificación entre miembros de una BackRoom |\n| Correo electrónico | Registro | Autenticación, recuperación de contraseña, comunicaciones transaccionales |\n| Contraseña (almacenada con hash, nunca en texto plano) | Registro | Autenticación |\n| Información de pago (procesada por el proveedor de la pasarela, no almacenada directamente por BackRoom) | Al contratar un plan de pago | Procesamiento de pagos |\n| Metadatos de uso (fecha de creación de cuenta, actividad dentro de la Plataforma) | Uso continuo de la Plataforma | Funcionamiento del servicio, soporte |\n\nBackRoom **no** recolecta deliberadamente datos sensibles (salud, orientación sexual, creencias religiosas o políticas, datos biométricos, entre otros definidos como sensibles por la Ley 1581 de 2012).\n\n## 5. Derechos del titular de los datos\n\nConforme al artículo 8 de la Ley 1581 de 2012, el Usuario (titular de los datos) tiene derecho a:\n\n- **Conocer, actualizar y rectificar** sus datos personales.\n- **Solicitar prueba de la autorización** otorgada para el tratamiento de sus datos.\n- **Ser informado** sobre el uso que se ha dado a sus datos personales.\n- **Presentar quejas** ante la Superintendencia de Industria y Comercio (SIC) por infracciones a la ley.\n- **Revocar la autorización y/o solicitar la supresión** de sus datos, cuando no exista un deber legal o contractual que impida su eliminación.\n- **Acceder gratuitamente** a sus datos personales que hayan sido objeto de tratamiento.\n\n## 6. Procedimiento para ejercer los derechos\n\nEl Usuario puede ejercer los derechos descritos en la sección 5 enviando una solicitud al correo [CORREO DE CONTACTO], indicando:\n\n1. Nombre completo y correo asociado a la cuenta.\n2. Descripción clara del derecho que desea ejercer.\n3. Cualquier documento que soporte la solicitud, si aplica.\n\nBackRoom dará respuesta a la solicitud dentro de los plazos establecidos por la ley (10 días hábiles para consultas, 15 días hábiles para reclamos, prorrogables conforme a lo dispuesto en la normativa).\n\n## 7. Autorización del titular\n\nAl registrarse en la Plataforma, mediante la aceptación explícita de los Términos y Condiciones y esta Política, el Usuario otorga su autorización previa, expresa e informada para el tratamiento de sus datos personales conforme a las finalidades descritas en la sección 3.\n\n## 8. Transferencia y transmisión de datos a terceros\n\nPara el funcionamiento de la Plataforma, algunos datos personales son procesados por proveedores externos, únicamente en la medida necesaria para prestar el servicio:\n\n| Proveedor | Datos que procesa | Finalidad |\n|---|---|---|\n| Supabase (infraestructura de base de datos y autenticación) | Todos los datos de cuenta | Almacenamiento y autenticación |\n| Resend (proveedor de correo transaccional) | Correo electrónico | Envío de correos de confirmación y recuperación de contraseña |\n| [Wompi / PSE — proveedor de pasarela de pagos] | Información de pago | Procesamiento de pagos de planes pagos |\n\nEstos proveedores actúan bajo sus propias políticas de seguridad y privacidad, y BackRoom selecciona proveedores que cumplen estándares de seguridad reconocidos en la industria.\n\n## 9. Medidas de seguridad\n\nBackRoom implementa medidas técnicas para proteger los datos personales, incluyendo:\n\n- Contraseñas almacenadas con hash seguro, nunca en texto plano.\n- Control de acceso a nivel de base de datos (Row Level Security), de forma que un Usuario solo puede acceder a los datos que le corresponden.\n- Conexiones cifradas (HTTPS) para toda comunicación entre el Usuario y la Plataforma en producción.\n- Separación de credenciales sensibles (variables de entorno) fuera del código fuente del proyecto.\n\n[Sección pendiente de ampliar cuando el proyecto esté desplegado en producción: certificado SSL específico, proveedor de hosting, política de retención y borrado de copias de seguridad.]\n\n## 10. Vigencia\n\nEsta política rige a partir de su fecha de publicación y permanecerá vigente mientras BackRoom trate datos personales para las finalidades aquí descritas. Las bases de datos asociadas se conservarán mientras sean necesarias para dichas finalidades o mientras exista una obligación legal de conservación.\n\n## 11. Contacto\n\nPara ejercer sus derechos o resolver dudas sobre el tratamiento de sus datos personales: [CORREO DE CONTACTO]\n\n---\n\n## Registro de cambios\n\n| Versión | Fecha | Descripción |\n|---|---|---|\n| 1.0 | [FECHA] | Versión inicial — borrador de trabajo, pendiente de ajustes finales. |\n"}
+      {`
+# Política de Tratamiento de Datos Personales — BackRoom
+
+**Última actualización:** [FECHA]
+**Versión:** 2.0
+
+> **Nota de alcance:** documento elaborado para el proyecto académico BackRoom (SENA — ADSO). Cumple la estructura exigida por la Ley 1581 de 2012 y su normativa reglamentaria. Los contenidos marcados con **[CORCHETES]** son decisiones pendientes del equipo y deben confirmarse antes de tratarlo como versión definitiva. **No sustituye asesoría legal profesional.**
+
+---
+
+## 1. Responsable del tratamiento
+
+| Campo | Valor |
+|---|---|
+| Nombre del proyecto/plataforma | BackRoom |
+| Responsables | [NOMBRE COMPLETO INTEGRANTE 1], [NOMBRE COMPLETO INTEGRANTE 2] |
+| Correo de contacto para temas de datos personales | [CORREO DE CONTACTO] |
+| Domicilio | República de Colombia |
+
+El **Responsable del Tratamiento** de los datos personales es quien decide sobre la recolección, almacenamiento, uso y supresión de los datos, según la definición de la Ley 1581 de 2012. Para los fines de esta política, el Responsable es el equipo del proyecto BackRoom.
+
+## 2. Marco normativo
+
+Esta política se rige por la normativa colombiana vigente sobre protección de datos personales, entre la que se incluye:
+
+- **Ley 1581 de 2012** — Régimen General de Protección de Datos Personales.
+- **Decreto 1377 de 2013** — reglamenta parcialmente la Ley 1581 de 2012 (autorización, deberes, menores, RNBD).
+- **Decreto 1074 de 2015** — Decreto Único Reglamentario del Sector Comercio, Industria y Turismo (libro de protección de datos).
+- **Decreto 2555 de 2022** — compila y actualiza las disposiciones reglamentarias en materia de protección de datos personales.
+- **Ley 1266 de 2008** — Habeas Data financiero (aplica en lo pertinente).
+- **Ley 527 de 1999** — comercio electrónico y mensajes de datos.
+- **Ley 1273 de 2009** — delitos informáticos (obligación de protección de la información).
+- **Ley 1480 de 2011** — Estatuto del Consumidor (aplica en la relación de consumo, en lo pertinente).
+- La **Jurisprudencia de la Corte Constitucional** y la **doctrina de la Superintendencia de Industria y Comercio (SIC)**, autoridad nacional de protección de datos.
+
+## 3. Principios del tratamiento
+
+Conforme al artículo 4 de la Ley 1581 de 2012, el tratamiento de datos personales se sujeta a los siguientes principios:
+
+1. **Legalidad:** el tratamiento se realiza conforme a la ley.
+2. **Finalidad:** el tratamiento obedece a finalidades legítimas e informadas al Titular.
+3. **Libertad:** el tratamiento solo puede ejercerse con autorización previa, expresa e informada del Titular.
+4. **Veracidad o calidad:** la información debe ser veraz, completa, exacta, actualizada y comprobable.
+5. **Transparencia:** el Titular puede obtener información sobre el tratamiento en cualquier momento.
+6. **Acceso y circulación restringida:** los datos solo se tratan conforme a la autorización y la ley.
+7. **Seguridad:** se adoptan medidas técnicas, humanas y administrativas para proteger la información.
+8. **Confidencialidad:** se garantiza la reserva de la información, incluso después de finalizada la relación con el Titular.
+
+## 4. Datos personales tratados
+
+La Plataforma trata las siguientes categorías de datos:
+
+- **Datos de identificación y contacto:** nombre de usuario, correo electrónico y demás datos suministrados al registrarse.
+- **Datos de autenticación:** credenciales, datos de proveedores de identidad (por ejemplo, Google o GitHub, cuando el Usuario use estos métodos) y registros de inicio de sesión.
+- **Datos de uso y técnicos:** dirección IP, fecha y hora de acceso, navegador, registros de actividad y de auditoría dentro de la Plataforma.
+- **Contenido del Usuario:** los recursos y contenidos que el Usuario suba o genere.
+
+**No se recolectan datos sensibles** (definidos en el artículo 5 de la Ley 1581 de 2012: origen racial o étnico, orientación política, convicciones religiosas o filosóficas, pertenencia a sindicatos, salud, vida sexual o datos biométricos), salvo que el Titular lo autorice de manera expresa y se cumplan las condiciones del artículo 6 de la ley.
+
+## 5. Finalidades del tratamiento
+
+Los datos personales se tratan con las siguientes finalidades:
+
+1. Crear, autenticar y administrar la cuenta del Usuario.
+2. Permitir el acceso a la Plataforma y garantizar la seguridad de las sesiones y de la información.
+3. Habilitar las funcionalidades colaborativas: identificar quién crea una BackRoom, quién es miembro de una Organización, quién sube o modifica recursos y registrar la auditoría de las acciones.
+4. Enviar comunicaciones **transaccionales** necesarias para el servicio (confirmación de cuenta, recuperación de contraseña, notificaciones de actividad).
+5. Prevenir fraude, abuso y conductas contrarias a los Términos y Condiciones.
+6. Cumplir obligaciones legales y atender requerimientos de autoridades competentes.
+7. En el futuro, procesar pagos a través de una pasarela de pagos, si el Usuario contrata un plan de pago.
+
+BackRoom **no** tratará los datos con fines de mercadeo, publicidad dirigida o venta de información a terceros sin una autorización adicional del Titular.
+
+## 6. Autorización del Titular
+
+La recolección y el tratamiento de los datos personales requieren la **autorización previa, expresa e informada** del Titular (artículo 9 de la Ley 1581 de 2012). Dicha autorización se obtiene de forma activa al momento del registro, mediante la casilla de verificación de aceptación de la Política de Tratamiento de Datos Personales y de los Términos y Condiciones.
+
+La autorización podrá consultarse o solicitarse en cualquier momento. El Titular podrá revocarla cuando lo considere, en los términos del artículo 9 de la ley.
+
+## 7. Derechos del Titular (Habeas Data)
+
+Conforme al artículo 8 de la Ley 1581 de 2012 y al artículo 15 de la Constitución Política, el Titular tiene derecho a:
+
+1. **Conocer, actualizar y rectificar** sus datos personales.
+2. **Solicitar prueba de la autorización** otorgada.
+3. **Ser informado**, previa solicitud, del uso que se ha dado a sus datos.
+4. **Presentar quejas ante la SIC** por el incumplimiento de la normativa.
+5. **Revocar la autorización** y/o solicitar la **supresión** de los datos cuando no se ajusten al tratamiento autorizado o se hayan vulnerado sus derechos.
+6. **Acceder en forma gratuita** a sus datos personales que hayan sido objeto de tratamiento.
+
+Para ejercer estos derechos, el Titular (o su representante acreditado) podrá contactar a **[CORREO DE CONTACTO]** mediante el procedimiento previsto en el artículo 14 de la Ley 1581 de 2012: consultas respondidas en **máximo 10 días hábiles** y reclamos en **máximo 15 días hábiles**, prorrogables por 15 días adicionales cuando las circunstancias lo exijan, previa comunicación al Titular.
+
+## 8. Política de tratamiento de datos de menores
+
+En cumplimiento del artículo 7 de la Ley 1581 de 2012 y del Decreto 1377 de 2013, la Plataforma **no recolecta ni trata datos personales de menores de edad**, salvo que se trate de datos de naturaleza pública o que el padre, madre o representante legal del menor otorgue autorización previa, expresa e informada, y se cumplan las condiciones legales y reglamentarias.
+
+## 9. Almacenamiento, seguridad y confidencialidad
+
+1. La Plataforma adopta **medidas técnicas, humanas y administrativas** razonables para proteger los datos contra acceso no autorizado, pérdida, alteración o divulgación (principio de seguridad, artículo 4 y 17 de la Ley 1581 de 2012; artículo 269A del Código Penal — Ley 1273 de 2009).
+2. Entre las medidas se incluyen: cifrado en tránsito (HTTPS), cookies de sesión httpOnly, autenticación, control de accesos por roles y Row Level Security (RLS) en la base de datos, verificación de captcha y registros de auditoría.
+3. La infraestructura puede operar mediante proveedores de nube (por ejemplo, **Supabase**, **Vercel** u otros). Dichos proveedores actúan como **Encargados del Tratamiento** y se vinculan mediante sus condiciones de servicio y garantías contractuales de confidencialidad y seguridad.
+4. El acceso a los datos estará restringido a las personas autorizadas dentro del proyecto y solo para las finalidades autorizadas.
+
+## 10. Transferencias y transmisiones internacionales
+
+1. La Plataforma **no realiza transferencias internacionales** de datos a terceros ajenos al servicio.
+2. Cuando los datos se transmitan a **proveedores de infraestructura ubicados fuera de Colombia** (por ejemplo, los servidores de Supabase o Vercel), ello se entiende como una **transmisión** (Encargado del Tratamiento) y no como una transferencia, por lo que se mantienen las garantías de confidencialidad, seguridad y finalidad, conforme a la Ley 1581 de 2012 y el Decreto 2555 de 2022.
+3. En cualquier caso, el Titular será informado sobre dichos encargados y podrá conocerlos a través de **[CORREO DE CONTACTO]**.
+
+## 11. Cookies y tecnologías similares
+
+La Plataforma utiliza cookies y tecnologías similares:
+
+1. **Cookies estrictamente necesarias:** para la sesión y el funcionamiento básico.
+2. **Cookies de seguridad:** verificación anti-robot (por ejemplo, Google reCAPTCHA) y protección contra abuso.
+3. **Cookies analíticas y funcionales:** en la medida en que se habiliten, para entender el uso de la Plataforma.
+
+El Usuario puede configurar su navegador para rechazar o eliminar cookies; sin embargo, algunas funciones de la Plataforma podrían no funcionar correctamente. El tratamiento de datos a través de estas tecnologías se rige por esta política.
+
+## 12. Conservación y retención
+
+Los datos personales se conservarán mientras exista la cuenta o la relación del Usuario con la Plataforma, y posteriormente durante los plazos exigidos por las normas aplicables. Cuando el Titular solicite la supresión de sus datos o revoque la autorización, se procederá a su eliminación, salvo las retenciones obligatorias por ley o requerimiento de autoridad competente.
+
+## 13. Vigencia y modificaciones de la política
+
+Esta política rige a partir de su publicación y permanecerá vigente durante la existencia de la Plataforma. Cualquier modificación será informada a los Titulares a través de la Plataforma o del correo registrado, con antelación razonable a su entrada en vigor (artículo 12, Decreto 1377 de 2013). El uso continuado de la Plataforma después de la modificación implica su aceptación.
+
+## 14. Autoridad competente y contacto
+
+La **Superintendencia de Industria y Comercio (SIC)** es la autoridad nacional competente para conocer los reclamos sobre protección de datos personales. Los Titulares pueden ejercer sus derechos o presentar reclamaciones ante BackRoom escribiendo a **[CORREO DE CONTACTO]** o acudiendo directamente a la SIC (www.sic.gov.co).
+
+Para el ejercicio de sus derechos, indique: nombre completo, correo de la cuenta, descripción de la solicitud y los documentos que acrediten su identidad o representación.
+      `}
     </ReactMarkdown>
   </div>
 );
