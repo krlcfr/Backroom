@@ -21,7 +21,7 @@ export const TermsAndConditions = () => (
       {`
 # Términos y Condiciones de Uso — BackRoom
 
-**Última actualización:** [FECHA]
+**Última actualización:** 13 de agosto de 2026
 **Versión:** 2.0
 
 > **Nota de alcance:** este documento corresponde a un proyecto académico (SENA — Tecnología en Análisis y Desarrollo de Software) y se elabora como plantilla de referencia. **No sustituye asesoría legal profesional.** Antes de un lanzamiento con usuarios reales, pagos reales o datos personales reales fuera del entorno de pruebas, estos Términos y la Política de Tratamiento de Datos Personales deben ser revisados y aprobados por un abogado con conocimiento del régimen de protección de datos y del consumidor colombiano.
@@ -34,8 +34,8 @@ export const TermsAndConditions = () => (
 |---|---|
 | Nombre del proyecto/plataforma | BackRoom |
 | Naturaleza | Proyecto académico — Tecnología en Análisis y Desarrollo de Software (ADSO), SENA |
-| Responsables del proyecto | [NOMBRE COMPLETO INTEGRANTE 1], [NOMBRE COMPLETO INTEGRANTE 2] |
-| Correo de contacto | [CORREO DE CONTACTO] |
+| Responsables del proyecto | Carlos Andrés Ramírez Osorio, Luisa Fernanda Gómez Martínez |
+| Correo de contacto | contacto@backroom.com.co |
 | Domicilio / jurisdicción | República de Colombia |
 
 ## 2. Objeto y ámbito de aplicación
@@ -67,7 +67,7 @@ La aceptación se registra de forma explícita y activa durante el proceso de re
 1. El Usuario debe proporcionar información **veraz, completa y actualizada** al momento del registro.
 2. El registro y el uso de la Plataforma están restringidos a personas que acrediten la mayoría de edad (18 años) o, en el caso de menores de edad, que cuenten con la autorización previa, expresa e informada de sus padres o representantes legales, conforme al artículo 7 de la Ley 1581 de 2012 y a la normativa que lo reglamente.
 3. La cuenta es personal e intransferible. El Usuario es responsable de mantener la confidencialidad de sus credenciales y de **todas las actividades** realizadas con su cuenta.
-4. El Usuario debe notificar de inmediato cualquier uso no autorizado de su cuenta a [CORREO DE CONTACTO].
+4. El Usuario debe notificar de inmediato cualquier uso no autorizado de su cuenta a contacto@backroom.com.co.
 5. Está prohibido crear cuentas falsas, suplantar a otra persona o crear cuentas en nombre de terceros sin autorización.
 
 ## 6. Licencia de uso y conducta permitida
@@ -129,11 +129,11 @@ BackRoom podrá modificar estos Términos en cualquier momento. Las modificacion
 
 ## 15. Ley aplicable y jurisdicción
 
-Estos Términos se rigen por las leyes de la **República de Colombia**. Para la solución de controversias relacionadas con la protección de datos personales, será competente la **Superintendencia de Industria y Comercio (SIC)**. Las demás controversias se someterán a la jurisdicción ordinaria de [CIUDAD, COLOMBIA].
+Estos Términos se rigen por las leyes de la **República de Colombia**. Para la solución de controversias relacionadas con la protección de datos personales, será competente la **Superintendencia de Industria y Comercio (SIC)**. Las demás controversias se someterán a la jurisdicción ordinaria de Bogotá D.C., Colombia.
 
 ## 16. Contacto y quejas
 
-Para consultas, quejas o reclamaciones sobre estos Términos, escríbanos a **[CORREO DE CONTACTO]** indicando el asunto y los datos de la cuenta. Atenderemos su solicitud en los términos previstos por la ley.
+Para consultas, quejas o reclamaciones sobre estos Términos, escríbanos a **contacto@backroom.com.co** indicando el asunto y los datos de la cuenta. Atenderemos su solicitud en los términos previstos por la ley.
       `}
     </ReactMarkdown>
   </div>
@@ -145,10 +145,10 @@ export const PrivacyPolicy = () => (
       {`
 # Política de Tratamiento de Datos Personales — BackRoom
 
-**Última actualización:** [FECHA]
+**Última actualización:** 13 de agosto de 2026
 **Versión:** 2.0
 
-> **Nota de alcance:** documento elaborado para el proyecto académico BackRoom (SENA — ADSO). Cumple la estructura exigida por la Ley 1581 de 2012 y su normativa reglamentaria. Los contenidos marcados con **[CORCHETES]** son decisiones pendientes del equipo y deben confirmarse antes de tratarlo como versión definitiva. **No sustituye asesoría legal profesional.**
+> **Nota de alcance:** documento elaborado para el proyecto académico BackRoom (SENA — ADSO). Cumple la estructura exigida por la Ley 1581 de 2012 y su normativa reglamentaria. Los datos institucionales (responsables, correo y ciudad) son de referencia para el entorno de pruebas y deben confirmarse antes de un lanzamiento. **No sustituye asesoría legal profesional.**
 
 ---
 
@@ -157,8 +157,8 @@ export const PrivacyPolicy = () => (
 | Campo | Valor |
 |---|---|
 | Nombre del proyecto/plataforma | BackRoom |
-| Responsables | [NOMBRE COMPLETO INTEGRANTE 1], [NOMBRE COMPLETO INTEGRANTE 2] |
-| Correo de contacto para temas de datos personales | [CORREO DE CONTACTO] |
+| Responsables | Carlos Andrés Ramírez Osorio, Luisa Fernanda Gómez Martínez |
+| Correo de contacto para temas de datos personales | contacto@backroom.com.co |
 | Domicilio | República de Colombia |
 
 El **Responsable del Tratamiento** de los datos personales es quien decide sobre la recolección, almacenamiento, uso y supresión de los datos, según la definición de la Ley 1581 de 2012. Para los fines de esta política, el Responsable es el equipo del proyecto BackRoom.
@@ -232,7 +232,7 @@ Conforme al artículo 8 de la Ley 1581 de 2012 y al artículo 15 de la Constituc
 5. **Revocar la autorización** y/o solicitar la **supresión** de los datos cuando no se ajusten al tratamiento autorizado o se hayan vulnerado sus derechos.
 6. **Acceder en forma gratuita** a sus datos personales que hayan sido objeto de tratamiento.
 
-Para ejercer estos derechos, el Titular (o su representante acreditado) podrá contactar a **[CORREO DE CONTACTO]** mediante el procedimiento previsto en el artículo 14 de la Ley 1581 de 2012: consultas respondidas en **máximo 10 días hábiles** y reclamos en **máximo 15 días hábiles**, prorrogables por 15 días adicionales cuando las circunstancias lo exijan, previa comunicación al Titular.
+Para ejercer estos derechos, el Titular (o su representante acreditado) podrá contactar a **contacto@backroom.com.co** mediante el procedimiento previsto en el artículo 14 de la Ley 1581 de 2012: consultas respondidas en **máximo 10 días hábiles** y reclamos en **máximo 15 días hábiles**, prorrogables por 15 días adicionales cuando las circunstancias lo exijan, previa comunicación al Titular.
 
 ## 8. Política de tratamiento de datos de menores
 
@@ -249,7 +249,7 @@ En cumplimiento del artículo 7 de la Ley 1581 de 2012 y del Decreto 1377 de 201
 
 1. La Plataforma **no realiza transferencias internacionales** de datos a terceros ajenos al servicio.
 2. Cuando los datos se transmitan a **proveedores de infraestructura ubicados fuera de Colombia** (por ejemplo, los servidores de Supabase o Vercel), ello se entiende como una **transmisión** (Encargado del Tratamiento) y no como una transferencia, por lo que se mantienen las garantías de confidencialidad, seguridad y finalidad, conforme a la Ley 1581 de 2012 y el Decreto 2555 de 2022.
-3. En cualquier caso, el Titular será informado sobre dichos encargados y podrá conocerlos a través de **[CORREO DE CONTACTO]**.
+3. En cualquier caso, el Titular será informado sobre dichos encargados y podrá conocerlos a través de **contacto@backroom.com.co**.
 
 ## 11. Cookies y tecnologías similares
 
@@ -271,7 +271,7 @@ Esta política rige a partir de su publicación y permanecerá vigente durante l
 
 ## 14. Autoridad competente y contacto
 
-La **Superintendencia de Industria y Comercio (SIC)** es la autoridad nacional competente para conocer los reclamos sobre protección de datos personales. Los Titulares pueden ejercer sus derechos o presentar reclamaciones ante BackRoom escribiendo a **[CORREO DE CONTACTO]** o acudiendo directamente a la SIC (www.sic.gov.co).
+La **Superintendencia de Industria y Comercio (SIC)** es la autoridad nacional competente para conocer los reclamos sobre protección de datos personales. Los Titulares pueden ejercer sus derechos o presentar reclamaciones ante BackRoom escribiendo a **contacto@backroom.com.co** o acudiendo directamente a la SIC (www.sic.gov.co).
 
 Para el ejercicio de sus derechos, indique: nombre completo, correo de la cuenta, descripción de la solicitud y los documentos que acrediten su identidad o representación.
       `}
