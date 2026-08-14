@@ -8,24 +8,24 @@ export class AuthService {
     const supabase = await createClient();
     const supabaseAdmin = createAdminClient();
 
-    const { data: existingUsername } = await supabase
+    const { data: existingUsername } = await supabaseAdmin
       .from("usuarios")
       .select("id")
       .eq("username", input.username)
       .maybeSingle();
 
     if (existingUsername) {
-      throw new ApiError(409, "El nombre de usuario ingresado ya se encuentra en uso");
+      throw new ApiError(409, "El nombre de usuario ingresado ya se encuentra en uso", "username");
     }
 
-    const { data: existingEmail } = await supabase
+    const { data: existingEmail } = await supabaseAdmin
       .from("usuarios")
       .select("id")
       .eq("correo", input.email)
       .maybeSingle();
 
     if (existingEmail) {
-      throw new ApiError(409, "El correo electrónico ingresado ya se encuentra registrado");
+      throw new ApiError(409, "El correo electrónico ingresado ya se encuentra registrado", "email");
     }
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -40,7 +40,7 @@ export class AuthService {
     const { error: insertError } = await supabaseAdmin.from("usuarios").insert({
       auth_id: authData.user.id,
       username: input.username,
-      nombre_completo: input.fullName,
+      nombre_completo: input.username,
       correo: input.email,
     });
 

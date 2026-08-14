@@ -1,0 +1,58 @@
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
+import { handleApiError, ApiError } from "@/lib/api-error";
+import { checkPermission } from "@/lib/auth/rbac";
+import { z } from "zod";
+
+const createRoomSchema = z.object({
+  backroom_id: z.string().uuid(),
+  parent_id: z.string().uuid().optional().nullable(),
+  nombre: z.string().min(1).max(200),
+  descripcion: z.string().max(2000).optional(),
+});
+
+// POST /api/rooms — BE-33
+// Crea una sala dentro de un backroom, opcionalmente con padre (árbol recursivo).
+export async function POST(request: NextRequest) {
+  try {
+    const user = await requireAuth();
+    const body = await request.json();
+    const input = createRoomSchema.parse(body);
+
+    const hasAccess = await checkPermission(user.id, input.backroom_id, "contribuir");
+    if (!hasAccess) throw new ApiError(403, "Se requiere permiso 'contribuir' para crear salas.");
+
+    const supabase = await createClient();
+
+    // Calcular profundidad según el padre
+    let depth = 0;
+    if (input.parent_id) {
+      const { data: parent } = await supabase
+        .from("salas")
+        .select("depth")
+        .eq("id", input.parent_id)
+        .single();
+      if (!parent) throw new ApiError(404, "Sala padre no encontrada.");
+      depth = (parent.depth ?? 0) + 1;
+    }
+
+    const { data, error } = await supabase
+      .from("salas")
+      .insert({
+        backroom_id: input.backroom_id,
+        nombre: input.nombre,
+        descripcion: input.descripcion ?? null,
+        parent_id: input.parent_id ?? null,
+        depth,
+      })
+      .select()
+      .single();
+
+    if (error || !data) throw new ApiError(500, "No se pudo crear la sala.");
+
+    return NextResponse.json({ data: { room: data } }, { status: 201 });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
