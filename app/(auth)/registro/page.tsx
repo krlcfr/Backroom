@@ -131,7 +131,7 @@ export default function RegistroPage() {
       </div>
 
       <div className="p-6 flex flex-col gap-5">
-        <OAuthButtons />
+        <OAuthButtons disabled={!captchaToken} />
 
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-[#4a4455]"></div>
@@ -276,7 +276,7 @@ export default function RegistroPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaToken}
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#7c3aed] px-4 py-2.5 text-sm font-medium text-[#ede0ff] hover:bg-[#8B5CF6] disabled:opacity-50"
           >
             {loading ? "Registrando…" : "Crear cuenta"}
