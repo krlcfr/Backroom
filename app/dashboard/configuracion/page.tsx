@@ -65,6 +65,7 @@ export default async function ConfiguracionPage() {
             name: org.name,
             description: org.description ?? "",
             logoUrl: org.logoUrl,
+            updatedAt: org.updatedAt,
           }}
         />
       )}

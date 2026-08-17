@@ -8,6 +8,7 @@ interface OrgProps {
   name: string
   description: string
   logoUrl: string | null
+  updatedAt: string
 }
 
 type Tab = "perfil" | "seguridad"
@@ -154,7 +155,7 @@ export default function ConfiguracionForm({ org }: { org: OrgProps }) {
                   <img src={logoPreview} alt="Logo seleccionado" className="w-full h-full object-cover" />
                 ) : org.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={org.logoUrl} alt={`Logo de ${org.name}`} className="w-full h-full object-cover" />
+                  <img src={`${org.logoUrl}?v=${encodeURIComponent(org.updatedAt)}`} alt={`Logo de ${org.name}`} className="w-full h-full object-cover" />
                 ) : (
                   <span className="material-symbols-outlined text-[#d2bbff] text-[32px]">apartment</span>
                 )}

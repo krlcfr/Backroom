@@ -146,7 +146,7 @@ export class OrganizationsService {
       const admin = createAdminClient();
       const { error: uploadError } = await admin.storage
         .from("org-logos")
-        .upload(path, buffer, { contentType: logo.type, upsert: true });
+        .upload(path, buffer, { contentType: logo.type, upsert: true, cacheControl: "0" });
 
       if (uploadError) {
         console.error("Storage upload error (create):", uploadError.message, uploadError);
@@ -245,7 +245,7 @@ export class OrganizationsService {
       const admin = createAdminClient();
       const { error: uploadError } = await admin.storage
         .from("org-logos")
-        .upload(path, buffer, { contentType: logoFile.type, upsert: true });
+        .upload(path, buffer, { contentType: logoFile.type, upsert: true, cacheControl: "0" });
 
       if (uploadError) {
         console.error("Storage upload error:", uploadError.message, uploadError);
