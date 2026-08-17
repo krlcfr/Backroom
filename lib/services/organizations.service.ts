@@ -12,6 +12,7 @@ const LOGO_MAX_BYTES = 2 * 1024 * 1024;
 const LOGO_MIME_EXT: Record<string, string> = {
   "image/png": ".png",
   "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
   "image/webp": ".webp",
 };
 
