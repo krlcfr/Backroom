@@ -74,10 +74,10 @@ export default function BackRoomPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-8">
+      <div className="max-w-4xl">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-zinc-200 rounded w-1/4" />
-          <div className="h-32 bg-zinc-200 rounded" />
+          <div className="h-8 bg-[#333535] rounded w-1/4" />
+          <div className="h-32 bg-[#333535] rounded" />
         </div>
       </div>
     )
@@ -85,11 +85,11 @@ export default function BackRoomPage() {
 
   if (error || !backroom) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-8 text-center">
-        <p className="text-red-600">{error || "BackRoom no encontrada"}</p>
+      <div className="max-w-4xl text-center">
+        <p className="text-[#ffb4ab]">{error || "BackRoom no encontrada"}</p>
         <Link
           href="/dashboard"
-          className="mt-4 inline-block text-zinc-500 hover:text-zinc-900"
+          className="mt-4 inline-block text-[#ccc3d8] hover:text-[#d2bbff]"
         >
           Volver al dashboard
         </Link>
@@ -98,16 +98,16 @@ export default function BackRoomPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
-      <nav className="mb-6 text-sm text-zinc-500">
-        <Link href="/dashboard" className="hover:text-zinc-900">
+    <div className="max-w-4xl">
+      <nav className="mb-6 text-[12px] text-[#ccc3d8]">
+        <Link href="/dashboard" className="hover:text-[#d2bbff] transition-colors">
           Dashboard
         </Link>
-        <span className="mx-2">›</span>
-        <span className="text-zinc-900">{backroom.name}</span>
+        <span className="mx-2 text-[#4a4455]">›</span>
+        <span className="text-[#e2e2e2]">{backroom.name}</span>
       </nav>
 
-      <div className="mb-8 overflow-hidden rounded-lg border border-zinc-200">
+      <div className="mb-8 overflow-hidden rounded-xl border border-[#4a4455]">
         <div
           className="flex h-32 items-end p-6 bg-cover bg-center"
           style={
@@ -116,32 +116,34 @@ export default function BackRoomPage() {
               : { backgroundImage: "linear-gradient(to bottom right, #8B5CF6, #7C3AED)" }
           }
         >
-          <h1 className="text-2xl font-bold text-white">{backroom.name}</h1>
+          <h1 className="text-[24px] font-bold text-white">{backroom.name}</h1>
         </div>
-        <div className="flex items-center justify-between px-6 py-4">
-          <p className="text-sm text-zinc-500">
-            Propietario: <span className="text-zinc-900">{backroom.ownerName ?? "Desconocido"}</span>
+        <div className="flex items-center justify-between px-6 py-4 bg-[#1e2020]">
+          <p className="text-[13px] text-[#ccc3d8]">
+            Propietario: <span className="text-[#e2e2e2]">{backroom.ownerName ?? "Desconocido"}</span>
           </p>
           {esPropietario && (
             <div className="relative">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="rounded-md px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+                className="rounded-md px-2 py-1 text-[13px] text-[#ccc3d8] hover:bg-[#333535] hover:text-[#e2e2e2] transition-colors"
               >
-                ⋮
+                <span className="material-symbols-outlined text-[20px]">more_vert</span>
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-full z-10 mt-1 w-56 rounded-md border border-zinc-200 bg-white py-1 shadow-lg">
+                <div className="absolute right-0 top-full z-10 mt-1 w-56 rounded-lg border border-[#4a4455] bg-[#1e2020] py-1 shadow-lg">
                   <Link
                     href={`/dashboard/backrooms/${id}/miembros`}
-                    className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+                    className="flex items-center gap-2 px-4 py-2 text-[13px] text-[#ccc3d8] hover:bg-[#333535] transition-colors"
                   >
+                    <span className="material-symbols-outlined text-[16px]">group</span>
                     Gestionar miembros
                   </Link>
                   <button
                     onClick={() => setConfirmDelete(true)}
-                    className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-zinc-50"
+                    className="flex items-center gap-2 w-full px-4 py-2 text-left text-[13px] text-[#ffb4ab] hover:bg-[#333535] transition-colors"
                   >
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
                     Eliminar BackRoom
                   </button>
                 </div>
@@ -152,31 +154,32 @@ export default function BackRoomPage() {
       </div>
 
       {backroom.description && (
-        <div className="mb-6 text-zinc-600">
+        <div className="mb-6 text-[#ccc3d8] text-[14px]">
           <p>{backroom.description}</p>
         </div>
       )}
 
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Salas</h2>
+        <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Salas</h2>
         {esPropietario && (
           <button
             disabled
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white opacity-50"
+            className="rounded-lg bg-[#7c3aed] px-4 py-2 text-[12px] font-medium text-white opacity-50 cursor-not-allowed"
           >
             Nueva sala
           </button>
         )}
       </div>
 
-      <div className="rounded-lg border border-dashed border-zinc-300 py-12 text-center">
-        <p className="mb-4 text-sm text-zinc-500">
+      <div className="rounded-xl border-2 border-dashed border-[#4a4455] py-12 text-center bg-[#1e2020]/50">
+        <span className="material-symbols-outlined text-[#958da1] text-[48px] mb-4 block">meeting_room</span>
+        <p className="mb-4 text-[14px] text-[#ccc3d8]">
           Las salas se implementarán en el Módulo 3 (M-03).
         </p>
         {esPropietario && (
           <button
             disabled
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white opacity-50"
+            className="rounded-lg bg-[#7c3aed] px-4 py-2 text-[12px] font-medium text-white opacity-50 cursor-not-allowed"
           >
             Crear primera sala (próximamente)
           </button>
@@ -184,23 +187,26 @@ export default function BackRoomPage() {
       </div>
 
       {confirmDelete && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-2 text-lg font-semibold">Eliminar BackRoom</h3>
-            <p className="mb-6 text-sm text-zinc-500">
-              Esta acción es irreversible. Se eliminarán todas las salas y recursos asociados.
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#121414]/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-md rounded-xl border border-[#4a4455] bg-[#1e2020] p-6 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center gap-3 text-[#ffb4ab] mb-4">
+              <span className="material-symbols-outlined text-[36px]">warning</span>
+              <h3 className="text-[20px] font-semibold">Eliminar BackRoom</h3>
+            </div>
+            <p className="mb-6 text-[14px] text-[#ccc3d8]">
+              Esta acción es <strong className="text-[#e2e2e2]">irreversible</strong>. Se eliminarán todas las salas y recursos asociados.
             </p>
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="text-sm text-zinc-500 hover:text-zinc-900"
+                className="px-4 py-2 border border-[#4a4455] rounded-lg text-[12px] font-medium text-[#ccc3d8] hover:bg-[#333535] transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className="px-4 py-2 bg-[#ffb4ab] text-[#690005] hover:bg-[#ffb4ab]/80 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
               >
                 {deleting ? "Eliminando…" : "Eliminar"}
               </button>

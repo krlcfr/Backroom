@@ -57,7 +57,7 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/dashboard/backrooms/nuevo"
-          className="btn-primary px-4 py-2 rounded-lg flex items-center gap-2 self-start md:self-auto font-label-sm text-[12px]"
+          className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg flex items-center gap-2 self-start md:self-auto text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           Nueva BackRoom
