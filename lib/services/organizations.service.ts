@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getUsuarioInterno } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
 import type {
@@ -143,7 +143,8 @@ export class OrganizationsService {
       const path = `${org.id}/logo${logoExt}`;
       const buffer = await logo.arrayBuffer();
 
-      const { error: uploadError } = await supabase.storage
+      const admin = createAdminClient();
+      const { error: uploadError } = await admin.storage
         .from("org-logos")
         .upload(path, buffer, { contentType: logo.type, upsert: true });
 
@@ -241,7 +242,8 @@ export class OrganizationsService {
       const path = `${org.id}/logo${logoExt}`;
       const buffer = await logoFile.arrayBuffer();
 
-      const { error: uploadError } = await supabase.storage
+      const admin = createAdminClient();
+      const { error: uploadError } = await admin.storage
         .from("org-logos")
         .upload(path, buffer, { contentType: logoFile.type, upsert: true });
 
