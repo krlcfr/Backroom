@@ -34,7 +34,9 @@ export interface OrganizacionMiembro {
   role: RolOrg;            // admin | member (Propietario vía owner_id, R-09)
   status: EstadoMiembro;   // active | pending
   joined_at: string | null;
+  last_access_at: string | null;
   created_at: string;
+  updated_at: string | null;
 }
 
 export interface BackRoom {
