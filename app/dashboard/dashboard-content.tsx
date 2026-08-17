@@ -104,7 +104,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="btn-primary px-4 py-2 rounded-lg flex items-center gap-2 self-start md:self-auto text-[12px] font-medium"
+          className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg flex items-center gap-2 self-start md:self-auto text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           Nueva BackRoom
@@ -121,7 +121,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
                 <Link
                   key={br.id}
                   href={`/dashboard/backrooms/${br.id}`}
-                  className="depth-2 rounded-xl p-6 flex flex-col relative overflow-hidden group"
+                  className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-6 flex flex-col relative overflow-hidden group"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-[#7c3aed]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                   <div className="flex justify-between items-start mb-4">
@@ -165,7 +165,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
               )
             })
           ) : (
-            <div className="depth-2 rounded-xl p-12 flex flex-col items-center justify-center text-center border-dashed border-2 border-[#4a4455] bg-[#121414]/50">
+            <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-12 flex flex-col items-center justify-center text-center border-dashed border-2 border-[#4a4455] bg-[#121414]/50">
               <div className="w-16 h-16 rounded-full bg-[#333535] flex items-center justify-center mb-4">
                 <span className="material-symbols-outlined text-[#958da1] text-[32px]">inventory_2</span>
               </div>
@@ -177,7 +177,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
               </p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="btn-secondary px-4 py-2 rounded-lg text-[12px] font-medium"
+                className="border border-[#3f3f46] bg-transparent px-4 py-2 rounded-lg text-[12px] font-medium hover:bg-[#27272a] transition-colors"
               >
                 Crear primera BackRoom
               </button>
@@ -186,7 +186,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
         </div>
 
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="depth-2 rounded-xl p-6">
+          <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-6">
             <h3 className="text-[12px] font-medium text-[#ccc3d8] uppercase tracking-wider mb-4 border-b border-[#4a4455] pb-2">
               Métricas Globales
             </h3>
