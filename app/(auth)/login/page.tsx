@@ -43,7 +43,7 @@ function LoginForm() {
       return
     }
 
-    window.location.href = "/"
+    window.location.href = "/login"
   }
 
   async function handleOAuth(provider: "google" | "github") {

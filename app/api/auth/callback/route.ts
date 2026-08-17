@@ -103,6 +103,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/admin`);
     }
 
+    // Verificar si tiene organización (propetario o miembro)
+    const { data: org } = await supabaseAdmin
+      .from("organizations")
+      .select("id")
+      .eq("owner_id", perfilId)
+      .maybeSingle();
+
+    const { data: orgMember } = await supabaseAdmin
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", perfilId)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+    if (org || orgMember) {
+      return NextResponse.redirect(`${origin}/dashboard`);
+    }
+
     const { data: member } = await supabaseAdmin
       .from("backroom_miembros")
       .select("backroom_id")
