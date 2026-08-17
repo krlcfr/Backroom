@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -20,16 +21,28 @@ export default function DashboardHeader({ userName, userAvatar }: DashboardHeade
   }
 
   return (
-    <header className="fixed top-0 w-full z-50 h-16 bg-[#121414]/80 backdrop-blur-md border-b border-[#4a4455] flex justify-between items-center px-8 max-w-[1440px]">
+    <header className="fixed top-0 w-full z-50 h-16 bg-[#121414]/80 backdrop-blur-md border-b border-[#4a4455] flex justify-between items-center px-8 w-full mx-auto max-w-[1440px]">
       <div className="flex items-center gap-6">
         <span className="text-[20px] font-semibold text-[#d2bbff]">BackRoom</span>
         <nav className="hidden md:flex gap-6 h-full items-center">
-          <span className="text-[#d2bbff] font-medium border-b-2 border-[#d2bbff] pb-1">
+          <Link href="/dashboard" className="text-[#d2bbff] font-medium border-b-2 border-[#d2bbff] pb-1">
             Dashboard
-          </span>
+          </Link>
+          <Link href="/dashboard" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
+            Logs
+          </Link>
+          <Link href="/dashboard/configuracion" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
+            Settings
+          </Link>
         </nav>
       </div>
       <div className="flex items-center gap-4">
+        <button className="text-[#ccc3d8] hover:text-[#d2bbff] transition-colors">
+          <span className="material-symbols-outlined text-[20px]">notifications</span>
+        </button>
+        <button className="text-[#ccc3d8] hover:text-[#d2bbff] transition-colors">
+          <span className="material-symbols-outlined text-[20px]">help_outline</span>
+        </button>
         <button
           onClick={handleLogout}
           disabled={loading}

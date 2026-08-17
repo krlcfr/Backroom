@@ -10,9 +10,11 @@ interface DashboardSidebarProps {
 }
 
 const NAV_ITEMS = [
-  { label: "Inicio", icon: "home", href: "/dashboard" },
-  { label: "Miembros", icon: "group", href: "/dashboard/miembros" },
-  { label: "Auditoría", icon: "history", href: "/dashboard/auditoria" },
+  { label: "Home", icon: "home", href: "/dashboard" },
+  { label: "Hierarchy", icon: "account_tree", href: "/dashboard/hierarchy" },
+  { label: "Storage", icon: "folder", href: "/dashboard/storage" },
+  { label: "Permissions", icon: "key", href: "/dashboard/miembros" },
+  { label: "History", icon: "history", href: "/dashboard/history" },
 ]
 
 export default function DashboardSidebar({ orgName, orgLogo, esPropietario }: DashboardSidebarProps) {
@@ -65,19 +67,25 @@ export default function DashboardSidebar({ orgName, orgLogo, esPropietario }: Da
           className="w-full bg-[#7c3aed] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          Nueva BackRoom
+          New Room
         </Link>
       </div>
 
       <div className="border-t border-[#4a4455] pt-2 px-2 flex flex-col gap-1">
-        <span className="flex items-center gap-3 text-[#ccc3d8] px-4 py-2 text-[12px]">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-3 text-[#ccc3d8] px-4 py-2 text-[12px] hover:bg-[#282a2b] rounded-lg transition-colors"
+        >
           <span className="material-symbols-outlined text-[18px]">description</span>
-          Docs
-        </span>
-        <span className="flex items-center gap-3 text-[#ccc3d8] px-4 py-2 text-[12px]">
+          <span>Docs</span>
+        </Link>
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-3 text-[#ccc3d8] px-4 py-2 text-[12px] hover:bg-[#282a2b] rounded-lg transition-colors"
+        >
           <span className="material-symbols-outlined text-[18px]">contact_support</span>
-          Soporte
-        </span>
+          <span>Support</span>
+        </Link>
       </div>
     </aside>
   )
