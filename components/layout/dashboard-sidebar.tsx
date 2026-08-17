@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 interface DashboardSidebarProps {
   orgName: string | null
   orgLogo: string | null
+  orgUpdatedAt: string | null
   esPropietario: boolean
 }
 
@@ -17,7 +18,7 @@ const NAV_ITEMS = [
   { label: "History", icon: "history", href: "/dashboard/history" },
 ]
 
-export default function DashboardSidebar({ orgName, orgLogo, esPropietario }: DashboardSidebarProps) {
+export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPropietario }: DashboardSidebarProps) {
   const pathname = usePathname()
 
   return (
@@ -27,7 +28,7 @@ export default function DashboardSidebar({ orgName, orgLogo, esPropietario }: Da
           <div className="w-10 h-10 rounded-lg bg-[#333535] flex items-center justify-center shrink-0 overflow-hidden">
             {orgLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={orgLogo} alt={orgName} className="w-full h-full object-cover" />
+              <img src={orgUpdatedAt ? `${orgLogo}?v=${encodeURIComponent(orgUpdatedAt)}` : orgLogo ?? ""} alt={orgName} className="w-full h-full object-cover" />
             ) : (
               <span className="material-symbols-outlined text-[#d2bbff]">apartment</span>
             )}
