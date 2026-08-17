@@ -70,7 +70,7 @@ export default function DashboardSidebar({ orgName, orgLogo, esPropietario }: Da
           className="w-full bg-[#7c3aed] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          New Room
+          New BackRoom
         </Link>
       </div>
 
