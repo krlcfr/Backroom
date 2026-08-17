@@ -63,7 +63,10 @@ export default function DashboardSidebar({ orgName, orgLogo, esPropietario }: Da
 
       <div className="px-4 mt-auto mb-4">
         <Link
-          href="/dashboard/backrooms/nuevo"
+          href="/dashboard"
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent("open-create-backroom"))
+          }}
           className="w-full bg-[#7c3aed] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
