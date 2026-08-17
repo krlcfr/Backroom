@@ -4,7 +4,7 @@ import { useState } from "react"
 
 type Provider = "google" | "github"
 
-export default function OAuthButtons() {
+export default function OAuthButtons({ disabled = false }: { disabled?: boolean }) {
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null)
 
   async function handleOAuth(provider: Provider) {
@@ -38,7 +38,7 @@ export default function OAuthButtons() {
       <button
         type="button"
         onClick={() => handleOAuth("google")}
-        disabled={loadingProvider !== null}
+        disabled={loadingProvider !== null || disabled}
         className={baseClasses}
       >
         <GoogleIcon />
@@ -47,7 +47,7 @@ export default function OAuthButtons() {
       <button
         type="button"
         onClick={() => handleOAuth("github")}
-        disabled={loadingProvider !== null}
+        disabled={loadingProvider !== null || disabled}
         className={baseClasses}
       >
         <GitHubIcon />

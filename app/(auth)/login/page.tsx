@@ -24,7 +24,7 @@ function LoginForm() {
     setLoading(true)
 
     if (!captchaToken) {
-      setError("Completá la verificación \"No soy un robot\".")
+      setError("Completá la verificación \"No soy un robot\" para continuar.")
       setLoading(false)
       return
     }
@@ -43,7 +43,7 @@ function LoginForm() {
       return
     }
 
-    window.location.href = "/"
+    window.location.href = "/login"
   }
 
   async function handleOAuth(provider: "google" | "github") {
@@ -144,7 +144,7 @@ function LoginForm() {
           <button 
             type="button"
             onClick={() => handleOAuth("google")}
-            disabled={loading || oauthLoading !== null}
+            disabled={loading || oauthLoading !== null || !captchaToken}
             className="flex items-center justify-center gap-3 w-full p-3 rounded-lg border border-[#4a4455] bg-transparent hover:bg-[#282a2b] transition-colors text-[#e2e2e2] text-[12px] font-medium tracking-wide active:scale-[0.98] disabled:opacity-50"
           >
             <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24">
@@ -158,7 +158,7 @@ function LoginForm() {
           <button 
             type="button"
             onClick={() => handleOAuth("github")}
-            disabled={loading || oauthLoading !== null}
+            disabled={loading || oauthLoading !== null || !captchaToken}
             className="flex items-center justify-center gap-3 w-full p-3 rounded-lg border border-[#4a4455] bg-transparent hover:bg-[#282a2b] transition-colors text-[#e2e2e2] text-[12px] font-medium tracking-wide active:scale-[0.98] disabled:opacity-50"
           >
             <svg aria-hidden="true" className="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -251,7 +251,7 @@ function LoginForm() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || oauthLoading !== null}
+            disabled={loading || oauthLoading !== null || !captchaToken}
             className="mt-2 w-full bg-[#7c3aed] text-[#ede0ff] hover:bg-[#7c3aed]/90 text-[12px] font-bold tracking-wide py-3 px-4 rounded-lg transition-all active:scale-[0.98] shadow-[0_4px_12px_rgba(124,58,237,0.2)] flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? "Ingresando..." : "Iniciar sesión"}

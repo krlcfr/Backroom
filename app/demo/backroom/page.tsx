@@ -153,12 +153,12 @@ export default function DemoBackroomPage() {
             Estás en modo Demo. Crea tu organización para acceder a todas las funcionalidades.
           </span>
         </div>
-        <button
-          onClick={() => setLimitsOpen(true)}
+        <Link
+          href="/demo/limites"
           className="text-[13px] font-medium underline hover:text-amber-300 transition-colors"
         >
           Ver límites de Demo
-        </button>
+        </Link>
       </div>
 
       {/* 2 Column Layout */}
