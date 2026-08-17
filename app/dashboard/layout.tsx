@@ -3,6 +3,7 @@ import { OrganizationsService } from "@/lib/services/organizations.service"
 import { getUsuarioInterno } from "@/lib/auth/rbac"
 import DashboardSidebar from "@/components/layout/dashboard-sidebar"
 import DashboardHeader from "@/components/layout/dashboard-header"
+import SessionTimeout from "@/components/session-timeout"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -33,6 +34,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-screen flex-col bg-[#121414]">
+      <SessionTimeout />
       <DashboardHeader userName={userName} userAvatar={userAvatar} />
       <div className="flex flex-1 pt-16">
         <DashboardSidebar
