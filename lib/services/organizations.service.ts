@@ -148,8 +148,9 @@ export class OrganizationsService {
         .upload(path, buffer, { contentType: logo.type, upsert: true });
 
       if (uploadError) {
+        console.error("Storage upload error (create):", uploadError.message, uploadError);
         await supabase.from("organizations").delete().eq("id", org.id);
-        throw new ApiError(500, "No se pudo subir el logo");
+        throw new ApiError(500, `No se pudo subir el logo: ${uploadError.message}`);
       }
 
       org.logo_url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/org-logos/${path}`;
@@ -245,7 +246,8 @@ export class OrganizationsService {
         .upload(path, buffer, { contentType: logoFile.type, upsert: true });
 
       if (uploadError) {
-        throw new ApiError(500, "No se pudo subir el logo");
+        console.error("Storage upload error:", uploadError.message, uploadError);
+        throw new ApiError(500, `No se pudo subir el logo: ${uploadError.message}`);
       }
 
       updateData.logo_url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/org-logos/${path}`;
