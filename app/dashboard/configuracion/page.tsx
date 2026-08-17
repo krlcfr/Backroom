@@ -11,14 +11,12 @@ export default async function ConfiguracionPage() {
 
   let org = null
   let esPropietario = false
-  let usuarioInternoId: string | null = null
 
   if (authId) {
     try {
       org = await OrganizationsService.getOrgForUser(authId)
       const perfil = await getUsuarioInterno(authId)
-      usuarioInternoId = perfil?.id ?? null
-      esPropietario = org !== null && org.ownerId === usuarioInternoId
+      esPropietario = org !== null && org.ownerId === perfil?.id
     } catch {
       org = null
     }
@@ -26,14 +24,17 @@ export default async function ConfiguracionPage() {
 
   if (!org) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#18181b] p-8 text-center">
-        <h1 className="text-xl font-bold text-[#e2e2e2]">Sin organización</h1>
-        <p className="max-w-md text-sm text-[#ccc3d8]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="w-16 h-16 rounded-full bg-[#333535] flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-[#958da1] text-[32px]">apartment</span>
+        </div>
+        <h2 className="text-[20px] font-semibold text-[#e2e2e2] mb-2">Sin organización</h2>
+        <p className="text-[#ccc3d8] max-w-md mb-6">
           Aún no perteneces a una organización. Crea una para configurar su perfil.
         </p>
         <Link
           href="/org/crear"
-          className="rounded-lg bg-[#7c3aed] px-5 py-2.5 text-sm font-medium text-[#fafafa] hover:bg-[#8b5cf6]"
+          className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
         >
           Crear organización
         </Link>
@@ -42,23 +43,18 @@ export default async function ConfiguracionPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#e2e2e2]">Configuración de la organización</h1>
-          <p className="text-sm text-[#ccc3d8]">Edita el perfil de {org.name}.</p>
-        </div>
-        <Link
-          href="/dashboard"
-          className="rounded-lg border border-[#3f3f46] px-4 py-2 text-sm text-[#ccc3d8] hover:text-[#e2e2e2]"
-        >
-          Volver al dashboard
-        </Link>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-headline-lg font-semibold text-[#e2e2e2] mb-2">Configuración de Organización</h1>
+        <p className="text-[#ccc3d8]">
+          Gestiona los detalles, seguridad y ciclo de vida de &apos;{org.name}&apos;.
+        </p>
       </div>
 
       {!esPropietario ? (
-        <div className="rounded-lg border border-[#3f3f46] bg-[#27272a] p-8 text-center">
-          <p className="text-sm text-[#ffb4ab]">
+        <div className="rounded-xl border border-[#4a4455] bg-[#1e2020] p-8 text-center">
+          <span className="material-symbols-outlined text-[#ffb4ab] text-[48px] mb-4 block">lock</span>
+          <p className="text-[14px] text-[#ffb4ab]">
             Solo el Propietario puede configurar la organización.
           </p>
         </div>
