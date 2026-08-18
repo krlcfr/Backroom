@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getUsuarioInterno } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
 import type {
@@ -12,6 +12,7 @@ const LOGO_MAX_BYTES = 2 * 1024 * 1024;
 const LOGO_MIME_EXT: Record<string, string> = {
   "image/png": ".png",
   "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
   "image/webp": ".webp",
 };
 
@@ -142,13 +143,15 @@ export class OrganizationsService {
       const path = `${org.id}/logo${logoExt}`;
       const buffer = await logo.arrayBuffer();
 
-      const { error: uploadError } = await supabase.storage
+      const admin = createAdminClient();
+      const { error: uploadError } = await admin.storage
         .from("org-logos")
-        .upload(path, buffer, { contentType: logo.type, upsert: true });
+        .upload(path, buffer, { contentType: logo.type, upsert: true, cacheControl: "0" });
 
       if (uploadError) {
+        console.error("Storage upload error (create):", uploadError.message, uploadError);
         await supabase.from("organizations").delete().eq("id", org.id);
-        throw new ApiError(500, "No se pudo subir el logo");
+        throw new ApiError(500, `No se pudo subir el logo: ${uploadError.message}`);
       }
 
       org.logo_url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/org-logos/${path}`;
@@ -239,12 +242,14 @@ export class OrganizationsService {
       const path = `${org.id}/logo${logoExt}`;
       const buffer = await logoFile.arrayBuffer();
 
-      const { error: uploadError } = await supabase.storage
+      const admin = createAdminClient();
+      const { error: uploadError } = await admin.storage
         .from("org-logos")
-        .upload(path, buffer, { contentType: logoFile.type, upsert: true });
+        .upload(path, buffer, { contentType: logoFile.type, upsert: true, cacheControl: "0" });
 
       if (uploadError) {
-        throw new ApiError(500, "No se pudo subir el logo");
+        console.error("Storage upload error:", uploadError.message, uploadError);
+        throw new ApiError(500, `No se pudo subir el logo: ${uploadError.message}`);
       }
 
       updateData.logo_url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/org-logos/${path}`;
