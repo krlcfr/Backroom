@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getUsuarioInterno, isOwner } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
 import type { CreateBackroomInput, UpdateBackroomInput } from "@/lib/validations/schemas";
@@ -32,6 +33,7 @@ export class BackroomsService {
     }
 
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
     const { data: backroom, error: backroomError } = await supabase
       .from("backrooms")
@@ -58,6 +60,16 @@ export class BackroomsService {
     if (miembroError) {
       await supabase.from("backrooms").delete().eq("id", backroom.id);
       throw new ApiError(500, "No se pudo crear la BackRoom");
+    }
+
+    const { error: salaError } = await adminSupabase.from("salas").insert({
+      backroom_id: backroom.id,
+      nombre: input.name,
+      depth: 0,
+    });
+
+    if (salaError) {
+      throw new ApiError(500, "No se pudo crear la sala raíz");
     }
 
     return toBackroomResponse(backroom, authId);
@@ -117,7 +129,7 @@ export class BackroomsService {
       throw new ApiError(403, "Solo el propietario puede editar el BackRoom");
     }
 
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
     const updateData: any = {};
     if (input.name !== undefined) updateData.nombre = input.name;
@@ -128,7 +140,7 @@ export class BackroomsService {
       return this.getById(backroomId); // Nothing to update
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("backrooms")
       .update(updateData)
       .eq("id", backroomId)
