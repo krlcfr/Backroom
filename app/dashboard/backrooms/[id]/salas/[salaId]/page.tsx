@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import RoomTree from "@/components/salas/room-tree"
@@ -38,12 +38,37 @@ export default function SalaPage() {
   const [children, setChildren] = useState<Sala[]>([])
   const [tree, setTree] = useState<SalaNode[]>([])
   const [backroom, setBackroom] = useState<Backroom | null>(null)
+  const [parentSala, setParentSala] = useState<Sala | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const [showCreateRoom, setShowCreateRoom] = useState(false)
 
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editNombre, setEditNombre] = useState("")
+  const [editDescripcion, setEditDescripcion] = useState("")
+  const [editError, setEditError] = useState("")
+  const [editLoading, setEditLoading] = useState(false)
+
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  const menuRef = useRef<HTMLDivElement>(null)
+
   const atMaxDepth = sala && sala.depth >= 2
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [menuOpen])
 
   useEffect(() => {
     async function fetchData() {
@@ -56,7 +81,16 @@ export default function SalaPage() {
 
         if (!salaRes.ok) throw new Error("No se pudo cargar la sala")
         const salaData = await salaRes.json()
-        setSala(salaData.data.room)
+        const salaInfo: Sala = salaData.data.room
+        setSala(salaInfo)
+
+        if (salaInfo.parent_id) {
+          const parentRes = await fetch(`/api/rooms/${salaInfo.parent_id}`)
+          if (parentRes.ok) {
+            const parentData = await parentRes.json()
+            setParentSala(parentData.data.room)
+          }
+        }
 
         if (treeRes.ok) {
           const treeData = await treeRes.json()
@@ -85,6 +119,71 @@ export default function SalaPage() {
     }
     if (salaId) fetchData()
   }, [id, salaId])
+
+  function openEdit() {
+    setMenuOpen(false)
+    if (!sala) return
+    setEditNombre(sala.nombre)
+    setEditDescripcion(sala.descripcion ?? "")
+    setEditError("")
+    setShowEditModal(true)
+  }
+
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!sala) return
+    setEditError("")
+
+    const trimmed = editNombre.trim()
+    if (trimmed.length < 1) {
+      setEditError("El nombre es requerido")
+      return
+    }
+
+    setEditLoading(true)
+
+    try {
+      const res = await fetch(`/api/rooms/${sala.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: trimmed,
+          descripcion: editDescripcion.trim() || null,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "No se pudo actualizar")
+      }
+
+      const updated = await res.json()
+      setSala(updated.data.room)
+      setShowEditModal(false)
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "No se pudo actualizar")
+    } finally {
+      setEditLoading(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!sala) return
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/rooms/${sala.id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("No se pudo eliminar")
+      if (sala.parent_id) {
+        router.push(`/dashboard/backrooms/${id}/salas/${sala.parent_id}`)
+      } else {
+        router.push(`/dashboard/backrooms/${id}`)
+      }
+      router.refresh()
+    } catch {
+      setError("No se pudo eliminar la sala")
+      setDeleting(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -119,6 +218,7 @@ export default function SalaPage() {
   const breadcrumbItems = [
     { label: "Dashboard", href: "/dashboard" },
     { label: backroom?.name ?? "BackRoom", href: `/dashboard/backrooms/${id}` },
+    ...(parentSala ? [{ label: parentSala.nombre, href: `/dashboard/backrooms/${id}/salas/${parentSala.id}` }] : []),
     { label: sala.nombre },
   ]
 
@@ -133,12 +233,41 @@ export default function SalaPage() {
       )}
 
       <main className="flex-1 flex flex-col gap-6 min-w-0">
-        <div>
-          <Breadcrumb items={breadcrumbItems} />
-          <h1 className="text-[28px] font-bold text-[#e2e2e2] mb-2">{sala.nombre}</h1>
-          {sala.descripcion && (
-            <p className="text-[#ccc3d8] text-[16px] max-w-2xl">{sala.descripcion}</p>
-          )}
+        <div className="flex items-start justify-between">
+          <div>
+            <Breadcrumb items={breadcrumbItems} />
+            <h1 className="text-[28px] font-bold text-[#e2e2e2] mb-2">{sala.nombre}</h1>
+            {sala.descripcion && (
+              <p className="text-[#ccc3d8] text-[16px] max-w-2xl">{sala.descripcion}</p>
+            )}
+          </div>
+
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#333535] text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px]">more_vert</span>
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-44 bg-[#27272a] border border-[#4a4455] rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.4)] z-50 py-1">
+                <button
+                  onClick={openEdit}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ccc3d8] hover:bg-[#333535] hover:text-[#e2e2e2] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">edit</span>
+                  Editar
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); setConfirmDelete(true) }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ffb4ab] hover:bg-[#ffb4ab]/10 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                  Eliminar
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {!atMaxDepth && (
@@ -171,6 +300,102 @@ export default function SalaPage() {
             setTree((prev) => [...prev, { id: room.id, nombre: room.nombre, depth: sala.depth + 1, children: [] }])
           }}
         />
+      )}
+
+      {showEditModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-[6px] p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false) }}
+        >
+          <div className="bg-[#303036] border border-[#4a4455] rounded-2xl shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] w-full max-w-[480px] overflow-hidden flex flex-col">
+            <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+              <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Editar Sala</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#333535] text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleEdit} className="px-6 py-2 flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-[12px] font-medium text-[#ccc3d8]">Nombre</label>
+                <input
+                  type="text"
+                  required
+                  value={editNombre}
+                  onChange={(e) => setEditNombre(e.target.value)}
+                  className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all"
+                  disabled={editLoading}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-[12px] font-medium text-[#ccc3d8]">
+                  Descripción <span className="text-[#ccc3d8]/50 font-normal">(Opcional)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={editDescripcion}
+                  onChange={(e) => setEditDescripcion(e.target.value)}
+                  placeholder="Define el propósito de esta sala..."
+                  className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 placeholder:text-[#ccc3d8]/40 resize-none transition-all"
+                  disabled={editLoading}
+                />
+              </div>
+
+              {editError && <p className="text-[12px] text-[#ffb4ab]">{editError}</p>}
+
+              <div className="px-0 py-4 flex items-center justify-end gap-3 border-t border-[#4a4455]/50">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  disabled={editLoading}
+                  className="px-4 py-2 rounded-lg border border-[#4a4455] bg-transparent text-[#e2e2e2] text-[12px] font-medium hover:bg-[#333535] transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="px-5 py-2 rounded-lg bg-[#7c3aed] text-[#fafafa] text-[12px] font-semibold hover:bg-[#8b5cf6] transition-colors disabled:opacity-50 shadow-sm"
+                >
+                  {editLoading ? "Guardando..." : "Guardar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#121414]/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-md rounded-xl border border-[#4a4455] bg-[#1e2020] p-6 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center gap-3 text-[#ffb4ab] mb-4">
+              <span className="material-symbols-outlined text-[36px]">warning</span>
+              <h3 className="text-[20px] font-semibold">Eliminar Sala</h3>
+            </div>
+            <p className="mb-6 text-[14px] text-[#ccc3d8]">
+              Esta acción es <strong className="text-[#e2e2e2]">irreversible</strong>. Se eliminarán todas las subsalas y recursos asociados.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-4 py-2 border border-[#4a4455] rounded-lg text-[12px] font-medium text-[#ccc3d8] hover:bg-[#333535] transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2 bg-[#ffb4ab] text-[#690005] hover:bg-[#ffb4ab]/80 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
+              >
+                {deleting ? "Eliminando..." : "Eliminar"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
