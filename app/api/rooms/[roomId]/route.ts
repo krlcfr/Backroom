@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
 import { z } from "zod";
 
@@ -42,9 +43,9 @@ export async function PATCH(
     const { roomId } = await params;
     const body = await request.json();
     const input = updateRoomSchema.parse(body);
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("salas")
       .update(input)
       .eq("id", roomId)
@@ -67,9 +68,9 @@ export async function DELETE(
   try {
     await requireAuth();
     const { roomId } = await params;
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
-    const { error } = await supabase.from("salas").delete().eq("id", roomId);
+    const { error } = await adminSupabase.from("salas").delete().eq("id", roomId);
     if (error) throw new ApiError(500, "No se pudo eliminar la sala.");
 
     return NextResponse.json({ data: { success: true } }, { status: 200 });
