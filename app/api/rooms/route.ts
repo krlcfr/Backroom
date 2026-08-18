@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
 import { checkPermission } from "@/lib/auth/rbac";
 import { z } from "zod";
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
     if (!hasAccess) throw new ApiError(403, "Se requiere permiso 'contribuir' para crear salas.");
 
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
     // Calcular profundidad según el padre
     let depth = 0;
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
       depth = (parent.depth ?? 0) + 1;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("salas")
       .insert({
         backroom_id: input.backroom_id,
