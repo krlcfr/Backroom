@@ -188,35 +188,7 @@ export default function BackRoomPage() {
   return (
     <div className="flex gap-6">
       <aside className="w-64 shrink-0 hidden md:flex flex-col">
-        <div className="flex items-center gap-3 pb-4 mb-2 border-b border-[#4a4455]">
-          <div className="w-10 h-10 rounded-lg bg-[#27272a] flex items-center justify-center border border-[#4a4455]">
-            <span className="material-symbols-outlined text-[#d2bbff]">folder_special</span>
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-[16px] font-bold text-[#d2bbff] truncate">{backroom.name}</h2>
-            <p className="text-[12px] text-[#ccc3d8] truncate">BackRoom</p>
-          </div>
-        </div>
-
         <nav className="flex-1 flex flex-col gap-1 overflow-y-auto">
-          <Link
-            href={`/dashboard/backrooms/${backroom.id}`}
-            className="flex items-center gap-3 bg-[#7c3aed]/10 text-[#d2bbff] border-l-2 border-[#7c3aed] px-4 py-2 rounded-r text-[13px] font-medium"
-          >
-            <span className="material-symbols-outlined text-[18px]">home</span>
-            Home
-          </Link>
-          <button
-            onClick={() => setShowCreateRoom(true)}
-            className="w-full bg-[#7c3aed] text-white hover:bg-[#8b5cf6] transition-colors text-[13px] font-medium py-2 rounded-lg flex items-center justify-center gap-2 mt-4"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Nueva sala
-          </button>
-
-          <div className="mt-4 mb-2 px-4 text-[10px] text-[#958da1] uppercase tracking-wider font-medium">
-            Active Room Hierarchy
-          </div>
           <RoomTree rooms={tree} backroomId={backroom.id} />
         </nav>
       </aside>
