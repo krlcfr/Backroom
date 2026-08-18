@@ -187,11 +187,13 @@ export default function BackRoomPage() {
 
   return (
     <div className="flex gap-6">
-      <aside className="w-64 shrink-0 hidden md:flex flex-col">
-        <nav className="flex-1 flex flex-col gap-1 overflow-y-auto">
-          <RoomTree rooms={tree} backroomId={backroom.id} />
-        </nav>
-      </aside>
+      {tree.length > 0 && (
+        <aside className="w-64 shrink-0 hidden md:flex flex-col">
+          <nav className="flex-1 flex flex-col gap-1 overflow-y-auto">
+            <RoomTree rooms={tree} backroomId={backroom.id} />
+          </nav>
+        </aside>
+      )}
 
       <main className="flex-1 flex flex-col gap-6 min-w-0">
         <div>
