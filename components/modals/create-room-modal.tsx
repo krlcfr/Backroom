@@ -27,10 +27,16 @@ export default function CreateRoomModal({
 
   const depth = parentRoomId ? currentDepth + 1 : 1
   const maxDepth = 3
+  const atMaxDepth = currentDepth >= maxDepth - 1
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError("")
+
+    if (atMaxDepth) {
+      setError("Profundidad máxima alcanzada (nivel 3). No se pueden crear más subsalas.")
+      return
+    }
 
     const trimmed = nombre.trim()
     if (trimmed.length < 1) {
@@ -154,11 +160,11 @@ export default function CreateRoomModal({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || atMaxDepth}
               className="px-5 py-2 rounded-lg bg-[#7c3aed] text-[#fafafa] text-[12px] font-semibold hover:bg-[#8b5cf6] transition-colors disabled:opacity-50 shadow-sm flex items-center gap-2"
             >
-              {loading ? "Creando..." : "Crear sala"}
-              {!loading && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
+              {loading ? "Creando..." : atMaxDepth ? "Profundidad máxima" : "Crear sala"}
+              {!loading && !atMaxDepth && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
             </button>
           </div>
         </form>

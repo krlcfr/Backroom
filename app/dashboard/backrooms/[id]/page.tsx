@@ -8,6 +8,7 @@ import RoomTree from "@/components/salas/room-tree"
 import SubRoomsGrid from "@/components/salas/sub-rooms-grid"
 import RightPanel from "@/components/salas/right-panel"
 import CreateRoomModal from "@/components/modals/create-room-modal"
+import Breadcrumb from "@/components/ui/breadcrumb"
 
 interface Backroom {
   id: string
@@ -197,13 +198,10 @@ export default function BackRoomPage() {
 
       <main className="flex-1 flex flex-col gap-6 min-w-0">
         <div>
-          <nav className="text-[13px] text-[#ccc3d8] gap-2 mb-2 flex items-center">
-            <Link href="/dashboard" className="hover:text-[#d2bbff] transition-colors">
-              Dashboard
-            </Link>
-            <span className="material-symbols-outlined text-[14px] text-[#4a4455]">chevron_right</span>
-            <span className="text-[#d2bbff]">{backroom.name}</span>
-          </nav>
+          <Breadcrumb items={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: backroom.name },
+          ]} />
           <h1 className="text-[28px] font-bold text-[#e2e2e2] mb-2">{backroom.name}</h1>
           {backroom.description && (
             <p className="text-[#ccc3d8] text-[16px] max-w-2xl">{backroom.description}</p>
