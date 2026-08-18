@@ -100,16 +100,7 @@ function TreeNode({
 }
 
 export default function RoomTree({ rooms, backroomId, activeRoomId }: RoomTreeProps) {
-  if (rooms.length === 0) {
-    return (
-      <div className="px-4 py-6 text-center">
-        <span className="material-symbols-outlined text-[#958da1] text-[32px] mb-2 block">
-          account_tree
-        </span>
-        <p className="text-[13px] text-[#958da1]">Sin salas creadas</p>
-      </div>
-    )
-  }
+  if (rooms.length === 0) return null
 
   return (
     <div className="py-2">
