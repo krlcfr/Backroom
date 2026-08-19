@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { isOwner } from '@/lib/auth/rbac';
-import { ApiError } from '@/lib/api-error';
+import { ApiError, handleApiError } from '@/lib/api-error';
+import { z } from 'zod';
 
-type Role = 'admin' | 'editor' | 'viewer' | 'contribuir' | 'solo_visualizar';
+const updateRoleSchema = z.object({
+  role: z.enum(['admin', 'editor', 'viewer', 'contribuir', 'solo_visualizar'])
+});
 
 // POST /api/backrooms/[backroomId]/roles/[userId]
 // Assign or update a role for a user in a backroom
@@ -19,13 +22,11 @@ export async function POST(
     // Solo el propietario (owner) puede cambiar roles
     const owner = await isOwner(requester.id, backroomId);
     if (!owner) {
-      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+      throw new ApiError(403, 'Forbidden');
     }
 
-    const { role } = await request.json();
-    if (!role) {
-      return NextResponse.json({ success: false, error: 'Missing role' }, { status: 400 });
-    }
+    const body = await request.json();
+    const { role } = updateRoleSchema.parse(body);
 
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -41,7 +42,7 @@ export async function POST(
     if (error) throw error;
     return NextResponse.json({ success: true, data }, { status: 200 });
   } catch (err) {
-    return NextResponse.json({ success: false, error: (err as any).message }, { status: 500 });
+    return handleApiError(err);
   }
 }
 
@@ -56,7 +57,7 @@ export async function DELETE(
     const { backroomId, userId } = await params;
     const owner = await isOwner(requester.id, backroomId);
     if (!owner) {
-      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+      throw new ApiError(403, 'Forbidden');
     }
 
     const supabase = await createClient();
@@ -68,6 +69,6 @@ export async function DELETE(
     if (error) throw error;
     return NextResponse.json({ success: true }, { status: 204 });
   } catch (err) {
-    return NextResponse.json({ success: false, error: (err as any).message }, { status: 500 });
+    return handleApiError(err);
   }
 }

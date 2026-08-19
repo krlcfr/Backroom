@@ -77,10 +77,10 @@ export async function checkRoomPermission(authId: string, roomId: string, permis
     .select(permisoRequerido.replace(".", "_"))
     .eq("sala_id", roomId)
     .eq("usuario_id", usuario.id)
-    .single();
+    .maybeSingle();
 
-  if (permiso && (permiso as any)[permisoRequerido.replace(".", "_")] === true) {
-    return true;
+  if (permiso) {
+    return (permiso as any)[permisoRequerido.replace(".", "_")] === true;
   }
 
   // Fallback: si no hay permisos específicos, usamos el rol general?

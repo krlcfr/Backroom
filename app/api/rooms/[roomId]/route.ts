@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
+import { checkRoomPermission } from "@/lib/auth/rbac";
 import { z } from "zod";
 
 const updateRoomSchema = z.object({
@@ -16,7 +17,7 @@ export async function GET(
   { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     const { roomId } = await params;
     const supabase = await createClient();
 
@@ -39,8 +40,12 @@ export async function PATCH(
   { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     const { roomId } = await params;
+
+    const hasAccess = await checkRoomPermission(user.id, roomId, "salas.editar");
+    if (!hasAccess) throw new ApiError(403, "No tienes permiso para editar esta sala.");
+
     const body = await request.json();
     const input = updateRoomSchema.parse(body);
     const adminSupabase = createAdminClient();
@@ -66,8 +71,12 @@ export async function DELETE(
   { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
-    await requireAuth();
+    const user = await requireAuth();
     const { roomId } = await params;
+
+    const hasAccess = await checkRoomPermission(user.id, roomId, "salas.eliminar");
+    if (!hasAccess) throw new ApiError(403, "No tienes permiso para eliminar esta sala.");
+
     const adminSupabase = createAdminClient();
 
     const { error } = await adminSupabase.from("salas").delete().eq("id", roomId);

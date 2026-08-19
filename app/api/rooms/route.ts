@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
-import { checkPermission } from "@/lib/auth/rbac";
+import { checkPermission, checkRoomPermission } from "@/lib/auth/rbac";
 import { z } from "zod";
 
 const createRoomSchema = z.object({
@@ -21,8 +21,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const input = createRoomSchema.parse(body);
 
-    const hasAccess = await checkPermission(user.id, input.backroom_id, "contribuir");
-    if (!hasAccess) throw new ApiError(403, "Se requiere permiso 'contribuir' para crear salas.");
+    if (input.parent_id) {
+      const hasRoomAccess = await checkRoomPermission(user.id, input.parent_id, "salas.crear");
+      if (!hasRoomAccess) throw new ApiError(403, "No tienes permiso para crear sub-salas aquí.");
+    } else {
+      const hasAccess = await checkPermission(user.id, input.backroom_id, "contribuir");
+      if (!hasAccess) throw new ApiError(403, "Se requiere permiso 'contribuir' para crear salas principales.");
+    }
 
     const supabase = await createClient();
     const adminSupabase = createAdminClient();
