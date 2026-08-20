@@ -6,7 +6,7 @@ export async function getUsuarioInterno(authId: string) {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("usuarios")
-    .select("id, es_superadmin")
+    .select("id, es_superadmin, correo")
     .eq("auth_id", authId)
     .single();
 

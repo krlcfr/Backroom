@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getUsuarioInterno } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
 import { z } from "zod";
@@ -16,21 +16,21 @@ export class InvitationsService {
     const usuario = await getUsuarioInterno(authId);
     if (!usuario) throw new ApiError(404, "Perfil no encontrado");
 
-    const supabase = await createClient();
+    const admin = createAdminClient();
 
     // Verify user is owner or admin
-    const { data: org } = await supabase
+    const { data: org, error: orgError } = await admin
       .from("organizations")
       .select("owner_id")
       .eq("id", orgId)
       .maybeSingle();
 
-    if (!org) throw new ApiError(404, "Organización no encontrada");
+    if (orgError || !org) throw new ApiError(404, "Organización no encontrada");
 
     let hasPermission = org.owner_id === usuario.id;
 
     if (!hasPermission) {
-      const { data: member } = await supabase
+      const { data: member } = await admin
         .from("organization_members")
         .select("role")
         .eq("organization_id", orgId)
@@ -47,15 +47,21 @@ export class InvitationsService {
       throw new ApiError(403, "No tienes permisos para invitar miembros");
     }
 
-    // Verify if already a member
-    const { data: existingUser } = await supabase
+    const emailLower = input.email.toLowerCase().trim();
+
+    // Verify if target email is already the owner or a member
+    const { data: existingUser } = await admin
       .from("usuarios")
       .select("id")
-      .eq("correo", input.email)
+      .eq("correo", emailLower)
       .maybeSingle();
 
     if (existingUser) {
-      const { data: existingMember } = await supabase
+      if (org.owner_id === existingUser.id) {
+        throw new ApiError(409, "El usuario ya es propietario de esta organización");
+      }
+
+      const { data: existingMember } = await admin
         .from("organization_members")
         .select("id")
         .eq("organization_id", orgId)
@@ -69,11 +75,11 @@ export class InvitationsService {
     }
 
     // Check if there's an active pending invitation
-    const { data: existingInvite } = await supabase
+    const { data: existingInvite } = await admin
       .from("organization_invitations")
       .select("id")
       .eq("organization_id", orgId)
-      .eq("email", input.email)
+      .eq("email", emailLower)
       .eq("status", "pending")
       .maybeSingle();
 
@@ -81,16 +87,16 @@ export class InvitationsService {
       throw new ApiError(409, "Ya hay una invitación pendiente para este correo");
     }
 
-    // Generate secure token
+    // Generate secure token (64 hex characters)
     const token = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
 
-    const { data: invitation, error: insertError } = await supabase
+    const { data: invitation, error: insertError } = await admin
       .from("organization_invitations")
       .insert({
         organization_id: orgId,
         created_by: usuario.id,
-        email: input.email,
+        email: emailLower,
         role: input.role,
         token,
         status: "pending",
@@ -100,6 +106,7 @@ export class InvitationsService {
       .single();
 
     if (insertError || !invitation) {
+      console.error("Error creating invitation in database:", insertError);
       throw new ApiError(500, "Error al crear la invitación");
     }
 
@@ -107,11 +114,12 @@ export class InvitationsService {
     if (process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const inviteLink = `${process.env.NEXT_PUBLIC_SITE_URL}/invitaciones/${token}`;
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        const inviteLink = `${baseUrl}/invitaciones/${token}`;
         
         await resend.emails.send({
           from: "BackRoom <onboarding@resend.dev>", // Cambiar a dominio verificado en prod
-          to: input.email,
+          to: emailLower,
           subject: "Has sido invitado a unirte a un BackRoom",
           html: `
             <div style="font-family: sans-serif; max-w-md; margin: auto; padding: 20px;">
@@ -133,9 +141,9 @@ export class InvitationsService {
   }
 
   static async getInvitationByToken(token: string) {
-    const supabase = await createClient();
+    const admin = createAdminClient();
 
-    const { data: invitation, error } = await supabase
+    const { data: invitation, error } = await admin
       .from("organization_invitations")
       .select("*, organizations(name, logo_url)")
       .eq("token", token)
@@ -151,7 +159,7 @@ export class InvitationsService {
 
     if (new Date(invitation.expires_at) < new Date()) {
       // Auto-update to expired
-      await supabase
+      await admin
         .from("organization_invitations")
         .update({ status: "expired" })
         .eq("id", invitation.id);
@@ -165,7 +173,7 @@ export class InvitationsService {
     const usuario = await getUsuarioInterno(authId);
     if (!usuario) throw new ApiError(404, "Perfil no encontrado");
 
-    const supabase = await createClient();
+    const admin = createAdminClient();
     const invitation = await this.getInvitationByToken(token); // Validates expiration and status
 
     if (invitation.email.toLowerCase() !== usuario.correo.toLowerCase()) {
@@ -174,15 +182,18 @@ export class InvitationsService {
 
     // Begin transaction-like operations
     // 1. Mark as accepted
-    const { error: updateError } = await supabase
+    const { error: updateError } = await admin
       .from("organization_invitations")
       .update({ status: "accepted", updated_at: new Date().toISOString() })
       .eq("id", invitation.id);
 
-    if (updateError) throw new ApiError(500, "No se pudo aceptar la invitación");
+    if (updateError) {
+      console.error("Error updating invitation status:", updateError);
+      throw new ApiError(500, "No se pudo aceptar la invitación");
+    }
 
     // 2. Insert into members
-    const { error: insertError } = await supabase
+    const { error: insertError } = await admin
       .from("organization_members")
       .insert({
         organization_id: invitation.organization_id,
@@ -194,6 +205,7 @@ export class InvitationsService {
 
     if (insertError) {
       if (insertError.code !== '23505') { // 23505 = unique_violation
+        console.error("Error inserting organization member:", insertError);
         throw new ApiError(500, "No se pudo vincular a la organización");
       }
     }
@@ -205,10 +217,10 @@ export class InvitationsService {
     const usuario = await getUsuarioInterno(authId);
     if (!usuario) throw new ApiError(404, "Perfil no encontrado");
 
-    const supabase = await createClient();
+    const admin = createAdminClient();
 
     // Verify user is owner or admin
-    const { data: org } = await supabase
+    const { data: org } = await admin
       .from("organizations")
       .select("owner_id")
       .eq("id", orgId)
@@ -219,7 +231,7 @@ export class InvitationsService {
     let hasPermission = org.owner_id === usuario.id;
 
     if (!hasPermission) {
-      const { data: member } = await supabase
+      const { data: member } = await admin
         .from("organization_members")
         .select("role")
         .eq("organization_id", orgId)
@@ -236,29 +248,34 @@ export class InvitationsService {
       throw new ApiError(403, "No tienes permisos para revocar invitaciones");
     }
 
-    const { error } = await supabase
+    const { error } = await admin
       .from("organization_invitations")
       .update({ status: "revoked", updated_at: new Date().toISOString() })
       .eq("id", invitationId)
       .eq("organization_id", orgId);
 
     if (error) {
+      console.error("Error revoking invitation:", error);
       throw new ApiError(500, "No se pudo revocar la invitación");
     }
   }
 
   static async listPendingInvitations(orgId: string) {
-    const supabase = await createClient();
+    const admin = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from("organization_invitations")
       .select("*")
       .eq("organization_id", orgId)
       .eq("status", "pending")
       .order("created_at", { ascending: false });
 
-    if (error) throw new ApiError(500, "Error al listar invitaciones");
+    if (error) {
+      console.error("Error listing pending invitations:", error);
+      throw new ApiError(500, "Error al listar invitaciones");
+    }
 
     return data;
   }
 }
+
