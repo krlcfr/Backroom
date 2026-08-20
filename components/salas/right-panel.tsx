@@ -1,6 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
+import RoomTree, { RoomNode } from "./room-tree"
 
 interface Backroom {
   id: string
@@ -15,9 +17,13 @@ interface Backroom {
 interface RightPanelProps {
   backroom: Backroom
   esPropietario: boolean
+  tree?: RoomNode[]
+  activeRoomId?: string
 }
 
-export default function RightPanel({ backroom, esPropietario }: RightPanelProps) {
+export default function RightPanel({ backroom, esPropietario, tree, activeRoomId }: RightPanelProps) {
+  const [isTreeExpanded, setIsTreeExpanded] = useState(true)
+
   const createdDate = new Date(backroom.createdAt).toLocaleDateString("es-AR", {
     year: "numeric",
     month: "short",
@@ -67,6 +73,28 @@ export default function RightPanel({ backroom, esPropietario }: RightPanelProps)
           </div>
         </div>
       </div>
+
+      {tree && tree.length > 0 && (
+        <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4">
+          <button
+            onClick={() => setIsTreeExpanded(!isTreeExpanded)}
+            className="flex items-center justify-between w-full text-left"
+          >
+            <h3 className="text-[12px] text-[#ccc3d8] uppercase tracking-wider font-medium">
+              Estructura de Salas
+            </h3>
+            <span className="material-symbols-outlined text-[16px] text-[#958da1] transition-transform">
+              {isTreeExpanded ? "expand_less" : "expand_more"}
+            </span>
+          </button>
+          
+          {isTreeExpanded && (
+            <div className="mt-3 border-t border-[#3f3f46] pt-2">
+              <RoomTree rooms={tree} backroomId={backroom.id} activeRoomId={activeRoomId} />
+            </div>
+          )}
+        </div>
+      )}
     </aside>
   )
 }

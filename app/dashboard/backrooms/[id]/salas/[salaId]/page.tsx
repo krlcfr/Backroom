@@ -43,6 +43,7 @@ export default function SalaPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [showCreateRoom, setShowCreateRoom] = useState(false)
+  const [isTreeExpanded, setIsTreeExpanded] = useState(true)
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -227,14 +228,6 @@ export default function SalaPage() {
 
   return (
     <div className="flex gap-6">
-      {tree.length > 0 && (
-        <aside className="w-64 shrink-0 hidden md:flex flex-col">
-          <nav className="flex-1 flex flex-col gap-1 overflow-y-auto">
-            <RoomTree rooms={tree} backroomId={id} activeRoomId={salaId} />
-          </nav>
-        </aside>
-      )}
-
       <main className="flex-1 flex flex-col gap-6 min-w-0">
         <div className="flex items-start justify-between">
           <div>
@@ -290,6 +283,30 @@ export default function SalaPage() {
         )}
       </main>
 
+      <aside className="w-80 flex flex-col gap-6 hidden md:flex">
+        {tree && tree.length > 0 && (
+          <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4">
+            <button
+              onClick={() => setIsTreeExpanded(!isTreeExpanded)}
+              className="flex items-center justify-between w-full text-left"
+            >
+              <h3 className="text-[12px] text-[#ccc3d8] uppercase tracking-wider font-medium">
+                Estructura de Salas
+              </h3>
+              <span className="material-symbols-outlined text-[16px] text-[#958da1] transition-transform">
+                {isTreeExpanded ? "expand_less" : "expand_more"}
+              </span>
+            </button>
+            
+            {isTreeExpanded && (
+              <div className="mt-3 border-t border-[#3f3f46] pt-2">
+                <RoomTree rooms={tree} backroomId={id} activeRoomId={salaId} />
+              </div>
+            )}
+          </div>
+        )}
+      </aside>
+
       {showCreateRoom && (
         <CreateRoomModal
           backroomId={id}
@@ -297,10 +314,23 @@ export default function SalaPage() {
           parentRoomName={sala.nombre}
           currentDepth={sala.depth}
           onClose={() => setShowCreateRoom(false)}
-          onCreated={(room) => {
+          onCreated={async (room) => {
             setShowCreateRoom(false)
             setChildren((prev) => [...prev, { ...room, descripcion: null, depth: sala.depth + 1, parent_id: salaId, backroom_id: id, created_at: new Date().toISOString() }])
-            setTree((prev) => [...prev, { id: room.id, nombre: room.nombre, depth: sala.depth + 1, children: [] }])
+            
+            // Refetch tree to get accurate nested structure
+            const rootRoomRes = await fetch(`/api/backrooms/${id}/rooms`)
+            if (rootRoomRes.ok) {
+              const roomsData = await rootRoomRes.json()
+              const rootRoom = roomsData.find((r: any) => r.depth === 0)
+              if (rootRoom) {
+                const treeRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
+                if (treeRes.ok) {
+                  const treeData = await treeRes.json()
+                  setTree(treeData.data.room)
+                }
+              }
+            }
           }}
         />
       )}

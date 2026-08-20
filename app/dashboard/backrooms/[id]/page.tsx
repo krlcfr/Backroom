@@ -198,14 +198,6 @@ export default function BackRoomPage() {
 
   return (
     <div className="flex gap-6">
-      {tree.length > 0 && (
-        <aside className="w-64 shrink-0 hidden md:flex flex-col">
-          <nav className="flex-1 flex flex-col gap-1 overflow-y-auto">
-            <RoomTree rooms={tree} backroomId={backroom.id} />
-          </nav>
-        </aside>
-      )}
-
       <main className="flex-1 flex flex-col gap-6 min-w-0">
         <div>
           <Breadcrumb items={[
@@ -225,15 +217,28 @@ export default function BackRoomPage() {
         />
       </main>
 
-      <RightPanel backroom={backroom} esPropietario={esPropietario} />
+      <RightPanel 
+        backroom={backroom} 
+        esPropietario={esPropietario} 
+        tree={tree}
+        activeRoomId={rooms.find(r => r.depth === 0)?.id}
+      />
 
       {showCreateRoom && (
         <CreateRoomModal
           backroomId={backroom.id}
           onClose={() => setShowCreateRoom(false)}
-          onCreated={(room) => {
+          onCreated={async (room) => {
             setShowCreateRoom(false)
             setRooms((prev) => [...prev, { ...room, descripcion: null, depth: 0, created_at: new Date().toISOString() }])
+            const rootRoom = rooms.find(r => r.depth === 0) || room
+            if (rootRoom) {
+              const treeRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
+              if (treeRes.ok) {
+                const treeData = await treeRes.json()
+                setTree(treeData.data.room)
+              }
+            }
           }}
         />
       )}
