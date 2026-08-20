@@ -63,6 +63,27 @@ export async function GET(request: NextRequest) {
     let esSuperadmin = existing?.es_superadmin ?? false;
 
     if (!perfilId) {
+      if (user.email) {
+        // Buscar si existe un perfil huérfano con este correo
+        const { data: existingByEmail } = await supabaseAdmin
+          .from("usuarios")
+          .select("id, es_superadmin")
+          .eq("correo", user.email)
+          .maybeSingle();
+
+        if (existingByEmail) {
+          await supabaseAdmin
+            .from("usuarios")
+            .update({ auth_id: user.id })
+            .eq("id", existingByEmail.id);
+
+          perfilId = existingByEmail.id;
+          esSuperadmin = existingByEmail.es_superadmin;
+        }
+      }
+    }
+
+    if (!perfilId) {
       // Username único: base + sufijo si colisiona
       const base = baseUsername(user);
       let username = base;

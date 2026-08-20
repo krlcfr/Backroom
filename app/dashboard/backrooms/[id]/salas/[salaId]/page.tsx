@@ -73,9 +73,9 @@ export default function SalaPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [salaRes, treeRes, backroomRes] = await Promise.all([
+        const [salaRes, roomsRes, backroomRes] = await Promise.all([
           fetch(`/api/rooms/${salaId}`),
-          fetch(`/api/rooms/${salaId}/tree`),
+          fetch(`/api/backrooms/${id}/rooms`),
           fetch(`/api/backrooms/${id}`),
         ])
 
@@ -92,19 +92,22 @@ export default function SalaPage() {
           }
         }
 
-        if (treeRes.ok) {
-          const treeData = await treeRes.json()
-          const treeNodes = treeData.data.room as SalaNode[]
-          setTree(treeNodes)
-          const flatChildren: Sala[] = []
-          function collect(nodes: SalaNode[]) {
-            for (const n of nodes) {
-              flatChildren.push({ id: n.id, nombre: n.nombre, depth: n.depth, descripcion: null, parent_id: null, backroom_id: id, created_at: "" })
-              if (n.children) collect(n.children)
+        if (roomsRes.ok) {
+          const roomsData = await roomsRes.json()
+          const rootRoom = roomsData.find((r: any) => r.depth === 0)
+          
+          if (rootRoom) {
+            const treeRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
+            if (treeRes.ok) {
+              const treeData = await treeRes.json()
+              const treeNodes = treeData.data.room as SalaNode[]
+              setTree(treeNodes)
+
+              // Reconstruir children directos de esta sala a partir del árbol plano
+              const thisRoomChildren = roomsData.filter((r: any) => r.parent_id === salaId)
+              setChildren(thisRoomChildren)
             }
           }
-          if (treeNodes.length > 0) collect(treeNodes)
-          setChildren(flatChildren)
         }
 
         if (backroomRes.ok) {

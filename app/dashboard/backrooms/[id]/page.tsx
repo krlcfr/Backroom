@@ -84,6 +84,16 @@ export default function BackRoomPage() {
         if (roomsRes.ok) {
           const roomsData = await roomsRes.json()
           setRooms(roomsData)
+
+          // Fetch the full tree using the root room (depth === 0)
+          const rootRoom = roomsData.find((r: any) => r.depth === 0)
+          if (rootRoom) {
+            const treeRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
+            if (treeRes.ok) {
+              const treeData = await treeRes.json()
+              setTree(treeData.data.room)
+            }
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido")
