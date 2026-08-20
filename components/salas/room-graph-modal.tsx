@@ -21,28 +21,53 @@ interface RoomGraphModalProps {
   backroomName: string
   activeRoomId?: string
   onClose: () => void
+  auditMode?: boolean
+  userPermissions?: any[]
+  onNodeAuditClick?: (roomId: string) => void
 }
 
 // Custom Node component to show icon and name
 function CustomRoomNode({ data }: { data: any }) {
   const isRoot = data.isRoot;
+  
+  // Lógica de colores para modo normal vs auditoría
+  let borderColor = data.hasAccess ? "border-[#7c3aed]" : "border-[#4a4455]";
+  let textColor = data.hasAccess ? "text-[#e2e2e2]" : "text-[#958da1]";
+  let shadow = "shadow-[0_0_20px_rgba(124,58,237,0.15)] group-hover:shadow-[0_0_30px_rgba(124,58,237,0.3)]";
+  let icon = data.icono || "grid_view";
+
+  if (!data.hasAccess) {
+    icon = "lock";
+  }
+
+  if (data.auditMode) {
+    if (data.auditAccess) {
+      borderColor = "border-[#10b981]"; // Verde si tiene acceso
+      textColor = "text-[#10b981]";
+      shadow = "shadow-[0_0_20px_rgba(16,185,129,0.15)] group-hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]";
+    } else {
+      borderColor = "border-[#ef4444]"; // Rojo si no tiene acceso
+      textColor = "text-[#ef4444]";
+      shadow = "shadow-[0_0_20px_rgba(239,68,68,0.15)] group-hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]";
+      icon = "block";
+    }
+  } else if (data.isActive) {
+    borderColor = "border-[#a78bfa]";
+    textColor = "text-[#a78bfa]";
+    shadow = "shadow-[0_0_25px_rgba(167,139,250,0.6)]";
+  }
+
   return (
     <div className="flex flex-col items-center justify-center relative cursor-pointer group">
       <Handle type="target" position={Position.Top} className="opacity-0 !top-1/2 !left-1/2 !transform !-translate-x-1/2 !-translate-y-1/2" />
       
       <div 
-        className={`flex items-center justify-center rounded-full border-2 bg-[#222225] transition-all group-hover:scale-110 ${
-          data.isActive
-            ? "border-[#a78bfa] shadow-[0_0_25px_rgba(167,139,250,0.6)]"
-            : "shadow-[0_0_20px_rgba(124,58,237,0.15)] group-hover:shadow-[0_0_30px_rgba(124,58,237,0.3)]"
-        } ${
+        className={`flex items-center justify-center rounded-full border-2 bg-[#222225] transition-all group-hover:scale-110 ${borderColor} ${shadow} ${
           isRoot ? "w-[72px] h-[72px]" : "w-14 h-14"
-        } ${
-          data.hasAccess ? (data.isActive ? "text-[#a78bfa]" : "border-[#7c3aed] text-[#e2e2e2]") : "border-[#4a4455] text-[#958da1]"
-        }`}
+        } ${textColor}`}
       >
         <span className={`material-symbols-outlined ${isRoot ? "text-[32px]" : "text-[24px]"}`}>
-          {!data.hasAccess ? "lock" : data.icono || "grid_view"}
+          {icon}
         </span>
       </div>
 
@@ -61,7 +86,7 @@ const nodeTypes = {
   room: CustomRoomNode,
 }
 
-export default function RoomGraphModal({ tree, backroomId, backroomName, activeRoomId, onClose }: RoomGraphModalProps) {
+export default function RoomGraphModal({ tree, backroomId, backroomName, activeRoomId, onClose, auditMode, userPermissions, onNodeAuditClick }: RoomGraphModalProps) {
   const router = useRouter()
 
   // Convert tree into nodes and edges using a radial layout
@@ -109,6 +134,20 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
         y: Math.sin(angle) * radius,
       }
 
+      // Chequeo de permisos para auditMode
+      let auditAccess = true; // Por defecto asumimos que tiene acceso si es admin, pero veamos los permisos
+      if (auditMode && userPermissions) {
+        // En auditoría, el root node (backroom) siempre es accesible visualmente
+        if (depth === 0) {
+          auditAccess = true;
+        } else {
+          const perm = userPermissions.find((p: any) => p.sala_id === node.id);
+          // O si no hay fila de permisos pero el usuario es admin o contribuir, depende de la lógica.
+          // Para esta visualización, marcaremos en verde si `salas_acceder` es true explícitamente.
+          auditAccess = perm?.salas_acceder === true;
+        }
+      }
+
       nodes.push({
         id: node.id,
         type: "room",
@@ -120,6 +159,8 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
           roomId: node.id,
           isRoot: depth === 0,
           isActive: node.id === activeRoomId || (depth === 0 && node.id === backroomId),
+          auditMode,
+          auditAccess,
         },
       })
 
@@ -156,12 +197,18 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
   const [nodes, , onNodesChange] = useNodesState(initialNodes)
   const [edges, , onEdgesChange] = useEdgesState(initialEdges)
 
-  const onNodeClick = useCallback((event: any, node: any) => {
-    if (node.data.hasAccess) {
+  const onNodeClickCallback = useCallback((event: any, node: any) => {
+    if (auditMode && onNodeAuditClick) {
+      // En modo auditoría, hacer click en la Backroom raíz (depth 0) puede que no tenga sentido configurarle permisos
+      // porque es la backroom. Pero por si acaso, lo habilitamos solo si no es root, o lo controlamos en el padre.
+      if (!node.data.isRoot) {
+        onNodeAuditClick(node.data.roomId)
+      }
+    } else if (node.data.hasAccess) {
       onClose()
       router.push(`/dashboard/backrooms/${backroomId}/salas/${node.data.roomId}`)
     }
-  }, [router, backroomId, onClose])
+  }, [router, backroomId, onClose, auditMode, onNodeAuditClick])
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#18181b]/90 backdrop-blur-sm">
@@ -189,7 +236,7 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
-            onNodeClick={onNodeClick}
+            onNodeClick={onNodeClickCallback}
             nodeTypes={nodeTypes}
             fitView
             className="bg-[#1e2020]"

@@ -5,6 +5,16 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Breadcrumb from "@/components/ui/breadcrumb"
 import { createBrowserClient } from "@supabase/ssr"
+import RoomGraphModal from "@/components/salas/room-graph-modal"
+
+interface RoomNode {
+  id: string;
+  nombre: string;
+  depth: number;
+  icono?: string;
+  hasAccess?: boolean;
+  children?: RoomNode[];
+}
 
 interface Member {
   usuario_id: string
@@ -33,6 +43,12 @@ export default function MiembrosPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  
+  const [auditUserId, setAuditUserId] = useState<string | null>(null)
+  const [auditPermissions, setAuditPermissions] = useState<any[]>([])
+  const [auditTree, setAuditTree] = useState<RoomNode[]>([])
+  const [isAuditing, setIsAuditing] = useState(false)
+  const [auditLoading, setAuditLoading] = useState(false)
   
   useEffect(() => {
     async function loadData() {
@@ -101,6 +117,48 @@ export default function MiembrosPage() {
     } catch (error) {
       console.error(error)
     }
+  }
+
+  const openAudit = async (userId: string) => {
+    setAuditLoading(true)
+    try {
+      const [roomsRes, permsRes] = await Promise.all([
+        fetch(`/api/backrooms/${id}/rooms`),
+        fetch(`/api/backrooms/${id}/members/${userId}/permissions`)
+      ])
+      
+      let treeData: RoomNode[] = []
+      if (roomsRes.ok) {
+        const roomsData = await roomsRes.json()
+        const rootRoom = roomsData.find((r: any) => r.depth === 0)
+        if (rootRoom) {
+          const tRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
+          if (tRes.ok) {
+            const t = await tRes.json()
+            treeData = t.data.room
+          }
+        }
+      }
+      
+      if (permsRes.ok) {
+        const pData = await permsRes.json()
+        setAuditPermissions(pData.data)
+      }
+      
+      setAuditTree(treeData)
+      setAuditUserId(userId)
+      setIsAuditing(true)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setAuditLoading(false)
+    }
+  }
+
+  const handleNodeAuditClick = (roomId: string) => {
+    // Fase 4 opcional: Abrir panel para editar los permisos específicos de este usuario en esta sala directamente.
+    // Por ahora redirigiremos a la página de la matriz de la sala.
+    router.push(`/dashboard/backrooms/${id}/salas/${roomId}/permisos`)
   }
 
   if (loading) {
@@ -195,8 +253,9 @@ export default function MiembrosPage() {
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button 
-                      onClick={() => alert("Pronto se abrirá el flujograma de acceso para este usuario.")}
-                      className="flex items-center gap-1 bg-[#333535] hover:bg-[#4a4455] text-[#ccc3d8] px-3 py-1.5 rounded-lg transition-colors text-[12px] font-medium border border-[#3f3f46]"
+                      onClick={() => openAudit(member.usuario_id)}
+                      disabled={auditLoading}
+                      className="flex items-center gap-1 bg-[#333535] hover:bg-[#4a4455] text-[#ccc3d8] px-3 py-1.5 rounded-lg transition-colors text-[12px] font-medium border border-[#3f3f46] disabled:opacity-50"
                       title="Ver flujograma de acceso"
                     >
                       <span className="material-symbols-outlined text-[16px]">account_tree</span>
@@ -226,6 +285,18 @@ export default function MiembrosPage() {
           </tbody>
         </table>
       </div>
+
+      {isAuditing && (
+        <RoomGraphModal
+          tree={auditTree}
+          backroomId={backroom.id}
+          backroomName={backroom.name}
+          onClose={() => setIsAuditing(false)}
+          auditMode={true}
+          userPermissions={auditPermissions}
+          onNodeAuditClick={handleNodeAuditClick}
+        />
+      )}
     </div>
   )
 }
