@@ -34,6 +34,7 @@ export const createBackroomSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(2000).optional().nullable(),
   coverUrl: z.string().url().optional().nullable(),
+  icono: z.string().optional(),
 });
 
 export type CreateBackroomInput = z.infer<typeof createBackroomSchema>;
@@ -42,6 +43,7 @@ export const updateBackroomSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional().nullable(),
   coverUrl: z.string().url().optional().nullable(),
+  icono: z.string().optional(),
 });
 
 export type UpdateBackroomInput = z.infer<typeof updateBackroomSchema>;

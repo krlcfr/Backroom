@@ -11,6 +11,7 @@ const createRoomSchema = z.object({
   parent_id: z.string().uuid().optional().nullable(),
   nombre: z.string().min(1).max(200),
   descripcion: z.string().max(2000).optional(),
+  icono: z.string().optional(),
 });
 
 // POST /api/rooms — BE-33
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
         descripcion: input.descripcion ?? null,
         parent_id: input.parent_id ?? null,
         depth,
+        icono: input.icono ?? "grid_view",
       })
       .select()
       .single();

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import IconPicker from "@/components/ui/icon-picker"
 
 interface CreateRoomModalProps {
   backroomId: string
@@ -21,6 +22,7 @@ export default function CreateRoomModal({
 }: CreateRoomModalProps) {
   const [nombre, setNombre] = useState("")
   const [descripcion, setDescripcion] = useState("")
+  const [icono, setIcono] = useState("grid_view")
   const [heredarPermisos, setHeredarPermisos] = useState(true)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -55,6 +57,7 @@ export default function CreateRoomModal({
           parent_id: parentRoomId ?? null,
           nombre: trimmed,
           descripcion: descripcion.trim() || undefined,
+          icono: icono,
         }),
       })
 
@@ -100,19 +103,25 @@ export default function CreateRoomModal({
           </div>
 
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[12px] font-medium text-[#ccc3d8]">
-                Nombre de la sala <span className="text-[#ffb4ab]">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej. Arquitectura Frontend"
-                className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 placeholder:text-[#ccc3d8]/40 transition-all"
-                disabled={loading}
-              />
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-1.5 shrink-0">
+                <label className="text-[12px] font-medium text-[#ccc3d8]">Icono</label>
+                <IconPicker value={icono} onChange={setIcono} />
+              </div>
+              <div className="flex flex-col gap-1.5 flex-1">
+                <label className="text-[12px] font-medium text-[#ccc3d8]">
+                  Nombre de la sala <span className="text-[#ffb4ab]">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  placeholder="Ej. Arquitectura Frontend"
+                  className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 placeholder:text-[#ccc3d8]/40 transition-all"
+                  disabled={loading}
+                />
+              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
