@@ -20,10 +20,9 @@ export async function GET(
 
     const supabase = await createClient();
 
-    // TODO: ajustar join cuando la tabla `usuarios` tenga más campos (avatar, email)
     const { data, error } = await supabase
       .from("backroom_miembros")
-      .select("usuario_id, permiso, asignado_por, created_at, usuarios(username)")
+      .select("usuario_id, permiso, asignado_por, created_at, usuarios(id, username, correo, nombre_completo)")
       .eq("backroom_id", backroomId);
 
     if (error) throw new ApiError(500, "No se pudieron obtener los miembros.");

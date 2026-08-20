@@ -240,31 +240,41 @@ export default function SalaPage() {
             )}
           </div>
 
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#333535] text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors"
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/dashboard/backrooms/${id}/salas/${salaId}/permisos`}
+              className="flex items-center gap-2 bg-[#27272a] hover:bg-[#333535] border border-[#4a4455] text-[#ccc3d8] hover:text-[#e2e2e2] px-3 py-1.5 rounded-lg transition-colors text-[13px] font-medium"
             >
-              <span className="material-symbols-outlined text-[20px]">more_vert</span>
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-44 bg-[#27272a] border border-[#4a4455] rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.4)] z-50 py-1">
-                <button
-                  onClick={openEdit}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ccc3d8] hover:bg-[#333535] hover:text-[#e2e2e2] transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[16px]">edit</span>
-                  Editar
-                </button>
-                <button
-                  onClick={() => { setMenuOpen(false); setConfirmDelete(true) }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ffb4ab] hover:bg-[#ffb4ab]/10 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[16px]">delete</span>
-                  Eliminar
-                </button>
-              </div>
-            )}
+              <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+              Permisos
+            </Link>
+
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#333535] text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors"
+              >
+                <span className="material-symbols-outlined text-[20px]">more_vert</span>
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-44 bg-[#27272a] border border-[#4a4455] rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.4)] z-50 py-1">
+                  <button
+                    onClick={openEdit}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ccc3d8] hover:bg-[#333535] hover:text-[#e2e2e2] transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">edit</span>
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => { setMenuOpen(false); setConfirmDelete(true) }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ffb4ab] hover:bg-[#ffb4ab]/10 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                    Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
