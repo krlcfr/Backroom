@@ -93,12 +93,12 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
           const size = formatSize(res.tamano_bytes)
 
           return (
-            <div key={res.id} className="bg-[#1e2020] border border-[#3f3f46] rounded-xl p-4 flex gap-4 hover:border-[#a78bfa]/50 transition-colors group">
+            <div key={res.id} className="bg-[#1e2020] border border-[#3f3f46] rounded-xl p-4 flex items-start gap-4 hover:border-[#a78bfa]/50 transition-colors group">
               <div 
-                className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 cursor-pointer ${bg} ${color}`}
+                className={`mt-0.5 w-10 h-10 rounded-full flex items-center justify-center shrink-0 cursor-pointer ${bg} ${color}`}
                 onClick={() => handleResourceClick(res)}
               >
-                <span className="material-symbols-outlined text-[24px]">{icon}</span>
+                <span className="material-symbols-outlined text-[20px]">{icon}</span>
               </div>
               
               <div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -109,10 +109,10 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
                 >
                   {res.nombre}
                 </h4>
-                <div className="flex items-center gap-2 mt-1 text-[11px] text-[#958da1]">
+                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-1 text-[11px] text-[#958da1]">
                   <span className="truncate">{res.usuarios?.nombre_completo}</span>
                   <span>•</span>
-                  <span>{formatDistanceToNow(new Date(res.created_at), { addSuffix: true, locale: es })}</span>
+                  <span>{formatDistanceToNow(new Date(res.created_at.endsWith('Z') ? res.created_at : `${res.created_at}Z`), { addSuffix: true, locale: es })}</span>
                   {size && (
                     <>
                       <span>•</span>
