@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
-import { checkPermission } from "@/lib/auth/rbac";
+import { checkPermission, getUsuarioInterno } from "@/lib/auth/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
@@ -74,6 +74,9 @@ export async function POST(
 
     if (!url || !tipo || !nombre) throw new ApiError(400, "Faltan datos obligatorios");
 
+    const usuario = await getUsuarioInterno(user.id);
+    if (!usuario) throw new ApiError(401, "Usuario interno no encontrado");
+
     const supabase = await createClient();
     const { data: sala, error: salaError } = await supabase
       .from("salas")
@@ -92,7 +95,7 @@ export async function POST(
       .from("recursos")
       .insert([{
         sala_id: roomId,
-        subido_por: user.id,
+        subido_por: usuario.id,
         url,
         tipo,
         nombre
