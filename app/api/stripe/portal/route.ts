@@ -17,6 +17,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
+    // Get the internal user profile to check ownership
+    const { getUsuarioInterno } = await import("@/lib/auth/rbac");
+    const internalUser = await getUsuarioInterno(user.id);
+    if (!internalUser) {
+      throw new ApiError(404, "Perfil de usuario no encontrado");
+    }
+
     // Verify user is owner of the organization
     const { data: org } = await supabase
       .from("organizations")
@@ -28,7 +35,7 @@ export async function POST(request: NextRequest) {
       throw new ApiError(404, "Organización no encontrada");
     }
 
-    if (org.owner_id !== user.id) {
+    if (org.owner_id !== internalUser.id) {
       throw new ApiError(403, "Solo el propietario puede gestionar los planes de pago");
     }
 
