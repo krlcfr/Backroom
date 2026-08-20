@@ -22,7 +22,7 @@ export async function GET(
 
     const { data, error } = await supabase
       .from("backroom_miembros")
-      .select("usuario_id, permiso, asignado_por, created_at, usuarios(id, username, correo, nombre_completo)")
+      .select("usuario_id, permiso, asignado_por, created_at, usuarios!backroom_miembros_usuario_id_fkey(id, username, correo, nombre_completo)")
       .eq("backroom_id", backroomId);
 
     if (error) throw new ApiError(500, "No se pudieron obtener los miembros.");
