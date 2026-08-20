@@ -26,7 +26,7 @@ export async function GET(
       .single();
 
     if (!rootSala) throw new ApiError(404, "Sala no encontrada.");
-    const isOwner = rootSala.backrooms?.propietario_id === usuario.id;
+    const isOwner = (rootSala.backrooms as any)?.propietario_id === usuario.id;
 
     // Traer todas las salas del mismo backroom
     const { data: allSalas, error } = await supabase
@@ -78,22 +78,8 @@ export async function GET(
         }));
     }
 
-    const tree = buildTree(allSalas ?? [], roomId);
-
-    // Si también se solicitó el árbol desde null (la raíz de la estructura de salas) en vez de roomId, 
-    // pero el endpoint se llama con [roomId], la sala actual es la raíz de este subárbol.
-    // Vamos a agregar la info de hasAccess a la propia sala raíz.
-    const rootNode = allSalas?.find(s => s.id === roomId);
-    let result = tree;
-    
-    // Si queremos retornar un solo nodo raíz con sus hijos:
-    if (rootNode) {
-      result = [{
-        ...rootNode,
-        hasAccess: checkAccess(rootNode.id),
-        children: tree
-      }];
-    }
+    const tree = buildTree(allSalas ?? [], null);
+    const result = tree;
 
     return NextResponse.json({ data: { room: result } }, { status: 200 });
   } catch (error) {

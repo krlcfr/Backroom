@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { Permiso, CodigoPermiso } from "@/types/database.types";
+export type Permiso = "contribuir" | "solo_visualizar" | "admin";
+export type CodigoPermiso = "salas.crear" | "salas.editar" | "salas.eliminar" | "salas.ver" | "salas.acceder" | "miembros.gestionar" | "recursos.subir" | "archivos.subir" | "recursos.eliminar" | "configuracion.editar";
 
 export async function getUsuarioInterno(authId: string) {
   const supabase = createAdminClient();

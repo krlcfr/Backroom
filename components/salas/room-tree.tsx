@@ -34,7 +34,7 @@ function TreeNode({
   const isActive = node.id === activeRoomId
   const hasAccess = node.hasAccess !== false
 
-  const ItemWrapper = hasAccess ? Link : "div"
+  const ItemWrapper = (hasAccess ? Link : "div") as any
   const wrapperProps = hasAccess
     ? { href: `/dashboard/backrooms/${backroomId}/salas/${node.id}` }
     : {}
@@ -71,7 +71,7 @@ function TreeNode({
         <ItemWrapper
           {...wrapperProps}
           className="flex items-center gap-2 flex-1 min-w-0"
-          onClick={(e) => {
+          onClick={(e: any) => {
             if (!hasAccess) e.preventDefault()
           }}
         >

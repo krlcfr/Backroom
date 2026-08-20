@@ -221,7 +221,7 @@ export default function BackRoomPage() {
         backroom={backroom} 
         esPropietario={esPropietario} 
         tree={tree}
-        activeRoomId={rooms.find(r => r.depth === 0)?.id}
+        activeRoomId={backroom.id}
       />
 
       {showCreateRoom && (

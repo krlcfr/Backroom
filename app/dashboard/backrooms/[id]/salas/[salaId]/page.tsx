@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import RoomTree from "@/components/salas/room-tree"
+import RoomGraphModal from "@/components/salas/room-graph-modal"
 import SubRoomsGrid from "@/components/salas/sub-rooms-grid"
 import CreateRoomModal from "@/components/modals/create-room-modal"
 import Breadcrumb from "@/components/ui/breadcrumb"
@@ -45,6 +46,7 @@ export default function SalaPage() {
   const [showCreateRoom, setShowCreateRoom] = useState(false)
   const [isTreeExpanded, setIsTreeExpanded] = useState(true)
 
+  const [showGraph, setShowGraph] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editNombre, setEditNombre] = useState("")
@@ -286,17 +288,28 @@ export default function SalaPage() {
       <aside className="w-80 flex flex-col gap-6 hidden md:flex">
         {tree && tree.length > 0 && (
           <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4">
-            <button
+            <div
               onClick={() => setIsTreeExpanded(!isTreeExpanded)}
-              className="flex items-center justify-between w-full text-left"
+              className="flex items-center justify-between w-full text-left cursor-pointer"
             >
-              <h3 className="text-[12px] text-[#ccc3d8] uppercase tracking-wider font-medium">
+              <h3 className="text-[12px] text-[#ccc3d8] uppercase tracking-wider font-medium flex items-center gap-2">
                 Estructura de Salas
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowGraph(true)
+                  }}
+                  className="flex items-center gap-1 text-[10px] text-[#a78bfa] hover:text-[#d2bbff] transition-colors bg-[#333535] px-1.5 py-0.5 rounded"
+                  title="Ver mapa visual"
+                >
+                  <span className="material-symbols-outlined text-[14px]">account_tree</span>
+                  Mapa
+                </button>
               </h3>
               <span className="material-symbols-outlined text-[16px] text-[#958da1] transition-transform">
                 {isTreeExpanded ? "expand_less" : "expand_more"}
               </span>
-            </button>
+            </div>
             
             {isTreeExpanded && (
               <div className="mt-3 border-t border-[#3f3f46] pt-2">
@@ -306,6 +319,16 @@ export default function SalaPage() {
           </div>
         )}
       </aside>
+
+      {showGraph && tree && backroom && (
+        <RoomGraphModal
+          tree={tree}
+          backroomId={backroom.id}
+          backroomName={backroom.name}
+          activeRoomId={salaId}
+          onClose={() => setShowGraph(false)}
+        />
+      )}
 
       {showCreateRoom && (
         <CreateRoomModal
