@@ -4,6 +4,7 @@ import { getUsuarioInterno } from "@/lib/auth/rbac"
 import DashboardSidebar from "@/components/layout/dashboard-sidebar"
 import DashboardHeader from "@/components/layout/dashboard-header"
 import SessionTimeout from "@/components/session-timeout"
+import { UpsellModal } from "@/components/modals/upsell-modal"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -47,6 +48,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {children}
         </main>
       </div>
+      <UpsellModal orgId={org?.id} />
     </div>
   )
 }
