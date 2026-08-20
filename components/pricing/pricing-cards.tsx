@@ -23,11 +23,15 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
         body: JSON.stringify({ organizationId, priceId }),
       });
       const data = await res.json();
-      if (data.url) {
+      if (res.ok && data.url) {
         window.location.href = data.url;
+      } else {
+        alert("Error al iniciar checkout: " + (data.error || "Desconocido"));
+        setLoading(false);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert("Error al iniciar checkout: " + err.message);
       setLoading(false);
     }
   };

@@ -33,19 +33,12 @@ export async function POST(request: NextRequest) {
       throw new ApiError(403, "Solo el propietario puede gestionar los planes de pago");
     }
 
-    // Get the user's email from users table
-    const { data: userData } = await supabase
-      .from("usuarios")
-      .select("email")
-      .eq("id", user.id)
-      .single();
-
     // Create or retrieve Stripe customer
     let customerId = org.stripe_customer_id;
 
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: userData?.email || undefined,
+        email: user.email || undefined,
         name: org.name,
         metadata: {
           organizationId: org.id,
