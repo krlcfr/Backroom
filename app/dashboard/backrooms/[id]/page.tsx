@@ -9,6 +9,8 @@ import SubRoomsGrid from "@/components/salas/sub-rooms-grid"
 import RightPanel from "@/components/salas/right-panel"
 import CreateRoomModal from "@/components/modals/create-room-modal"
 import Breadcrumb from "@/components/ui/breadcrumb"
+import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
+import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 
 interface Backroom {
   id: string
@@ -57,6 +59,13 @@ export default function BackRoomPage() {
 
   const [showCreateRoom, setShowCreateRoom] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  
+  const [resources, setResources] = useState<Resource[]>([])
+  const [canUpload, setCanUpload] = useState(false)
+  const [canDeleteRes, setCanDeleteRes] = useState(false)
+  const [showAddResource, setShowAddResource] = useState(false)
+  const [rootRoomId, setRootRoomId] = useState<string | null>(null)
+
   const esPropietario = currentUserId !== null && backroom?.ownerId === currentUserId
 
   useEffect(() => {
@@ -88,10 +97,22 @@ export default function BackRoomPage() {
           // Fetch the full tree using the root room (depth === 0)
           const rootRoom = roomsData.find((r: any) => r.depth === 0)
           if (rootRoom) {
-            const treeRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
+            setRootRoomId(rootRoom.id)
+            const [treeRes, resourcesRes] = await Promise.all([
+              fetch(`/api/rooms/${rootRoom.id}/tree`),
+              fetch(`/api/rooms/${rootRoom.id}/resources`)
+            ])
+            
             if (treeRes.ok) {
               const treeData = await treeRes.json()
               setTree(treeData.data.room)
+            }
+
+            if (resourcesRes.ok) {
+              const resData = await resourcesRes.json()
+              setResources(resData.data)
+              setCanUpload(resData.canUpload)
+              setCanDeleteRes(resData.canDelete)
             }
           }
         }
@@ -103,6 +124,21 @@ export default function BackRoomPage() {
     }
     if (id) fetchData()
   }, [id])
+
+  const reloadResources = async () => {
+    if (!rootRoomId) return
+    try {
+      const resourcesRes = await fetch(`/api/rooms/${rootRoomId}/resources`)
+      if (resourcesRes.ok) {
+        const resData = await resourcesRes.json()
+        setResources(resData.data)
+        setCanUpload(resData.canUpload)
+        setCanDeleteRes(resData.canDelete)
+      }
+    } catch (e) {
+      console.error("Error reloading resources", e)
+    }
+  }
 
   async function handleDelete() {
     if (!id) return
@@ -215,6 +251,35 @@ export default function BackRoomPage() {
           backroomId={backroom.id}
           onCreateClick={() => setShowCreateRoom(true)}
         />
+
+        <hr className="border-[#3f3f46] my-4" />
+
+        {rootRoomId && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Recursos Generales</h2>
+                <p className="text-[#958da1] text-[13px] mt-1">Archivos y enlaces compartidos en la Backroom principal.</p>
+              </div>
+              {canUpload && (
+                <button
+                  onClick={() => setShowAddResource(true)}
+                  className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[13px] font-medium"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add</span>
+                  Añadir Recurso
+                </button>
+              )}
+            </div>
+
+            <ResourcesGrid 
+              resources={resources}
+              roomId={rootRoomId}
+              canDelete={canDeleteRes}
+              onResourceDeleted={reloadResources}
+            />
+          </div>
+        )}
       </main>
 
       <RightPanel 
@@ -337,6 +402,17 @@ export default function BackRoomPage() {
             </div>
           </div>
         </div>
+      )}
+      
+      {showAddResource && rootRoomId && (
+        <AddResourceModal
+          roomId={rootRoomId}
+          onClose={() => setShowAddResource(false)}
+          onSuccess={() => {
+            setShowAddResource(false)
+            reloadResources()
+          }}
+        />
       )}
     </div>
   )

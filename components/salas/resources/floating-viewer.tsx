@@ -57,9 +57,23 @@ export default function FloatingViewer({ url, tipo, nombre, onClose }: FloatingV
       )
     }
 
-    // Fallback genérico para iframes (podría ser un PDF si se firma la url para renderizarlo directo)
+    if (tipo === "pdf") {
+      return (
+        <iframe src={url} className="w-full h-full rounded-b-xl bg-white border-0" title={nombre}></iframe>
+      )
+    }
+
+    // Si es un documento de office (docx, xlsx, pptx) u otro, intentar con Google Docs Viewer
+    if (tipo === "archivo" && (nombre.endsWith(".doc") || nombre.endsWith(".docx") || nombre.endsWith(".xls") || nombre.endsWith(".xlsx") || nombre.endsWith(".ppt") || nombre.endsWith(".pptx"))) {
+      const gdocsUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+      return (
+        <iframe src={gdocsUrl} className="w-full h-full rounded-b-xl bg-white border-0" title={nombre}></iframe>
+      )
+    }
+
+    // Fallback genérico para iframes (enlaces externos)
     return (
-      <iframe src={url} className="w-full h-full rounded-b-xl bg-white"></iframe>
+      <iframe src={url} className="w-full h-full rounded-b-xl bg-white border-0" title={nombre}></iframe>
     )
   }
 

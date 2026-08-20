@@ -45,13 +45,10 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
   }
 
   const handleResourceClick = (resource: Resource) => {
-    if (resource.tipo === "youtube" || resource.tipo === "video" || resource.tipo === "image") {
+    if (resource.tipo === "youtube" || resource.tipo === "video" || resource.tipo === "image" || resource.tipo === "pdf" || resource.tipo === "archivo") {
       setActiveResource(resource)
-    } else if (resource.signedUrl) {
-      // Es un archivo, abrirlo en nueva pestaña
-      window.open(resource.signedUrl, "_blank")
     } else {
-      // Es un link normal
+      // Es un link normal externo que no queremos empotrar
       window.open(resource.url, "_blank")
     }
   }

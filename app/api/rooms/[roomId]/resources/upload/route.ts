@@ -82,7 +82,7 @@ export async function POST(
     if (dbError) {
       // Intentar rollback del storage
       await supabaseAdmin.storage.from("recursos").remove([fileName]);
-      throw new ApiError(500, "Error al registrar el archivo en la base de datos");
+      throw new ApiError(500, `Error al registrar el archivo en la base de datos: ${dbError.message}`);
     }
 
     return NextResponse.json({ data }, { status: 201 });
