@@ -279,7 +279,8 @@ export default function MiembrosPage() {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
             
             {members.length === 0 && (
               <tr>

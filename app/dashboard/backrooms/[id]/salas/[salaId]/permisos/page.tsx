@@ -168,7 +168,7 @@ export default function PermisosSalaPage() {
   ]
 
   return (
-    <div className="min-h-screen p-8 max-w-7xl mx-auto flex flex-col gap-6">
+    <div className="min-h-screen p-4 md:p-8 w-full max-w-7xl mx-auto flex flex-col gap-6 overflow-x-hidden">
       <Breadcrumb
         items={[
           { label: "Dashboard", href: "/dashboard" },
@@ -178,7 +178,7 @@ export default function PermisosSalaPage() {
         ]}
       />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between w-full">
         <div>
           <h1 className="text-[28px] font-bold text-[#e2e2e2] flex items-center gap-3">
             <span className="material-symbols-outlined text-[#a78bfa] text-3xl">admin_panel_settings</span>
@@ -188,7 +188,7 @@ export default function PermisosSalaPage() {
         </div>
       </div>
 
-      <div className="bg-[#1e2020] border border-[#3f3f46] rounded-xl overflow-x-auto mt-4">
+      <div className="bg-[#1e2020] border border-[#3f3f46] rounded-xl overflow-x-auto mt-4 w-full">
         <table className="w-full text-left border-collapse min-w-max">
           <thead>
             <tr className="bg-[#27272a] border-b border-[#3f3f46] text-[#958da1] text-[11px] uppercase tracking-wider">
