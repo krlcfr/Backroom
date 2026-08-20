@@ -99,6 +99,12 @@ export default function DashboardContent({ backrooms: initialBackrooms, org, cur
 
       if (!res.ok) {
         const err = await res.json()
+        if (res.status === 403 && err.error && err.error.includes("LÍMITE_PLAN")) {
+          window.dispatchEvent(new CustomEvent("show-upsell", { detail: { message: err.error } }))
+          setShowCreateModal(false)
+          setLoading(false)
+          return
+        }
         throw new Error(err.error || "No se pudo crear la BackRoom")
       }
 

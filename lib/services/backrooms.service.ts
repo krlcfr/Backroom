@@ -37,6 +37,32 @@ export class BackroomsService {
     const supabase = await createClient();
     const adminSupabase = createAdminClient();
 
+    // -- PAYMENT PLAN LIMIT ENFORCEMENT --
+    // Obtener la organización del usuario
+    const { OrganizationsService } = await import("@/lib/services/organizations.service");
+    const org = await OrganizationsService.getOrgForUser(authId);
+    
+    if (org) {
+      const { data: orgData } = await adminSupabase
+        .from("organizations")
+        .select("plan")
+        .eq("id", org.id)
+        .single();
+        
+      if (orgData?.plan === "free") {
+        // Contar cuántos backrooms tiene el propietario de esta organización
+        const { count } = await adminSupabase
+          .from("backrooms")
+          .select("*", { count: "exact", head: true })
+          .eq("propietario_id", org.ownerId);
+          
+        if (count && count >= 1) {
+          throw new ApiError(403, "LÍMITE_PLAN: Has alcanzado el límite de 1 BackRoom en el plan Free.");
+        }
+      }
+    }
+    // ------------------------------------
+
     const { data: backroom, error: backroomError } = await supabase
       .from("backrooms")
       .insert({

@@ -22,6 +22,9 @@ export async function POST(request: NextRequest) {
     const input = createBackroomSchema.parse(body);
 
     const backroom = await BackroomsService.create(user.id, input);
+    
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/dashboard", "layout");
 
     return NextResponse.json(backroom, { status: 201 });
   } catch (error) {
