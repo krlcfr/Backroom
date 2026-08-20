@@ -1,6 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { getMenuPermissions } from "@/lib/auth/rbac"
+import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
+import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import RoomTree from "@/components/salas/room-tree"
@@ -54,6 +57,11 @@ export default function SalaPage() {
   const [editError, setEditError] = useState("")
   const [editLoading, setEditLoading] = useState(false)
 
+  const [resources, setResources] = useState<Resource[]>([])
+  const [canUpload, setCanUpload] = useState(false)
+  const [canDeleteRes, setCanDeleteRes] = useState(false)
+  const [showAddResource, setShowAddResource] = useState(false)
+
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -76,10 +84,11 @@ export default function SalaPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [salaRes, roomsRes, backroomRes] = await Promise.all([
+        const [salaRes, roomsRes, backroomRes, resourcesRes] = await Promise.all([
           fetch(`/api/rooms/${salaId}`),
           fetch(`/api/backrooms/${id}/rooms`),
           fetch(`/api/backrooms/${id}`),
+          fetch(`/api/rooms/${salaId}/resources`),
         ])
 
         if (!salaRes.ok) throw new Error("No se pudo cargar la sala")
@@ -117,6 +126,13 @@ export default function SalaPage() {
           const brData = await backroomRes.json()
           setBackroom({ id: brData.id, name: brData.name })
         }
+
+        if (resourcesRes.ok) {
+          const resData = await resourcesRes.json()
+          setResources(resData.data)
+          setCanUpload(resData.canUpload)
+          setCanDeleteRes(resData.canDelete)
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido")
       } finally {
@@ -125,6 +141,20 @@ export default function SalaPage() {
     }
     if (salaId) fetchData()
   }, [id, salaId])
+
+  const reloadResources = async () => {
+    try {
+      const resourcesRes = await fetch(`/api/rooms/${salaId}/resources`)
+      if (resourcesRes.ok) {
+        const resData = await resourcesRes.json()
+        setResources(resData.data)
+        setCanUpload(resData.canUpload)
+        setCanDeleteRes(resData.canDelete)
+      }
+    } catch (e) {
+      console.error("Error reloading resources", e)
+    }
+  }
 
   function openEdit() {
     setMenuOpen(false)
@@ -288,11 +318,39 @@ export default function SalaPage() {
 
         {atMaxDepth && children.length === 0 && (
           <div className="text-center py-12">
-            <span className="material-symbols-outlined text-[48px] text-[#958da1] mb-3 block">folder_off</span>
-            <p className="text-[14px] text-[#958da1]">Esta sala no tiene subsalas.</p>
-            <p className="text-[12px] text-[#958da1]/70 mt-1">Profundidad máxima alcanzada (nivel 3).</p>
+            <span className="material-symbols-outlined text-[48px] text-[#4a4455] mb-4">
+              block
+            </span>
+            <p className="text-[#ccc3d8]">Has alcanzado la profundidad máxima para sub-salas.</p>
           </div>
         )}
+
+        <hr className="border-[#3f3f46] my-8" />
+
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Recursos</h2>
+              <p className="text-[#958da1] text-[13px] mt-1">Archivos y enlaces compartidos en esta sala.</p>
+            </div>
+            {canUpload && (
+              <button
+                onClick={() => setShowAddResource(true)}
+                className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[13px] font-medium"
+              >
+                <span className="material-symbols-outlined text-[18px]">add</span>
+                Añadir Recurso
+              </button>
+            )}
+          </div>
+
+          <ResourcesGrid 
+            resources={resources}
+            roomId={salaId}
+            canDelete={canDeleteRes}
+            onResourceDeleted={reloadResources}
+          />
+        </div>
       </main>
 
       <aside className="w-80 flex flex-col gap-6 hidden md:flex">
@@ -462,6 +520,17 @@ export default function SalaPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {showAddResource && (
+        <AddResourceModal
+          roomId={salaId}
+          onClose={() => setShowAddResource(false)}
+          onSuccess={() => {
+            setShowAddResource(false)
+            reloadResources()
+          }}
+        />
       )}
     </div>
   )

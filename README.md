@@ -95,9 +95,9 @@ seeds/                       # Scripts de inicialización de datos (ej. SuperAdm
 
 Este proyecto está en desarrollo activo. Estado honesto, sin maquillar, al momento de este README:
 
-- ✅ Completo y probado: autenticación (registro, login, logout, recuperación de contraseña, perfil) y CRUD de BackRooms (crear, listar, ver detalle, eliminar).
-- ⬜ Pendiente: Salas, Recursos, Invitaciones, Permisos y Planes (ver [`docs/plan.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/plan.md) para el detalle completo por tarea).
-- ⬜ Pendiente: pruebas automatizadas, integración continua (CI/CD), contenerización, despliegue en servidor real, autenticación multifactor y límite de tasa de peticiones (rate limiting).
+- ✅ Completo y probado: Autenticación, Perfil, CRUD de BackRooms, Facturación/Stripe (Planes), Salas (CRUD, Jerarquía en árbol, Mapa Radial, Íconos custom) y Sistema de Permisos (RBAC global, Matriz granular, Flujograma de Auditoría).
+- ⬜ Pendiente (En progreso): Recursos/Documentos (subir enlaces/archivos), Invitaciones formales a miembros.
+- ⬜ Pendiente (Futuro): Pruebas automatizadas, CI/CD, despliegue, autenticación multifactor.
 
 ## Pruebas
 
