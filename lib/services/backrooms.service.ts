@@ -11,6 +11,7 @@ function toBackroomResponse(row: {
   descripcion: string | null;
   portada_url: string | null;
   created_at: string;
+  icono?: string;
   usuarios?: { auth_id: string; username: string } | null;
 }, ownerAuthIdOverride?: string) {
   return {
@@ -21,6 +22,7 @@ function toBackroomResponse(row: {
     description: row.descripcion,
     coverUrl: row.portada_url,
     createdAt: row.created_at,
+    icono: row.icono ?? "domain",
   };
 }
 
@@ -42,6 +44,7 @@ export class BackroomsService {
         nombre: input.name,
         descripcion: input.description,
         portada_url: input.coverUrl,
+        icono: input.icono ?? "domain",
       })
       .select()
       .single();
@@ -66,6 +69,7 @@ export class BackroomsService {
       backroom_id: backroom.id,
       nombre: input.name,
       depth: 0,
+      icono: input.icono ?? "domain",
     });
 
     if (salaError) {
@@ -135,6 +139,7 @@ export class BackroomsService {
     if (input.name !== undefined) updateData.nombre = input.name;
     if (input.description !== undefined) updateData.descripcion = input.description;
     if (input.coverUrl !== undefined) updateData.portada_url = input.coverUrl;
+    if (input.icono !== undefined) updateData.icono = input.icono;
 
     if (Object.keys(updateData).length === 0) {
       return this.getById(backroomId); // Nothing to update

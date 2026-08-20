@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import IconPicker from "@/components/ui/icon-picker"
 
 interface Backroom {
   id: string
@@ -12,6 +13,7 @@ interface Backroom {
   description: string | null
   coverUrl: string | null
   createdAt: string
+  icono?: string
 }
 
 interface Org {
@@ -28,11 +30,14 @@ interface DashboardContentProps {
   currentUserId: string | null
 }
 
-export default function DashboardContent({ backrooms, org, currentUserId }: DashboardContentProps) {
+export default function DashboardContent({ backrooms: initialBackrooms, org, currentUserId }: DashboardContentProps) {
   const router = useRouter()
+  
+  const [backrooms, setBackrooms] = useState<Backroom[]>(initialBackrooms)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [nombre, setNombre] = useState("")
   const [descripcion, setDescripcion] = useState("")
+  const [icono, setIcono] = useState("domain")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -40,6 +45,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
   const [editBackroom, setEditBackroom] = useState<Backroom | null>(null)
   const [editNombre, setEditNombre] = useState("")
   const [editDescripcion, setEditDescripcion] = useState("")
+  const [editIcono, setEditIcono] = useState("domain")
   const [editError, setEditError] = useState("")
   const [editLoading, setEditLoading] = useState(false)
   const [deleteBackroom, setDeleteBackroom] = useState<Backroom | null>(null)
@@ -87,6 +93,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
         body: JSON.stringify({
           name: trimmed,
           description: descripcion.trim() || undefined,
+          icono: icono,
         }),
       })
 
@@ -120,6 +127,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
     setEditBackroom(br)
     setEditNombre(br.name)
     setEditDescripcion(br.description ?? "")
+    setEditIcono(br.icono ?? "domain")
     setEditError("")
   }
 
@@ -150,6 +158,7 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
         body: JSON.stringify({
           name: trimmed,
           description: editDescripcion.trim() || undefined,
+          icono: editIcono,
         }),
       })
 
@@ -382,17 +391,23 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
             </div>
 
             <form onSubmit={handleCreate} className="px-6 py-2 flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="text-[12px] font-medium text-[#ccc3d8]">Nombre de la sala</label>
-                <input
-                  type="text"
-                  required
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  placeholder="Ej. Proyecto Alpha"
-                  className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 placeholder:text-[#ccc3d8]/40 transition-all"
-                  disabled={loading}
-                />
+              <div className="flex gap-4">
+                <div className="flex flex-col gap-2 shrink-0">
+                  <label className="text-[12px] font-medium text-[#ccc3d8]">Icono</label>
+                  <IconPicker value={icono} onChange={setIcono} />
+                </div>
+                <div className="flex flex-col gap-2 flex-1">
+                  <label className="text-[12px] font-medium text-[#ccc3d8]">Nombre de la sala</label>
+                  <input
+                    type="text"
+                    required
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Ej. Proyecto Alpha"
+                    className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 placeholder:text-[#ccc3d8]/40 transition-all"
+                    disabled={loading}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col gap-2">
@@ -466,16 +481,22 @@ export default function DashboardContent({ backrooms, org, currentUserId }: Dash
             </div>
 
             <form onSubmit={handleEdit} className="px-6 py-2 flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <label className="text-[12px] font-medium text-[#ccc3d8]">Nombre</label>
-                <input
-                  type="text"
-                  required
-                  value={editNombre}
-                  onChange={(e) => setEditNombre(e.target.value)}
-                  className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all"
-                  disabled={editLoading}
-                />
+              <div className="flex gap-4">
+                <div className="flex flex-col gap-2 shrink-0">
+                  <label className="text-[12px] font-medium text-[#ccc3d8]">Icono</label>
+                  <IconPicker value={editIcono} onChange={setEditIcono} />
+                </div>
+                <div className="flex flex-col gap-2 flex-1">
+                  <label className="text-[12px] font-medium text-[#ccc3d8]">Nombre</label>
+                  <input
+                    type="text"
+                    required
+                    value={editNombre}
+                    onChange={(e) => setEditNombre(e.target.value)}
+                    className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all"
+                    disabled={editLoading}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col gap-2">
