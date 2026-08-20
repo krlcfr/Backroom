@@ -95,8 +95,8 @@ seeds/                       # Scripts de inicialización de datos (ej. SuperAdm
 
 Este proyecto está en desarrollo activo. Estado honesto, sin maquillar, al momento de este README:
 
-- ✅ Completo y probado: Autenticación, Perfil, CRUD de BackRooms, Facturación/Stripe (Planes), Salas (CRUD, Jerarquía en árbol, Mapa Radial, Íconos custom) y Sistema de Permisos (RBAC global, Matriz granular, Flujograma de Auditoría).
-- ⬜ Pendiente (En progreso): Recursos/Documentos (subir enlaces/archivos), Invitaciones formales a miembros.
+- ✅ Completo y probado: Autenticación, Perfil, CRUD de BackRooms, Facturación/Stripe (Planes), Salas (CRUD, Jerarquía en árbol, Mapa Radial, Íconos custom), Sistema de Permisos (RBAC global, Matriz granular, Flujograma de Auditoría) y Gestión de Recursos (Archivos físicos y Visor flotante).
+- ⬜ Pendiente (En progreso): Invitaciones formales a miembros de la organización.
 - ⬜ Pendiente (Futuro): Pruebas automatizadas, CI/CD, despliegue, autenticación multifactor.
 
 ## Pruebas
