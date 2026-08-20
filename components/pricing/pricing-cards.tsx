@@ -12,10 +12,15 @@ interface PricingCardsProps {
 export function PricingCards({ mode, organizationId, currentPlan = "free" }: PricingCardsProps) {
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleCheckout = async (priceId: string) => {
-    if (!organizationId) return;
+    if (!organizationId) {
+      setErrorMsg("No hay organización seleccionada.");
+      return;
+    }
     setLoading(true);
+    setErrorMsg(null);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -26,19 +31,23 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
       if (res.ok && data.url) {
         window.location.href = data.url;
       } else {
-        alert("Error al iniciar checkout: " + (data.error || "Desconocido"));
+        setErrorMsg("Error al iniciar checkout: " + (data.error || "Desconocido"));
         setLoading(false);
       }
     } catch (err: any) {
       console.error(err);
-      alert("Error al iniciar checkout: " + err.message);
+      setErrorMsg("Error al conectar con la pasarela: " + err.message);
       setLoading(false);
     }
   };
 
   const handlePortal = async () => {
-    if (!organizationId) return;
+    if (!organizationId) {
+      setErrorMsg("No hay organización seleccionada.");
+      return;
+    }
     setLoading(true);
+    setErrorMsg(null);
     try {
       const res = await fetch("/api/stripe/portal", {
         method: "POST",
@@ -46,11 +55,15 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
         body: JSON.stringify({ organizationId }),
       });
       const data = await res.json();
-      if (data.url) {
+      if (res.ok && data.url) {
         window.location.href = data.url;
+      } else {
+        setErrorMsg("Error al abrir portal: " + (data.error || "Desconocido"));
+        setLoading(false);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setErrorMsg("Error de conexión: " + err.message);
       setLoading(false);
     }
   };
@@ -59,24 +72,30 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
     <div className="w-full flex flex-col items-center">
       {/* Toggle */}
       <div className="flex items-center gap-3 mb-12">
-        <span className={`text-sm ${!isAnnual ? "text-[#e2e2e2] font-semibold" : "text-[#958da1]"}`}>Mensual</span>
-        <button
-          onClick={() => setIsAnnual(!isAnnual)}
-          className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#7c3aed] transition-colors focus:outline-none"
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              isAnnual ? "translate-x-6" : "translate-x-1"
-            }`}
-          />
-        </button>
-        <span className={`text-sm ${isAnnual ? "text-[#e2e2e2] font-semibold" : "text-[#958da1]"}`}>
-          Anual <span className="ml-1 text-xs text-[#7c3aed] bg-[#7c3aed]/10 px-2 py-0.5 rounded-full">-20%</span>
-        </span>
+        <div className="flex items-center gap-3">
+          <span className={`text-sm font-medium ${!isAnnual ? "text-[#e2e2e2]" : "text-[#ccc3d8]"}`}>Mensual</span>
+          <button 
+            onClick={() => setIsAnnual(!isAnnual)}
+            className="w-12 h-6 bg-[#333535] rounded-full relative transition-colors focus:outline-none"
+          >
+            <div className={`absolute top-1 w-4 h-4 rounded-full bg-[#d2bbff] transition-transform ${isAnnual ? "left-7" : "left-1"}`} />
+          </button>
+          <span className={`text-sm font-medium flex items-center gap-2 ${isAnnual ? "text-[#e2e2e2]" : "text-[#ccc3d8]"}`}>
+            Anual
+            <span className="bg-[#7c3aed]/20 text-[#d2bbff] text-[10px] px-2 py-0.5 rounded-full border border-[#7c3aed]/30">-20%</span>
+          </span>
+        </div>
       </div>
 
+      {errorMsg && (
+        <div className="max-w-xl mx-auto mb-8 p-3 bg-[#ffb4ab]/10 border border-[#ffb4ab]/30 rounded-lg flex items-center gap-3 text-[#ffb4ab]">
+          <span className="material-symbols-outlined text-[20px]">error</span>
+          <p className="text-sm">{errorMsg}</p>
+        </div>
+      )}
+
       {/* Cards Container */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto w-full">
         {/* Free Plan */}
         <div className="flex flex-col p-8 bg-[#27272a] rounded-2xl border border-[#4a4455] shadow-lg relative">
           <h3 className="text-xl font-bold text-[#e2e2e2] mb-2">Free</h3>

@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { PricingCards } from "@/components/pricing/pricing-cards";
+import { getSession } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getSession();
+  if (session) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="flex flex-col flex-1 bg-[#121414] font-sans">
       {/* Navbar */}

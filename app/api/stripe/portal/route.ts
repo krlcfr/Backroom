@@ -46,12 +46,12 @@ export async function POST(request: NextRequest) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     // Create Stripe Customer Portal Session
-    const session = await stripe.billingPortal.sessions.create({
+    const portalSession = await stripe.billingPortal.sessions.create({
       customer: org.stripe_customer_id,
-      return_url: `${siteUrl}/dashboard/organizaciones/${org.id}/planes`,
+      return_url: `${siteUrl}/dashboard/configuracion/planes`,
     });
 
-    return NextResponse.json({ url: session.url }, { status: 200 });
+    return NextResponse.json({ url: portalSession.url }, { status: 200 });
   } catch (error) {
     return handleApiError(error);
   }

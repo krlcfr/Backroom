@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${siteUrl}/dashboard/organizaciones/${org.id}/planes?success=true`,
-      cancel_url: `${siteUrl}/dashboard/organizaciones/${org.id}/planes?canceled=true`,
+      success_url: `${siteUrl}/dashboard/configuracion/planes?success=true`,
+      cancel_url: `${siteUrl}/dashboard/configuracion/planes?canceled=true`,
       metadata: {
         organizationId: org.id,
       },
