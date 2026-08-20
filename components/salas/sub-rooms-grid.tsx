@@ -8,6 +8,7 @@ interface Sala {
   descripcion: string | null
   depth: number
   created_at: string
+  icono?: string
 }
 
 interface SubRoomsGridProps {
@@ -27,7 +28,7 @@ export default function SubRoomsGrid({ rooms, backroomId, onCreateClick }: SubRo
         >
           <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 rounded-lg bg-[#1e2020] flex items-center justify-center text-[#d2bbff] group-hover:bg-[#7c3aed]/20 transition-colors">
-              <span className="material-symbols-outlined">folder</span>
+              <span className="material-symbols-outlined">{room.icono || "grid_view"}</span>
             </div>
           </div>
           <h3 className="font-semibold text-[#e2e2e2] text-[16px] mb-1">{room.nombre}</h3>

@@ -8,6 +8,7 @@ export interface RoomNode {
   nombre: string
   depth: number
   hasAccess?: boolean
+  icono?: string
   children?: RoomNode[]
 }
 
@@ -79,7 +80,7 @@ function TreeNode({
               isActive ? "text-[#d2bbff]" : "text-[#958da1]"
             }`}
           >
-            {!hasAccess ? "lock" : isActive ? "folder_open" : "folder"}
+            {!hasAccess ? "lock" : (node.icono || (node.depth === 0 ? "domain" : "grid_view"))}
           </span>
           <span className="text-[13px] truncate">{node.nombre}</span>
         </ItemWrapper>

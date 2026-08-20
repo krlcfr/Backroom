@@ -231,7 +231,9 @@ export default function DashboardContent({ backrooms: initialBackrooms, org, cur
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-lg bg-[#333535] flex items-center justify-center border border-[#4a4455]">
-                          <span className="material-symbols-outlined text-[#d2bbff] text-[24px]">folder_special</span>
+                          <span className="material-symbols-outlined text-[#d2bbff] text-[24px]">
+                            {br.icono || "domain"}
+                          </span>
                         </div>
                         <div>
                           <h3 className="text-[20px] font-semibold text-[#e2e2e2]">{br.name}</h3>

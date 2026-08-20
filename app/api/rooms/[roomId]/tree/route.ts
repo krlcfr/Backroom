@@ -31,7 +31,7 @@ export async function GET(
     // Traer todas las salas del mismo backroom
     const { data: allSalas, error } = await supabase
       .from("salas")
-      .select("id, nombre, descripcion, depth, parent_id, created_at")
+      .select("id, nombre, descripcion, depth, parent_id, created_at, icono")
       .eq("backroom_id", rootSala.backroom_id);
 
     if (error) throw new ApiError(500, "No se pudo obtener el árbol de salas.");

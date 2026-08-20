@@ -16,9 +16,8 @@ export async function GET(
 
     const { data, error } = await supabase
       .from("salas")
-      .select("id, nombre, descripcion, depth, created_at")
+      .select("id, nombre, descripcion, depth, created_at, parent_id, icono")
       .eq("backroom_id", backroomId)
-      .is("parent_id", null)
       .order("created_at", { ascending: true })
 
     if (error) throw new ApiError(500, "No se pudieron cargar las salas.")

@@ -211,7 +211,7 @@ export default function BackRoomPage() {
         </div>
 
         <SubRoomsGrid
-          rooms={rooms}
+          rooms={rooms.filter((r: any) => !r.parent_id)}
           backroomId={backroom.id}
           onCreateClick={() => setShowCreateRoom(true)}
         />
