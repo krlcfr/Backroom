@@ -212,24 +212,30 @@ export default function MiembrosPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#3f3f46]">
-            {members.map((member) => (
-              <tr key={member.usuario_id} className="hover:bg-[#2a2a2e]/50 transition-colors">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#7c3aed]/20 flex items-center justify-center text-[#d2bbff] font-semibold text-[16px]">
-                      {member.usuarios.nombre_completo.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="text-[14px] font-medium text-[#e2e2e2] flex items-center gap-2">
-                        {member.usuarios.nombre_completo}
-                        {member.usuario_id === backroom.ownerId && (
-                          <span className="bg-[#7c3aed]/20 text-[#d2bbff] text-[10px] px-2 py-0.5 rounded-full border border-[#7c3aed]/30 uppercase tracking-wider">Propietario</span>
-                        )}
+            {members.map((member) => {
+              const u = Array.isArray(member.usuarios) ? member.usuarios[0] : member.usuarios;
+              const nombre = u?.nombre_completo || "Usuario Desconocido";
+              const correo = u?.correo || "Sin correo";
+              const inicial = nombre.charAt(0).toUpperCase();
+
+              return (
+                <tr key={member.usuario_id} className="hover:bg-[#2a2a2e]/50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#7c3aed]/20 flex items-center justify-center text-[#d2bbff] font-semibold text-[16px]">
+                        {inicial}
                       </div>
-                      <div className="text-[12px] text-[#958da1]">{member.usuarios.correo}</div>
+                      <div>
+                        <div className="text-[14px] font-medium text-[#e2e2e2] flex items-center gap-2">
+                          {nombre}
+                          {member.usuario_id === backroom.ownerId && (
+                            <span className="bg-[#7c3aed]/20 text-[#d2bbff] text-[10px] px-2 py-0.5 rounded-full border border-[#7c3aed]/30 uppercase tracking-wider">Propietario</span>
+                          )}
+                        </div>
+                        <div className="text-[12px] text-[#958da1]">{correo}</div>
+                      </div>
                     </div>
-                  </div>
-                </td>
+                  </td>
                 <td className="px-6 py-4">
                   {esPropietario && member.usuario_id !== backroom.ownerId ? (
                     <select

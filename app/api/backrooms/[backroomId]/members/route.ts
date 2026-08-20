@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
 import { checkPermission } from "@/lib/auth/rbac";
 
@@ -18,9 +18,12 @@ export async function GET(
     const hasAccess = await checkPermission(user.id, backroomId, "solo_visualizar");
     if (!hasAccess) throw new ApiError(403, "Sin acceso a este BackRoom.");
 
-    const supabase = await createClient();
+    // Usamos el cliente admin porque la tabla `usuarios` tiene RLS y un usuario
+    // normal no puede ver los datos de los demás usuarios, pero en esta vista de
+    // miembros sí es necesario.
+    const supabaseAdmin = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("backroom_miembros")
       .select("usuario_id, permiso, asignado_por, created_at, usuarios!backroom_miembros_usuario_id_fkey(id, username, correo, nombre_completo)")
       .eq("backroom_id", backroomId);

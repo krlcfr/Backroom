@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
 import { isOwner } from "@/lib/auth/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
 import { updateRoomPermissionsSchema } from "@/lib/validations/room-permissions.schema";
 
@@ -13,6 +14,7 @@ export async function GET(
     const user = await requireAuth();
     const { roomId } = await params;
     const supabase = await createClient();
+    const supabaseAdmin = createAdminClient();
 
     // Obtener la sala para verificar pertenencia al backroom
     const { data: sala, error: salaError } = await supabase
@@ -31,8 +33,8 @@ export async function GET(
       throw new ApiError(403, "No tienes permiso para gestionar permisos");
     }
 
-    // Obtener miembros del backroom con su información de usuario
-    const { data: miembros, error: miembrosError } = await supabase
+    // Obtener miembros del backroom con su información de usuario (Bypassing RLS on usuarios)
+    const { data: miembros, error: miembrosError } = await supabaseAdmin
       .from("backroom_miembros")
       .select("usuario_id, permiso, usuarios!backroom_miembros_usuario_id_fkey(username, nombre_completo, correo)")
       .eq("backroom_id", sala.backroom_id);
