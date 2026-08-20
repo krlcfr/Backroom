@@ -25,7 +25,7 @@ export function UpsellModal({ orgId }: { orgId?: string }) {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-[#1e2020] border border-[#4a4455] rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl relative p-8">
+      <div className="bg-[#1e2020] border border-[#4a4455] rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-2xl relative p-8 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#4a4455] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#5a5465]">
         
         <button 
           onClick={() => setIsOpen(false)}
