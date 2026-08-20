@@ -100,7 +100,7 @@ export async function POST(
       .select()
       .single();
 
-    if (error) throw new ApiError(500, "Error al guardar el recurso");
+    if (error) throw new ApiError(500, `Error al guardar el recurso: ${error.message}`);
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
