@@ -13,7 +13,9 @@ export function UpsellModal({ orgId }: { orgId?: string }) {
   useEffect(() => {
     // Escuchar un evento personalizado global "show-upsell"
     const handleShowUpsell = (e: CustomEvent<{ message: string }>) => {
-      setMessage(e.detail.message);
+      // Limpiar prefijos feos del backend si existen
+      const cleanMessage = e.detail.message.replace("LÍMITE_PLAN: ", "");
+      setMessage(cleanMessage);
       setIsOpen(true);
     };
 
@@ -39,7 +41,7 @@ export function UpsellModal({ orgId }: { orgId?: string }) {
             <span className="material-symbols-outlined text-[#d2bbff] text-[32px]">rocket_launch</span>
           </div>
           <h2 className="text-3xl font-bold text-[#e2e2e2] mb-2">¡Es hora de crecer!</h2>
-          <p className="text-[#ffb4ab] font-medium bg-[#ffb4ab]/10 px-4 py-2 rounded-lg inline-block">
+          <p className="text-[#d2bbff] font-medium bg-[#7c3aed]/10 px-4 py-2 rounded-lg inline-block border border-[#7c3aed]/20">
             {message || "Has alcanzado un límite en tu plan Free."}
           </p>
         </div>
