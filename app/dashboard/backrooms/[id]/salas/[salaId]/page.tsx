@@ -351,7 +351,6 @@ export default function SalaPage() {
             onResourceDeleted={reloadResources}
           />
         </div>
-        )}
       </main>
 
       <aside className="w-80 flex flex-col gap-6 hidden md:flex">
