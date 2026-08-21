@@ -95,16 +95,50 @@ export async function POST(
     }
 
     // 6. Guardar los bytes del PDF modificado
-    const pdfBytes = await pdfDoc.save();
+    let pdfBytes = await pdfDoc.save();
 
-    // 7. Sello Criptográfico (Placeholder para el .p12)
-    /*
-      TODO: Cuando el usuario suba su certificado .p12
-      1. Descargar certificado desde organizations.certificate_path
-      2. Leer contraseña
-      3. const signedPdf = signpdf.sign(pdfBytes, p12Buffer, { pass: password });
-      4. pdfBytes = signedPdf;
-    */
+    // 7. Sello Criptográfico (.p12)
+    // Obtener la organización del recurso para ver si tiene certificado
+    const { data: backroom } = await supabase
+      .from("backrooms")
+      .select("organization_id")
+      .eq("id", recurso.salas.backroom_id)
+      .single();
+    
+    if (backroom?.organization_id) {
+      const { data: org } = await supabase
+        .from("organizations")
+        .select("certificate_path, certificate_password, plan")
+        .eq("id", backroom.organization_id)
+        .single();
+      
+      // Si la org tiene un certificado configurado y está en plan Pro o Enterprise
+      if (org && org.certificate_path && org.certificate_password && (org.plan === "pro" || org.plan === "enterprise")) {
+        const signpdf = (await import("@signpdf/signpdf")).default;
+        const { plainAddPlaceholder } = await import("@signpdf/signpdf");
+        
+        // Descargar certificado desde Storage
+        const { data: certBlob } = await supabase.storage.from("certificates").download(org.certificate_path);
+        
+        if (certBlob) {
+          const p12Buffer = Buffer.from(await certBlob.arrayBuffer());
+          
+          // Añadir el placeholder para la firma (al final del archivo)
+          const pdfWithPlaceholder = plainAddPlaceholder({
+            pdfBuffer: Buffer.from(pdfBytes),
+            reason: 'Firma y Sello de Backroom',
+            signatureLength: 8192,
+          });
+
+          // Firmar criptográficamente
+          const signedPdf = signpdf.sign(pdfWithPlaceholder, p12Buffer, {
+            pass: org.certificate_password
+          });
+          
+          pdfBytes = new Uint8Array(signedPdf);
+        }
+      }
+    }
 
     // 8. Sobrescribir el archivo original en Supabase Storage
     const { error: uploadError } = await supabase

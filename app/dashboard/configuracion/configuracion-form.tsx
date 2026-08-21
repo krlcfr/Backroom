@@ -242,12 +242,91 @@ export default function ConfiguracionForm({ org }: { org: OrgProps }) {
 
       {/* Tab: Seguridad */}
       {activeTab === "seguridad" && (
-        <section className="rounded-xl border border-[#4a4455] bg-[#1e2020] p-8 text-center">
-          <span className="material-symbols-outlined text-[#958da1] text-[48px] mb-4 block">shield</span>
-          <h3 className="text-[20px] font-semibold text-[#e2e2e2] mb-2">Seguridad</h3>
-          <p className="text-[#ccc3d8] max-w-md mx-auto">
-            Configuración de seguridad de la organización. Próximamente.
-          </p>
+        <section className="rounded-xl overflow-hidden border border-[#4a4455] bg-[#1e2020]">
+          <div className="px-6 py-4 border-b border-[#4a4455]">
+            <h3 className="text-[20px] font-semibold text-[#e2e2e2] flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#a78bfa]">vpn_key</span>
+              Certificado Criptográfico (.p12)
+            </h3>
+            <p className="text-[13px] text-[#ccc3d8] mt-1">
+              Sube el certificado digital oficial de la empresa para sellar y validar criptográficamente los documentos firmados. (Solo planes Pro/Enterprise)
+            </p>
+          </div>
+          <form 
+            className="p-6 flex flex-col gap-6"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const fileInput = form.elements.namedItem("p12_file") as HTMLInputElement;
+              const passwordInput = form.elements.namedItem("p12_password") as HTMLInputElement;
+              const submitBtn = form.elements.namedItem("p12_submit") as HTMLButtonElement;
+
+              if (!fileInput.files?.length || !passwordInput.value) return;
+
+              submitBtn.disabled = true;
+              submitBtn.textContent = "Subiendo...";
+
+              try {
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+                formData.append("password", passwordInput.value);
+
+                const res = await fetch(`/api/organizations/${org.id}/certificate`, {
+                  method: "POST",
+                  body: formData
+                });
+
+                if (!res.ok) {
+                  const err = await res.json();
+                  alert(err.error || "Error al subir certificado");
+                } else {
+                  alert("Certificado guardado con éxito.");
+                  form.reset();
+                }
+              } catch (error) {
+                alert("Error de conexión");
+              } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Guardar Certificado";
+              }
+            }}
+          >
+            <div className="flex flex-col gap-2">
+              <label className="text-[12px] font-medium text-[#e2e2e2]">
+                Archivo del Certificado (.p12)
+              </label>
+              <input
+                type="file"
+                name="p12_file"
+                accept=".p12"
+                required
+                className="bg-[#121414] border border-[#4a4455] rounded-lg px-3 py-2 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] transition-all file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-[#333535] file:text-[#e2e2e2] hover:file:bg-[#47464a]"
+              />
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <label className="text-[12px] font-medium text-[#e2e2e2]">
+                Contraseña del Certificado
+              </label>
+              <input
+                type="password"
+                name="p12_password"
+                required
+                placeholder="••••••••"
+                className="bg-[#121414] border border-[#4a4455] rounded-lg px-3 py-2 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] transition-all"
+              />
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button
+                type="submit"
+                name="p12_submit"
+                className="px-6 py-2 bg-[#7c3aed] text-white hover:bg-[#8b5cf6] transition-colors rounded-lg text-[12px] font-medium"
+              >
+                Guardar Certificado
+              </button>
+            </div>
+          </form>
         </section>
       )}
 
