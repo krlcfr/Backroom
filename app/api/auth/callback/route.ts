@@ -160,7 +160,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/dashboard`);
     }
 
-    return NextResponse.redirect(`${origin}/demo/backroom`);
+    // Ya no existe el modo Demo; los usuarios sin org deben crear una
+    return NextResponse.redirect(`${origin}/org/crear`);
   } catch (error) {
     return handleApiError(error);
   }
