@@ -4,6 +4,12 @@ import { useState } from "react"
 import FloatingViewer from "./floating-viewer"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import dynamic from "next/dynamic"
+
+const DocumentEditorModal = dynamic(
+  () => import("@/components/modals/document-editor-modal").then(mod => mod.DocumentEditorModal),
+  { ssr: false, loading: () => <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center text-white">Cargando editor PDF...</div> }
+)
 
 export interface Resource {
   id: string
@@ -27,6 +33,7 @@ interface ResourcesGridProps {
 export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted }: ResourcesGridProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [activeResource, setActiveResource] = useState<Resource | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Seguro que deseas eliminar este recurso?")) return;
@@ -122,20 +129,31 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
                 </div>
               </div>
 
-              {canDelete && (
-                <button
-                  onClick={() => handleDelete(res.id)}
-                  disabled={deleting === res.id}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#ef4444]/10 text-[#ef4444] disabled:opacity-50"
-                  title="Eliminar"
-                >
-                  {deleting === res.id ? (
-                    <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-                  ) : (
-                    <span className="material-symbols-outlined text-[16px]">delete</span>
-                  )}
-                </button>
-              )}
+              <div className="flex items-center gap-1">
+                {(res.tipo === "pdf" || res.tipo === "archivo") && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setEditingId(res.id) }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#a78bfa]/10 text-[#a78bfa]"
+                    title="Firmar / Editar Documento"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">draw</span>
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(res.id) }}
+                    disabled={deleting === res.id}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#ef4444]/10 text-[#ef4444] disabled:opacity-50"
+                    title="Eliminar"
+                  >
+                    {deleting === res.id ? (
+                      <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                    ) : (
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           )
         })}
@@ -147,6 +165,13 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
           tipo={activeResource.tipo}
           nombre={activeResource.nombre}
           onClose={() => setActiveResource(null)}
+        />
+      )}
+
+      {editingId && (
+        <DocumentEditorModal 
+          recursoId={editingId} 
+          onClose={() => setEditingId(null)} 
         />
       )}
     </>

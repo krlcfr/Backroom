@@ -28,7 +28,7 @@ export default function CreateRoomModal({
   const [loading, setLoading] = useState(false)
 
   const depth = parentRoomId ? currentDepth + 1 : 1
-  const maxDepth = 3
+  const maxDepth = 2 // Solo se permiten 2 niveles: Backroom -> Sala
   const atMaxDepth = currentDepth >= maxDepth - 1
 
   async function handleSubmit(e: React.FormEvent) {
@@ -36,7 +36,7 @@ export default function CreateRoomModal({
     setError("")
 
     if (atMaxDepth) {
-      setError("Profundidad máxima alcanzada (nivel 3). No se pueden crear más subsalas.")
+      setError("Profundidad máxima alcanzada (nivel 2). No se pueden crear más subsalas.")
       return
     }
 

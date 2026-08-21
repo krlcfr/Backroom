@@ -11,6 +11,7 @@ import RoomGraphModal from "@/components/salas/room-graph-modal"
 import SubRoomsGrid from "@/components/salas/sub-rooms-grid"
 import CreateRoomModal from "@/components/modals/create-room-modal"
 import Breadcrumb from "@/components/ui/breadcrumb"
+import RecursosList from "@/components/salas/recursos-list"
 
 interface Sala {
   id: string
@@ -67,7 +68,7 @@ export default function SalaPage() {
 
   const menuRef = useRef<HTMLDivElement>(null)
 
-  const atMaxDepth = sala && sala.depth >= 2
+  const atMaxDepth = sala && sala.depth >= 1
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -318,10 +319,9 @@ export default function SalaPage() {
 
         {atMaxDepth && children.length === 0 && (
           <div className="text-center py-12">
-            <span className="material-symbols-outlined text-[48px] text-[#4a4455] mb-4">
-              block
-            </span>
-            <p className="text-[#ccc3d8]">Has alcanzado la profundidad máxima para sub-salas.</p>
+            <span className="material-symbols-outlined text-[48px] text-[#958da1] mb-3 block">folder_off</span>
+            <p className="text-[14px] text-[#958da1]">Esta sala no tiene subsalas.</p>
+            <p className="text-[12px] text-[#958da1]/70 mt-1">Profundidad máxima alcanzada (nivel 2).</p>
           </div>
         )}
 
@@ -351,6 +351,7 @@ export default function SalaPage() {
             onResourceDeleted={reloadResources}
           />
         </div>
+        )}
       </main>
 
       <aside className="w-80 flex flex-col gap-6 hidden md:flex">
