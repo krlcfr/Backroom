@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { getMenuPermissions } from "@/lib/auth/rbac"
+
 import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 import { useParams, useRouter } from "next/navigation"

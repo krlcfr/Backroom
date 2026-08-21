@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
-import { checkPermission, getUsuarioInterno } from "@/lib/auth/rbac";
+import { checkPermission, checkRoomPermission, getUsuarioInterno } from "@/lib/auth/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
@@ -25,11 +25,11 @@ export async function GET(
     if (salaError || !sala) throw new ApiError(404, "Sala no encontrada");
 
     // Verificar permiso 'salas_acceder'
-    const hasAccess = await checkPermission(user.id, sala.backroom_id, "salas_acceder", roomId);
+    const hasAccess = await checkRoomPermission(user.id, roomId, "salas.acceder");
     if (!hasAccess) throw new ApiError(403, "No tienes acceso a esta sala");
 
-    const canUpload = await checkPermission(user.id, sala.backroom_id, "archivos_subir", roomId);
-    const canDelete = await checkPermission(user.id, sala.backroom_id, "archivos_eliminar", roomId);
+    const canUpload = await checkRoomPermission(user.id, roomId, "recursos.subir");
+    const canDelete = await checkRoomPermission(user.id, roomId, "recursos.eliminar");
 
     // Obtener recursos (usamos admin para evitar problemas de RLS de lectura temporalmente, o supabase si hay RLS en recursos)
     // El schema dice que la tabla recursos existe. Asumiremos que supabase normal sirve,
@@ -86,8 +86,8 @@ export async function POST(
 
     if (salaError || !sala) throw new ApiError(404, "Sala no encontrada");
 
-    // Verificar permiso 'archivos_subir'
-    const hasUploadPerm = await checkPermission(user.id, sala.backroom_id, "archivos_subir", roomId);
+    // Verificar permiso 'recursos.subir'
+    const hasUploadPerm = await checkRoomPermission(user.id, roomId, "recursos.subir");
     if (!hasUploadPerm) throw new ApiError(403, "No tienes permiso para subir recursos");
 
     const supabaseAdmin = createAdminClient();

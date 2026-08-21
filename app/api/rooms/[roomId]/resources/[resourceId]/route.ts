@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
-import { checkPermission } from "@/lib/auth/rbac";
+import { checkPermission, checkRoomPermission } from "@/lib/auth/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
@@ -22,8 +22,8 @@ export async function DELETE(
 
     if (salaError || !sala) throw new ApiError(404, "Sala no encontrada");
 
-    // Verificar permiso 'archivos_eliminar'
-    const hasDeletePerm = await checkPermission(user.id, sala.backroom_id, "archivos_eliminar", roomId);
+    // Verificar permiso 'recursos.eliminar'
+    const hasDeletePerm = await checkRoomPermission(user.id, roomId, "recursos.eliminar");
     if (!hasDeletePerm) throw new ApiError(403, "No tienes permiso para eliminar recursos");
 
     const supabaseAdmin = createAdminClient();
