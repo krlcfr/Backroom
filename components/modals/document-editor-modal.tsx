@@ -39,6 +39,7 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
   const [signatures, setSignatures] = useState<SignatureLayer[]>([])
   const [loading, setLoading] = useState(true)
   const [clickMenuPos, setClickMenuPos] = useState<{x: number, y: number} | null>(null)
+  const [isOwner, setIsOwner] = useState(false)
 
   const sigPadRef = useRef<any>(null)
 
