@@ -43,14 +43,9 @@ export async function POST(
     }
 
     // 3. Descargar el archivo PDF desde Storage
-    // Extraer ruta del Storage desde la URL del recurso (Asumiendo que url es pública o la ruta exacta)
-    // Normalmente la URL es: https://[proyecto].supabase.co/storage/v1/object/public/[bucket]/[ruta]
-    const storagePathMatch = recurso.url.match(/public\/([^/]+)\/(.+)$/);
-    if (!storagePathMatch) {
-      throw new ApiError(400, "URL de almacenamiento inválida");
-    }
-    const bucket = storagePathMatch[1];
-    const filePath = storagePathMatch[2];
+    // La url en base de datos es la ruta del archivo en el bucket 'recursos'
+    const bucket = "recursos";
+    const filePath = recurso.url;
 
     const { data: fileBlob, error: downloadError } = await supabase
       .storage

@@ -53,6 +53,12 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
         .single()
       
       if (recData) {
+        // Generar URL firmada para poder renderizar el PDF
+        const { data: urlData } = await supabase.storage.from("recursos").createSignedUrl(recData.url, 60 * 60);
+        if (urlData?.signedUrl) {
+          recData.url = urlData.signedUrl;
+        }
+        
         setRecurso(recData)
         // 2. Cargar perfil para saber si es el owner
         const { data: { session } } = await supabase.auth.getSession()
