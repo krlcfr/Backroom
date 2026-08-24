@@ -103,7 +103,7 @@ export async function POST(
     if (backroom?.organization_id) {
       const { data: org } = await supabase
         .from("organizations")
-        .select("certificate_path, certificate_password, plan")
+        .select("name, certificate_path, certificate_password, plan")
         .eq("id", backroom.organization_id)
         .single();
       
@@ -123,6 +123,9 @@ export async function POST(
             pdfBuffer: Buffer.from(pdfBytes),
             reason: 'Firma y Sello de Backroom',
             signatureLength: 8192,
+            contactInfo: 'admin@backroom.test',
+            name: org.name || 'Organización',
+            location: 'Global',
           });
 
           // Firmar criptográficamente
