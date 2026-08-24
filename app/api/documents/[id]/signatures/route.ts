@@ -11,7 +11,7 @@ export async function POST(
     const user = await requireAuth();
     const resolvedParams = await params;
     const recursoId = resolvedParams.id;
-    const { signatures } = await request.json();
+    const { signatures } = await request.json(); // Array de firmas a guardar
 
     if (!Array.isArray(signatures)) {
       throw new ApiError(400, "Formato de firmas inválido");
@@ -21,29 +21,52 @@ export async function POST(
     const { data: perfil } = await supabase.from("usuarios").select("id").eq("auth_id", user.id).single();
     if (!perfil) throw new ApiError(404, "Usuario interno no encontrado");
 
-    // Borrar firmas anteriores de este usuario en este documento (para sobreescribir)
-    await supabase
-      .from("document_signatures")
-      .delete()
-      .eq("recurso_id", recursoId)
-      .eq("usuario_id", perfil.id);
+    // Verificar si es dueño
+    const { data: recurso } = await supabase
+      .from("recursos")
+      .select("salas(backrooms(propietario_id))")
+      .eq("id", recursoId)
+      .single();
+    const isOwner = recurso?.salas?.backrooms?.propietario_id === perfil.id;
 
-    // Insertar las nuevas firmas
-    if (signatures.length > 0) {
-      const inserts = signatures.map((sig: any) => ({
+    const upserts = [];
+    
+    for (const sig of signatures) {
+      // Si la firma es para otro usuario, solo el dueño puede asignarla
+      if (sig.usuario_id && sig.usuario_id !== perfil.id && !isOwner) {
+        throw new ApiError(403, "No puedes asignar o modificar firmas de otros usuarios");
+      }
+
+      const targetUserId = sig.usuario_id || perfil.id;
+
+      upserts.push({
+        ...(sig.id && !sig.id.startsWith("temp-") ? { id: sig.id } : {}),
         recurso_id: recursoId,
-        usuario_id: perfil.id,
-        signature_image_url: sig.url,
+        usuario_id: targetUserId,
+        signature_image_url: sig.url || null, // null significa que es un placeholder
         page_number: sig.page,
         pos_x: sig.x,
         pos_y: sig.y,
         width: 150,
         height: 100
-      }));
+      });
+    }
 
-      const { error: insertError } = await supabase.from("document_signatures").insert(inserts);
-      if (insertError) {
-        console.error("Error guardando firmas:", insertError);
+    // Si el usuario no es owner, no debería poder borrar cajas, solo hacer update de su URL.
+    // Si es owner, borramos todo lo que no esté en la lista nueva (para reflejar eliminaciones en el canvas)
+    if (isOwner) {
+      const idsToKeep = signatures.map((s: any) => s.id).filter((id: string) => id && !id.startsWith("temp-"));
+      let query = supabase.from("document_signatures").delete().eq("recurso_id", recursoId);
+      if (idsToKeep.length > 0) {
+        query = query.not("id", "in", `(${idsToKeep.join(',')})`);
+      }
+      await query;
+    }
+
+    if (upserts.length > 0) {
+      const { error: upsertError } = await supabase.from("document_signatures").upsert(upserts, { onConflict: "id" });
+      if (upsertError) {
+        console.error("Error guardando firmas:", upsertError);
         throw new ApiError(500, "No se pudieron guardar las posiciones de las firmas");
       }
     }
@@ -67,7 +90,7 @@ export async function GET(
     const supabase = await createClient();
     const { data: signatures, error } = await supabase
       .from("document_signatures")
-      .select("*")
+      .select("*, usuarios(id, nombre_completo, correo)")
       .eq("recurso_id", recursoId);
 
     if (error) throw new ApiError(500, "Error obteniendo firmas");
@@ -75,10 +98,12 @@ export async function GET(
     // Formatear para el frontend
     const formatted = signatures.map(sig => ({
       id: sig.id,
-      url: sig.signature_image_url,
+      url: sig.signature_image_url, // Puede ser null
       x: sig.pos_x,
       y: sig.pos_y,
-      page: sig.page_number
+      page: sig.page_number,
+      usuario_id: sig.usuario_id,
+      nombre_completo: (sig.usuarios as any)?.nombre_completo || (sig.usuarios as any)?.correo || "Usuario Desconocido"
     }));
 
     return NextResponse.json({ signatures: formatted });

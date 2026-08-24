@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -410,6 +410,7 @@ export type Database = {
           tamano_bytes: number | null
           tipo: string
           url: string
+          visibility_mode?: string
         }
         Insert: {
           created_at?: string
@@ -420,6 +421,7 @@ export type Database = {
           tamano_bytes?: number | null
           tipo: string
           url: string
+          visibility_mode?: string
         }
         Update: {
           created_at?: string
@@ -430,6 +432,7 @@ export type Database = {
           tamano_bytes?: number | null
           tipo?: string
           url?: string
+          visibility_mode?: string
         }
         Relationships: [
           {

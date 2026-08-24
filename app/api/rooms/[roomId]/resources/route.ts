@@ -37,14 +37,41 @@ export async function GET(
     const supabaseAdmin = createAdminClient();
     const { data: recursos, error: recursosError } = await supabaseAdmin
       .from("recursos")
-      .select("*, usuarios!recursos_subido_por_fkey(nombre_completo)")
+      .select("*, usuarios!recursos_subido_por_fkey(nombre_completo), salas(backroom_id, backrooms(propietario_id))")
       .eq("sala_id", roomId)
       .order("created_at", { ascending: false });
 
     if (recursosError) throw new ApiError(500, "Error al cargar recursos");
 
+    // Filtrar recursos según visibility_mode
+    const perfilId = (await getUsuarioInterno(user.id))?.id;
+    let filteredRecursos = recursos;
+
+    if (perfilId) {
+      const { data: mySignatures } = await supabaseAdmin
+        .from("document_signatures")
+        .select("recurso_id")
+        .eq("usuario_id", perfilId);
+
+      const misRecursosFirmables = new Set(mySignatures?.map(s => s.recurso_id) || []);
+
+      filteredRecursos = recursos.filter(res => {
+        if (!res.visibility_mode || res.visibility_mode === "sala_completa") return true;
+        // Si es 'solo_firmantes'
+        const isOwner = res.salas?.backrooms?.propietario_id === perfilId;
+        const isAssigned = misRecursosFirmables.has(res.id);
+        return isOwner || isAssigned;
+      });
+    }
+
+    // Limpiar metadata extra (salas)
+    filteredRecursos = filteredRecursos.map(res => {
+      const { salas, ...rest } = res;
+      return rest;
+    });
+
     // Generar Signed URLs para los recursos de tipo 'archivo'
-    const resourcesWithUrls = await Promise.all(recursos.map(async (res) => {
+    const resourcesWithUrls = await Promise.all(filteredRecursos.map(async (res) => {
       if (res.tipo !== "link" && res.tipo !== "youtube") {
         // Es un archivo físico guardado en Storage (res.url guarda el path)
         const { data } = await supabaseAdmin.storage
