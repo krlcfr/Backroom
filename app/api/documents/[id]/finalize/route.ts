@@ -130,7 +130,7 @@ export async function POST(
           });
 
           // Firmar criptográficamente
-          const signer = new P12Signer(p12Buffer, { pass: org.certificate_password });
+          const signer = new P12Signer(p12Buffer, { passphrase: org.certificate_password });
           const signedPdf = await signpdf.sign(pdfWithPlaceholder, signer);
           
           pdfBytes = new Uint8Array(signedPdf);
