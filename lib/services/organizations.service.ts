@@ -314,9 +314,9 @@ export class OrganizationsService {
   }
 
   static async listMembers(orgId: string) {
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("organization_members")
       .select("*, usuarios(username, nombre_completo, correo)")
       .eq("organization_id", orgId)
