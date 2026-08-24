@@ -130,20 +130,37 @@ export class InvitationsService {
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
         const inviteLink = `${baseUrl}/invitaciones/${token}`;
         
-        await resend.emails.send({
-          from: "BackRoom <onboarding@resend.dev>", // Cambiar a dominio verificado en prod
-          to: emailLower,
-          subject: "Has sido invitado a unirte a un BackRoom",
-          html: `
-            <div style="font-family: sans-serif; max-w-md; margin: auto; padding: 20px;">
+        // En entorno local, siempre imprimimos el link por si no llega el correo
+        if (process.env.NODE_ENV === "development") {
+          console.log(`\n📧 [DEV] Link de invitación para ${emailLower}: ${inviteLink}\n`);
+        }
+
+        try {
+          await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL || "BackRoom <onboarding@resend.dev>",
+            to: emailLower,
+            subject: "Has sido invitado a unirte a un BackRoom",
+            html: `
               <h2>¡Hola!</h2>
-              <p>Has sido invitado a unirte a un espacio en BackRoom.</p>
+              <p>Has sido invitado a unirte a una organización en BackRoom.</p>
+              <p>Tu rol asignado será: <strong>${input.role}</strong>.</p>
+              <br/>
               <p>Haz clic en el siguiente enlace para aceptar la invitación:</p>
-              <a href="${inviteLink}" style="display: inline-block; padding: 10px 20px; background-color: #7c3aed; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px;">Aceptar Invitación</a>
-              <p style="margin-top: 20px; color: #666; font-size: 12px;">Este enlace expira en 7 días.</p>
-            </div>
-          `,
-        });
+              <a href="${inviteLink}" style="padding: 10px 20px; background-color: #7c3aed; color: white; text-decoration: none; border-radius: 5px;">
+                Aceptar Invitación
+              </a>
+              <br/><br/>
+              <p>Este enlace expirará el: ${new Date(expiresAt).toLocaleDateString("es-CO")}</p>
+            `,
+          });
+        } catch (error: any) {
+          // Si estamos en desarrollo y el error es por sandbox de Resend, lo perdonamos
+          if (process.env.NODE_ENV === "development" && error?.name === "validation_error") {
+            console.warn(`\n⚠️ [DEV] Resend bloqueó el correo (Sandbox). ¡Usa el enlace de arriba para continuar!\n`);
+          } else {
+            throw error; // Si es otro error o estamos en producción, que explote
+          }
+        }
       } catch (err) {
         console.error("Error sending invitation email:", err);
         // We don't throw here so the invitation is still created even if email fails in dev

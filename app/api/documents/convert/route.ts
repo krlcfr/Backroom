@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     await browser.close();
 
     // 3. Return the PDF as a Blob response
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
