@@ -45,6 +45,17 @@ export async function POST(request: NextRequest) {
       depth = (parent.depth ?? 0) + 1;
     }
 
+    // Chequeo de límites del plan
+    const { data: backroomData } = await adminSupabase.from("backrooms").select("organizacion_id").eq("id", input.backroom_id).single();
+    if (backroomData && backroomData.organizacion_id) {
+      const { getOrganizationPlan, PLAN_LIMITS } = await import("@/lib/limits");
+      const plan = await getOrganizationPlan(backroomData.organizacion_id);
+      const limits = PLAN_LIMITS[plan];
+      if (depth > limits.max_depth) {
+        throw new ApiError(422, `Límite de profundidad alcanzado para el plan ${plan.toUpperCase()} (máximo ${limits.max_depth} niveles)`);
+      }
+    }
+
     const { data, error } = await adminSupabase
       .from("salas")
       .insert({

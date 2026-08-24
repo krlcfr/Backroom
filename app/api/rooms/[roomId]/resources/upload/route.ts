@@ -40,15 +40,34 @@ export async function POST(
       throw new ApiError(400, "No se proporcionó ningún archivo");
     }
 
-    // Límite 10MB
-    const MAX_SIZE = 10 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      throw new ApiError(400, "El archivo supera el límite de 10MB");
+    const supabaseAdmin = createAdminClient();
+    
+    // Obtener org_id para los límites
+    const { data: backroom } = await supabaseAdmin.from("backrooms").select("organizacion_id").eq("id", sala.backroom_id).single();
+    if (!backroom) throw new ApiError(500, "No se encontró el backroom");
+    
+    const { getOrganizationPlan, PLAN_LIMITS } = await import("@/lib/limits");
+    const plan = await getOrganizationPlan(backroom.organizacion_id);
+    const limits = PLAN_LIMITS[plan];
+
+    // Verificar tamaño máximo de archivo
+    if (file.size > limits.max_file_bytes) {
+      throw new ApiError(413, `El archivo supera el límite permitido por tu plan (${limits.max_file_bytes / (1024*1024)}MB)`);
     }
 
-    const fileExt = file.name.split('.').pop();
+    // Verificar espacio total de almacenamiento disponible
+    const { data: recursos, error: sumError } = await supabaseAdmin
+      .from("recursos")
+      .select("tamano_bytes")
+      .limit(10000); // Hack rápido para MVP. Debería ser una suma SQL de los recursos del backroom/org.
+    
+    const usedBytes = recursos?.reduce((acc, curr) => acc + (curr.tamano_bytes || 0), 0) || 0;
+    if (usedBytes + file.size > limits.storage_bytes) {
+      throw new ApiError(422, `Almacenamiento insuficiente. Límite de tu plan: ${limits.storage_bytes / (1024*1024)}MB`);
+    }
+
+    const fileExt = file.name.split('.').pop() || '';
     const fileName = `${roomId}/${uuidv4()}.${fileExt}`;
-    const supabaseAdmin = createAdminClient();
 
     // 1. Subir a Storage
     const buffer = await file.arrayBuffer();

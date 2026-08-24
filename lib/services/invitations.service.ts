@@ -46,6 +46,19 @@ export class InvitationsService {
     if (!hasPermission) {
       throw new ApiError(403, "No tienes permisos para invitar miembros");
     }
+    
+    // Chequear límites del plan
+    const { getOrganizationPlan, PLAN_LIMITS } = await import("@/lib/limits");
+    const plan = await getOrganizationPlan(orgId);
+    const limits = PLAN_LIMITS[plan];
+
+    const { count: membersCount } = await admin.from("organization_members").select("*", { count: "exact", head: true }).eq("organization_id", orgId).eq("status", "active");
+    const { count: pendingCount } = await admin.from("organization_invitations").select("*", { count: "exact", head: true }).eq("organization_id", orgId).eq("status", "pending");
+    
+    const totalMembersAndInvites = (membersCount || 0) + (pendingCount || 0) + 1; // +1 por el owner (si no está en members, o si está, membersCount lo cubre. Owner cuenta como miembro. Para no errar sumamos +1 por seguridad o asumimos que owner está en members. En BackRoom el owner NO está en members, así que owner es +1).
+    if (totalMembersAndInvites > limits.max_members) {
+      throw new ApiError(422, `Límite de miembros alcanzado para el plan ${plan.toUpperCase()} (máximo ${limits.max_members} usuarios)`);
+    }
 
     const emailLower = input.email.toLowerCase().trim();
 
