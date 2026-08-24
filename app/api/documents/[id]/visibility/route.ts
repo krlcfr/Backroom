@@ -30,7 +30,8 @@ export async function PATCH(
     if (recError || !recurso) throw new ApiError(404, "Recurso no encontrado");
 
     const perfilId = (await getUsuarioInterno(user.id))?.id;
-    const propietarioId = recurso.salas?.backrooms?.propietario_id;
+    // @ts-ignore
+    const propietarioId = recurso.salas?.backrooms?.propietario_id || (recurso.salas as any)?.[0]?.backrooms?.propietario_id;
 
     if (propietarioId !== perfilId) {
       throw new ApiError(403, "Solo el dueño del Backroom puede cambiar la visibilidad del documento");
