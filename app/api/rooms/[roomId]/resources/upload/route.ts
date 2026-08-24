@@ -4,6 +4,7 @@ import { checkPermission, getUsuarioInterno, checkRoomPermission } from "@/lib/a
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
+import { AuditService } from "@/lib/services/audit.service";
 import { v4 as uuidv4 } from "uuid";
 
 // Configuración para el tamaño máximo en Next.js (aunque también lo controlamos en el formData)
@@ -106,6 +107,16 @@ export async function POST(
       await supabaseAdmin.storage.from("recursos").remove([fileName]);
       throw new ApiError(500, `Error al registrar el archivo en la base de datos: ${dbError.message}`);
     }
+
+    // Auditoría: Registrar la subida del recurso
+    await AuditService.logAction({
+      orgId: backroom.organizacion_id,
+      actorId: user.id,
+      action: "RESOURCE_UPLOADED",
+      targetType: "resource",
+      targetId: data.id,
+      details: { fileName: file.name, size: file.size }
+    });
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
