@@ -122,29 +122,33 @@ export default function MiembrosTable({
 
   async function handleRemove() {
     if (!removing) return
-
     setBusyUserId(removing.userId)
-    setError("")
-
     try {
-      const res = await fetch(
-        `/api/organizations/${orgId}/members/${removing.userId}`,
-        { method: "DELETE" }
-      )
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => null)
-        setError(data?.error || "No se pudo remover el miembro")
-        setRemoving(null)
-        setBusyUserId(null)
-        return
+      const isInvite = removing.userId.startsWith("invite-")
+      if (isInvite) {
+        const inviteId = removing.userId.replace("invite-", "")
+        const res = await fetch(`/api/organizations/${orgId}/invitations/${inviteId}`, {
+          method: "DELETE",
+        })
+        if (!res.ok) {
+          const { error } = await res.json()
+          throw new Error(error?.message || "Error al revocar invitación")
+        }
+      } else {
+        const res = await fetch(`/api/organizations/${orgId}/members/${removing.userId}`, {
+          method: "DELETE",
+        })
+        if (!res.ok) {
+          const { error } = await res.json()
+          throw new Error(error?.message || "Error al remover miembro")
+        }
       }
-
-      setRemoving(null)
+      
       router.refresh()
-    } catch {
-      setError("Error de conexión al remover el miembro")
       setRemoving(null)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
       setBusyUserId(null)
     }
   }
@@ -232,6 +236,7 @@ export default function MiembrosTable({
               rows.map((m) => {
                 const isOwner = m.role === "Propietario"
                 const isSelf = m.userId === currentUserId
+                const isInvite = m.userId.startsWith("invite-")
                 const busy = busyUserId === m.userId
 
                 return (
@@ -262,27 +267,29 @@ export default function MiembrosTable({
                           <span className="text-[12px] text-[#ccc3d8]/50">Único</span>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() =>
-                                handleChangeRole(m, m.role === "admin" ? "member" : "admin")
-                              }
-                              className="rounded-lg border border-[#3f3f46] px-3 py-1.5 text-[12px] text-[#e2e2e2] hover:bg-[#18181b] disabled:opacity-50"
-                            >
-                              {busy
-                                ? "Guardando..."
-                                : m.role === "admin"
-                                  ? "Hacer Miembro"
-                                  : "Hacer Admin"}
-                            </button>
+                            {!isInvite && (
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() =>
+                                  handleChangeRole(m, m.role === "admin" ? "member" : "admin")
+                                }
+                                className="rounded-lg border border-[#3f3f46] px-3 py-1.5 text-[12px] text-[#e2e2e2] hover:bg-[#18181b] disabled:opacity-50"
+                              >
+                                {busy
+                                  ? "Guardando..."
+                                  : m.role === "admin"
+                                    ? "Hacer Miembro"
+                                    : "Hacer Admin"}
+                              </button>
+                            )}
                             <button
                               type="button"
                               disabled={busy}
                               onClick={() => setRemoving(m)}
                               className="rounded-lg border border-[#ffb4ab]/30 px-3 py-1.5 text-[12px] text-[#ffb4ab] hover:bg-[#ffb4ab]/10 disabled:opacity-50"
                             >
-                              Remover
+                              {isInvite ? "Revocar" : "Remover"}
                             </button>
                           </div>
                         )}
@@ -301,10 +308,12 @@ export default function MiembrosTable({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md rounded-xl border border-[#3f3f46] bg-[#27272a] p-6">
             <h3 className="text-[16px] font-semibold text-[#e2e2e2]">
-              ¿Remover a {memberDisplayName(removing)}?
+              {removing.userId.startsWith("invite-") ? "Revocar invitación para" : "Remover a"} {memberDisplayName(removing)}?
             </h3>
             <p className="mt-2 text-[13px] text-[#ccc3d8]">
-              El miembro perderá el acceso a la organización y a sus BackRooms.
+              {removing.userId.startsWith("invite-") 
+                ? "El enlace de invitación dejará de ser válido inmediatamente."
+                : "El miembro perderá el acceso a la organización y a sus BackRooms."}
             </p>
             <div className="mt-6 flex justify-end gap-3">
               <button
@@ -321,7 +330,7 @@ export default function MiembrosTable({
                 disabled={busyUserId === removing.userId}
                 className="px-5 py-2.5 bg-[#dc2626] hover:bg-[#ef4444] text-white text-[12px] font-medium rounded-lg transition-colors disabled:opacity-40"
               >
-                {busyUserId === removing.userId ? "Removiendo..." : "Remover"}
+                {busyUserId === removing.userId ? "Procesando..." : (removing.userId.startsWith("invite-") ? "Revocar" : "Remover")}
               </button>
             </div>
           </div>
