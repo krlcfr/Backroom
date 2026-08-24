@@ -111,6 +111,7 @@ export async function POST(
       if (org && org.certificate_path && org.certificate_password && (org.plan === "pro" || org.plan === "enterprise")) {
         const signpdf = (await import("@signpdf/signpdf")).default;
         const { plainAddPlaceholder } = await import("@signpdf/placeholder-plain");
+        const { P12Signer } = await import("@signpdf/signer-p12");
         
         // Descargar certificado desde Storage
         const { data: certBlob } = await supabase.storage.from("certificates").download(org.certificate_path);
@@ -129,9 +130,8 @@ export async function POST(
           });
 
           // Firmar criptográficamente
-          const signedPdf = signpdf.sign(pdfWithPlaceholder, p12Buffer, {
-            pass: org.certificate_password
-          });
+          const signer = new P12Signer(p12Buffer, { pass: org.certificate_password });
+          const signedPdf = await signpdf.sign(pdfWithPlaceholder, signer);
           
           pdfBytes = new Uint8Array(signedPdf);
         }
