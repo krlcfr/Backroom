@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
     const page = await browser.newPage();
-    await page.setContent(fullHtml, { waitUntil: "networkidle0" });
+    await page.setContent(fullHtml, { waitUntil: "domcontentloaded" });
     
     const pdfBuffer = await page.pdf({
       format: "A4",
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     await browser.close();
 
     // 3. Return the PDF as a Blob response
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

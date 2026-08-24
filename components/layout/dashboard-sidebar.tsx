@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { label: "Hierarchy", icon: "account_tree", href: "/dashboard/hierarchy" },
   { label: "Storage", icon: "folder", href: "/dashboard/storage" },
   { label: "Permissions", icon: "key", href: "/dashboard/miembros" },
-  { label: "History", icon: "history", href: "/dashboard/history" },
+  { label: "History", icon: "history", href: "/dashboard/auditoria" },
   { label: "Settings", icon: "settings", href: "/dashboard/configuracion" },
   { label: "Planes", icon: "credit_card", href: "/dashboard/configuracion/planes" },
 ]
