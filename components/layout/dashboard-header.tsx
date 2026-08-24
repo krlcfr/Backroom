@@ -21,7 +21,7 @@ export default function DashboardHeader({ userName, userAvatar }: DashboardHeade
   }
 
   return (
-    <header className="fixed top-0 w-full z-50 h-16 bg-[#121414]/80 backdrop-blur-md border-b border-[#4a4455] flex justify-between items-center px-8 w-full mx-auto max-w-[1440px]">
+    <header className="fixed top-0 w-full z-50 h-16 bg-[#121414]/80 backdrop-blur-md border-b border-[#4a4455] flex justify-between items-center px-4 md:px-8">
       <div className="flex items-center gap-6">
         <span className="text-[20px] font-semibold text-[#d2bbff]">BackRoom</span>
         <nav className="hidden md:flex gap-6 h-full items-center">

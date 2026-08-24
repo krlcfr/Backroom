@@ -48,7 +48,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           esPropietario={esPropietario}
           isSuperAdmin={isSuperAdmin}
         />
-        <main className="flex-1 md:ml-[260px] p-4 md:p-8 w-full max-w-[1440px]">
+        <main className="flex-1 md:ml-[260px] p-4 md:p-8 w-full">
           {children}
         </main>
       </div>
