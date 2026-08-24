@@ -109,13 +109,20 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
               </div>
               
               <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <h4 
-                  className="text-[#e2e2e2] font-medium text-[14px] truncate cursor-pointer hover:text-[#a78bfa] transition-colors"
-                  onClick={() => handleResourceClick(res)}
-                  title={res.nombre}
-                >
-                  {res.nombre}
-                </h4>
+                <div className="flex items-center gap-2">
+                  <h4 
+                    className="text-[#e2e2e2] font-medium text-[14px] truncate cursor-pointer hover:text-[#a78bfa] transition-colors"
+                    onClick={() => handleResourceClick(res)}
+                    title={res.nombre}
+                  >
+                    {res.nombre}
+                  </h4>
+                  {(res as any).pending_signature && (
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 whitespace-nowrap" title="Requiere tu firma">
+                      FIRMAR
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-1 text-[11px] text-[#958da1]">
                   <span className="truncate">{res.usuarios?.nombre_completo}</span>
                   <span>•</span>

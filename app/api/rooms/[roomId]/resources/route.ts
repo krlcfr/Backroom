@@ -50,18 +50,23 @@ export async function GET(
     if (perfilId) {
       const { data: mySignatures } = await supabaseAdmin
         .from("document_signatures")
-        .select("recurso_id")
+        .select("recurso_id, signature_image_url")
         .eq("usuario_id", perfilId);
 
       const misRecursosFirmables = new Set(mySignatures?.map(s => s.recurso_id) || []);
+      const misRecursosPendientes = new Set(mySignatures?.filter(s => s.signature_image_url === null).map(s => s.recurso_id) || []);
 
       filteredRecursos = recursos.filter(res => {
         if (!res.visibility_mode || res.visibility_mode === "sala_completa") return true;
-        // Si es 'solo_firmantes'
         const isOwner = res.salas?.backrooms?.propietario_id === perfilId;
         const isAssigned = misRecursosFirmables.has(res.id);
         return isOwner || isAssigned;
-      });
+      }).map(res => ({
+        ...res,
+        pending_signature: misRecursosPendientes.has(res.id)
+      }));
+    } else {
+      filteredRecursos = recursos.map(res => ({ ...res, pending_signature: false }));
     }
 
     // Limpiar metadata extra (salas)

@@ -16,6 +16,7 @@ interface Recurso {
   url: string
   tipo: string
   created_at: string
+  pending_signature?: boolean
 }
 
 export default function RecursosList({ salaId }: { salaId: string }) {
@@ -70,7 +71,14 @@ export default function RecursosList({ salaId }: { salaId: string }) {
                   <span className="material-symbols-outlined text-[20px] text-[#a78bfa]">description</span>
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[#e2e2e2] text-sm font-medium truncate">{recurso.nombre}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#e2e2e2] text-sm font-medium truncate">{recurso.nombre}</span>
+                    {recurso.pending_signature && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 whitespace-nowrap">
+                        FIRMA PENDIENTE
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[#958da1] text-xs">{(new Date(recurso.created_at)).toLocaleDateString()}</span>
                 </div>
               </div>
