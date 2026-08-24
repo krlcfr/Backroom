@@ -120,10 +120,6 @@ export async function GET(request: NextRequest) {
       esSuperadmin = insert.es_superadmin ?? false;
     }
 
-    if (esSuperadmin) {
-      return NextResponse.redirect(`${origin}/admin`);
-    }
-
     // Verificar si tiene organización (propetario o miembro)
     const { data: org } = await supabaseAdmin
       .from("organizations")

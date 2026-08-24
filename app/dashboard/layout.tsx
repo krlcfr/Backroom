@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { OrganizationsService } from "@/lib/services/organizations.service"
+import { SuperAdminService } from "@/lib/services/superadmin.service"
 import { getUsuarioInterno } from "@/lib/auth/rbac"
 import DashboardSidebar from "@/components/layout/dashboard-sidebar"
 import DashboardHeader from "@/components/layout/dashboard-header"
@@ -14,9 +15,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let org: { id: string; ownerId: string; name: string; description: string | null; logoUrl: string | null; updatedAt: string } | null = null
   let usuarioInternoId: string | null = null
   let esPropietario = false
+  let isSuperAdmin = false
 
   if (authId) {
     try {
+      isSuperAdmin = await SuperAdminService.isSuperAdmin(authId)
       org = await OrganizationsService.getOrgForUser(authId)
       const perfil = await getUsuarioInterno(authId)
       usuarioInternoId = perfil?.id ?? null
@@ -43,6 +46,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           orgLogo={org?.logoUrl ?? null}
           orgUpdatedAt={org?.updatedAt ?? null}
           esPropietario={esPropietario}
+          isSuperAdmin={isSuperAdmin}
         />
         <main className="flex-1 md:ml-[260px] p-4 md:p-8 w-full max-w-[1440px]">
           {children}

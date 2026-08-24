@@ -1,6 +1,7 @@
+import { requireAuth } from "@/lib/auth/session";
 import { SuperAdminService } from "@/lib/services/superadmin.service";
 import { AdminCharts } from "./admin-charts";
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
 function formatBytes(bytes: number) {
   if (bytes === 0) return '0 Bytes';
@@ -11,6 +12,13 @@ function formatBytes(bytes: number) {
 }
 
 export default async function AdminPage() {
+  const session = await requireAuth();
+  const isSuper = await SuperAdminService.isSuperAdmin(session.id);
+  
+  if (!isSuper) {
+    redirect("/forbidden");
+  }
+
   const metrics = await SuperAdminService.getPlatformMetrics();
 
   return (
@@ -23,20 +31,11 @@ export default async function AdminPage() {
 
       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4 pt-4">
         <div>
-          <h2 className="text-3xl font-bold text-[#e2e2e2] tracking-tight">Centro de Control</h2>
+          <h2 className="text-3xl font-bold text-[#e2e2e2] tracking-tight">Centro de Control Global</h2>
           <p className="text-sm text-[#a1a1aa] mt-2">
-            Visión panorámica del ecosistema BackRoom.
+            Visión panorámica de todas las organizaciones en BackRoom.
           </p>
         </div>
-        <Link 
-          href="/dashboard"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black px-5 py-2.5 text-sm font-medium hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-          Abrir App Normal
-        </Link>
       </div>
 
       {/* Tarjetas de Métricas con estilo "glass" */}

@@ -8,6 +8,7 @@ interface DashboardSidebarProps {
   orgLogo: string | null
   orgUpdatedAt: string | null
   esPropietario: boolean
+  isSuperAdmin?: boolean
 }
 
 const NAV_ITEMS = [
@@ -20,8 +21,18 @@ const NAV_ITEMS = [
   { label: "Planes", icon: "credit_card", href: "/dashboard/configuracion/planes" },
 ]
 
-export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPropietario }: DashboardSidebarProps) {
+export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPropietario, isSuperAdmin }: DashboardSidebarProps) {
   const pathname = usePathname()
+
+  // Filtramos planes si no es propietario
+  let navItems = esPropietario ? [...NAV_ITEMS] : NAV_ITEMS.filter((i) => i.label !== "Planes")
+  
+  if (isSuperAdmin) {
+    // Evitar añadirlo duplicado por mutaciones accidentales si se hace spread
+    if (!navItems.find(i => i.label === "Métricas Globales")) {
+      navItems.push({ label: "Métricas Globales", icon: "public", href: "/dashboard/admin" })
+    }
+  }
 
   return (
     <aside className="hidden md:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-[260px] bg-[#1a1c1c] border-r border-[#4a4455] flex-col py-4 gap-2">
