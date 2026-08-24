@@ -11,31 +11,69 @@ async function seedSuperAdmin() {
 
   const supabaseAdmin = createAdminClient();
 
-  const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
+  // Buscar si el usuario ya existe en auth
+  const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+  let authUser = users.users.find(u => u.email === email);
 
-  if (authError || !authData.user) {
-    console.error("No se pudo crear el usuario en Supabase Auth:", authError?.message);
-    return;
+  if (!authUser) {
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (authError || !authData.user) {
+      console.error("No se pudo crear el usuario en Supabase Auth:", authError?.message);
+      return;
+    }
+    authUser = authData.user;
   }
 
-  const { error: insertError } = await supabaseAdmin.from("usuarios").insert({
-    auth_id: authData.user.id,
-    username: "superadmin",
-    nombre_completo: "Super Administrador",
-    correo: email,
-    es_superadmin: true,
-  });
-
-  if (insertError) {
-    console.error("No se pudo insertar el perfil del superadmin:", insertError.message);
-    return;
+  // Buscar o crear perfil en usuarios
+  let { data: userData } = await supabaseAdmin.from("usuarios").select().eq("correo", email).maybeSingle();
+  
+  if (!userData) {
+    const { data: newUserData, error: insertError } = await supabaseAdmin.from("usuarios").insert({
+      auth_id: authUser.id,
+      username: "superadmin",
+      nombre_completo: "Super Administrador",
+      correo: email,
+      es_superadmin: true,
+    }).select().single();
+    if (insertError) return console.error(insertError);
+    userData = newUserData;
+  } else {
+    // Asegurar que sea superadmin
+    await supabaseAdmin.from("usuarios").update({ es_superadmin: true }).eq("id", userData.id);
   }
 
-  console.log("SuperAdmin creado correctamente:", email);
+  // Crear organizacion Enterprise para el superadmin
+  let { data: orgData } = await supabaseAdmin.from("organizations").select().eq("owner_id", userData.id).maybeSingle();
+
+  if (!orgData) {
+    const { data: newOrgData, error: orgError } = await supabaseAdmin.from("organizations").insert({
+      name: "Administración Central",
+      owner_id: userData.id,
+      plan: "enterprise"
+    }).select().single();
+
+    if (orgError) {
+      console.error("No se pudo crear la organización enterprise:", orgError.message);
+    } else {
+      orgData = newOrgData;
+      // Vincularlo como miembro activo (Admin)
+      await supabaseAdmin.from("organization_members").insert({
+        organization_id: orgData.id,
+        user_id: userData.id,
+        role: "admin",
+        status: "active"
+      });
+    }
+  } else {
+    // Asegurarnos que tenga el plan enterprise
+    await supabaseAdmin.from("organizations").update({ plan: "enterprise" }).eq("id", orgData.id);
+  }
+
+  console.log("SuperAdmin configurado correctamente con plan Enterprise:", email);
 }
 
 seedSuperAdmin();
