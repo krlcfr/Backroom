@@ -240,6 +240,16 @@ export class InvitationsService {
       }
     }
 
+    const { AuditService } = await import("@/lib/services/audit.service");
+    await AuditService.logAction({
+      orgId: invitation.organization_id,
+      actorId: usuario.id,
+      action: "MEMBER_JOINED",
+      targetType: "member",
+      targetId: usuario.id,
+      details: { role: invitation.role }
+    });
+
     return { organization_id: invitation.organization_id };
   }
 

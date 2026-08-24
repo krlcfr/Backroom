@@ -16,6 +16,17 @@ export async function POST(
 
     const invitation = await InvitationsService.createInvitation(user.id, orgId, input);
 
+    // Auditoría
+    const { AuditService } = await import("@/lib/services/audit.service");
+    await AuditService.logAction({
+      orgId: orgId,
+      actorId: user.id,
+      action: "MEMBER_INVITED",
+      targetType: "member",
+      targetId: invitation.id,
+      details: { email: input.email, role: input.role }
+    });
+
     return NextResponse.json({ data: { invitation } }, { status: 201 });
   } catch (error) {
     return handleApiError(error);
