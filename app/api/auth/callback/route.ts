@@ -119,45 +119,9 @@ export async function GET(request: NextRequest) {
       perfilId = insert.id;
       esSuperadmin = insert.es_superadmin ?? false;
     }
-
-    // Verificar si tiene organización (propetario o miembro)
-    const { data: org } = await supabaseAdmin
-      .from("organizations")
-      .select("id")
-      .eq("owner_id", perfilId)
-      .maybeSingle();
-
-    const { data: orgMember } = await supabaseAdmin
-      .from("organization_members")
-      .select("organization_id")
-      .eq("user_id", perfilId)
-      .eq("status", "active")
-      .limit(1)
-      .maybeSingle();
-
-    if (org || orgMember) {
-      return NextResponse.redirect(`${origin}/dashboard`);
-    }
-
-    const { data: member } = await supabaseAdmin
-      .from("backroom_miembros")
-      .select("backroom_id")
-      .eq("usuario_id", perfilId)
-      .limit(1)
-      .maybeSingle();
-    const { data: owner } = await supabaseAdmin
-      .from("backrooms")
-      .select("id")
-      .eq("propietario_id", perfilId)
-      .limit(1)
-      .maybeSingle();
-
-    if (member || owner) {
-      return NextResponse.redirect(`${origin}/dashboard`);
-    }
-
-    // Ya no existe el modo Demo; los usuarios sin org deben crear una
-    return NextResponse.redirect(`${origin}/org/crear`);
+    // Siempre mandar al dashboard, ya sea que tenga org/salas o no.
+    // El dashboard sabe cómo manejar el estado "Sin organización".
+    return NextResponse.redirect(`${origin}/dashboard`);
   } catch (error) {
     return handleApiError(error);
   }
