@@ -110,7 +110,7 @@ export async function POST(
       // Si la org tiene un certificado configurado y está en plan Pro o Enterprise
       if (org && org.certificate_path && org.certificate_password && (org.plan === "pro" || org.plan === "enterprise")) {
         const signpdf = (await import("@signpdf/signpdf")).default;
-        const { plainAddPlaceholder } = await import("@signpdf/signpdf");
+        const { plainAddPlaceholder } = await import("@signpdf/placeholder-plain");
         
         // Descargar certificado desde Storage
         const { data: certBlob } = await supabase.storage.from("certificates").download(org.certificate_path);

@@ -10,6 +10,7 @@
     "seed:superadmin": "tsx --env-file=.env.local seeds/superadmin.ts"
   },
   "dependencies": {
+    "@signpdf/placeholder-plain": "^3.3.0",
     "@signpdf/signpdf": "^3.3.0",
     "@signpdf/utils": "^3.3.0",
     "@supabase/ssr": "^0",
