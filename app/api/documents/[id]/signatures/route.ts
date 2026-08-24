@@ -27,7 +27,8 @@ export async function POST(
       .select("salas(backrooms(propietario_id))")
       .eq("id", recursoId)
       .single();
-    const isOwner = recurso?.salas?.backrooms?.propietario_id === perfil.id;
+    // @ts-ignore - Supabase type inference bug with nested relations
+    const isOwner = recurso?.salas?.backrooms?.propietario_id === perfil.id || (recurso?.salas as any)?.[0]?.backrooms?.propietario_id === perfil.id;
 
     const upserts = [];
     
