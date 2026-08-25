@@ -29,10 +29,10 @@ export default function DashboardHeader({ userName, userAvatar }: DashboardHeade
             Dashboard
           </Link>
           <Link href="/dashboard" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
-            Logs
+            Registros
           </Link>
           <Link href="/dashboard/configuracion" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
-            Settings
+            Configuración
           </Link>
         </nav>
       </div>

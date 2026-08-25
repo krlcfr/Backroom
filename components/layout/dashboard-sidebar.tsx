@@ -12,12 +12,12 @@ interface DashboardSidebarProps {
 }
 
 const NAV_ITEMS = [
-  { label: "Home", icon: "home", href: "/dashboard" },
-  { label: "Hierarchy", icon: "account_tree", href: "/dashboard/hierarchy" },
-  { label: "Storage", icon: "folder", href: "/dashboard/storage" },
-  { label: "Permissions", icon: "key", href: "/dashboard/miembros" },
-  { label: "History", icon: "history", href: "/dashboard/auditoria" },
-  { label: "Settings", icon: "settings", href: "/dashboard/configuracion" },
+  { label: "Inicio", icon: "home", href: "/dashboard" },
+  { label: "Jerarquía", icon: "account_tree", href: "/dashboard/hierarchy" },
+  { label: "Almacenamiento", icon: "folder", href: "/dashboard/storage" },
+  { label: "Permisos", icon: "key", href: "/dashboard/miembros" },
+  { label: "Historial", icon: "history", href: "/dashboard/auditoria" },
+  { label: "Configuración", icon: "settings", href: "/dashboard/configuracion" },
   { label: "Planes", icon: "credit_card", href: "/dashboard/configuracion/planes" },
 ]
 
@@ -84,7 +84,7 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
           className="w-full bg-[#7c3aed] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          New BackRoom
+          Nuevo BackRoom
         </Link>
       </div>
 
@@ -94,14 +94,14 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
           className="flex items-center gap-3 text-[#ccc3d8] px-4 py-2 text-[12px] hover:bg-[#282a2b] rounded-lg transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">description</span>
-          <span>Docs</span>
+          <span>Documentación</span>
         </Link>
         <Link
           href="/dashboard"
           className="flex items-center gap-3 text-[#ccc3d8] px-4 py-2 text-[12px] hover:bg-[#282a2b] rounded-lg transition-colors"
         >
           <span className="material-symbols-outlined text-[18px]">contact_support</span>
-          <span>Support</span>
+          <span>Soporte</span>
         </Link>
       </div>
     </aside>
