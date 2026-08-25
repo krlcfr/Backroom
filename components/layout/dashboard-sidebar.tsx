@@ -56,7 +56,7 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
       )}
 
       <nav className="flex-1 overflow-y-auto flex flex-col gap-1 px-2">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link

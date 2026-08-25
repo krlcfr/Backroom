@@ -48,7 +48,7 @@ export async function updateSession(request: NextRequest) {
       const { data: profile } = await supabase.from('usuarios').select('id, es_superadmin').eq('auth_id', user.id).single()
       
       if (profile?.es_superadmin) {
-        url.pathname = '/admin'
+        url.pathname = '/dashboard/admin'
         url.search = ''
         return NextResponse.redirect(url)
       }
@@ -74,8 +74,8 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    // Proteger /admin solo para superadmins
-    if (url.pathname.startsWith('/admin')) {
+    // Proteger /dashboard/admin solo para superadmins
+    if (url.pathname.startsWith('/dashboard/admin')) {
       const { data: profile } = await supabase.from('usuarios').select('es_superadmin').eq('auth_id', user.id).single()
       if (!profile?.es_superadmin) {
         url.pathname = '/dashboard' // o /forbidden

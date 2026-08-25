@@ -33,45 +33,45 @@ export function AdminCharts({ metrics }: { metrics: { users: number, organizatio
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 relative z-10">
       
       {/* Gráfica de Usuarios */}
-      <div className="rounded-xl border border-[#27272a]/50 bg-[#18181b]/80 p-6 shadow-xl backdrop-blur-md">
-        <h3 className="text-lg font-medium text-[#e2e2e2] mb-6">Crecimiento de Usuarios (Últimos 7 días)</h3>
+      <div className="rounded-2xl border border-[#3f3f46]/40 bg-[#18181b]/40 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-xl">
+        <h3 className="text-lg font-medium text-[#e2e2e2] mb-8">Actividad de la plataforma (Últimos 7 días)</h3>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={userTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={userTrend} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
               <defs>
                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-              <XAxis dataKey="name" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+              <XAxis dataKey="name" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} tickMargin={12} />
+              <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} tickMargin={12} />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#e2e2e2' }}
-                itemStyle={{ color: '#3b82f6' }}
+                contentStyle={{ backgroundColor: '#18181b', borderColor: '#3f3f46', borderRadius: '12px', color: '#e2e2e2', boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}
+                itemStyle={{ color: '#7c3aed' }}
               />
-              <Area type="monotone" dataKey="valor" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorUsers)" />
+              <Area type="monotone" dataKey="valor" stroke="#7c3aed" strokeWidth={3} fillOpacity={1} fill="url(#colorUsers)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Gráfica de Organizaciones */}
-      <div className="rounded-xl border border-[#27272a]/50 bg-[#18181b]/80 p-6 shadow-xl backdrop-blur-md">
-        <h3 className="text-lg font-medium text-[#e2e2e2] mb-6">Nuevas Organizaciones</h3>
+      <div className="rounded-2xl border border-[#3f3f46]/40 bg-[#18181b]/40 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-xl">
+        <h3 className="text-lg font-medium text-[#e2e2e2] mb-8">Nuevas Organizaciones</h3>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={orgTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={orgTrend} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-              <XAxis dataKey="name" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+              <XAxis dataKey="name" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} tickMargin={12} />
+              <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} tickMargin={12} />
               <Tooltip 
-                contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px', color: '#e2e2e2' }}
-                itemStyle={{ color: '#a855f7' }}
+                contentStyle={{ backgroundColor: '#18181b', borderColor: '#3f3f46', borderRadius: '12px', color: '#e2e2e2', boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}
+                itemStyle={{ color: '#d2bbff' }}
                 cursor={{ fill: '#27272a', opacity: 0.4 }}
               />
-              <Bar dataKey="valor" fill="#a855f7" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="valor" fill="#d2bbff" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
