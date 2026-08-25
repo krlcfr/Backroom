@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { InvitationsService } from "@/lib/services/invitations.service";
 import InvitationClient from "./invitation-client";
 import { AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Button from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -12,7 +12,7 @@ export const metadata = {
 };
 
 export default async function InvitationPage({ params }: { params: { token: string } }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   try {
@@ -51,7 +51,7 @@ export default async function InvitationPage({ params }: { params: { token: stri
             </Button>
           </CardFooter>
         </Card>
-      </Card>
+      </div>
     );
   }
 }
