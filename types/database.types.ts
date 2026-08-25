@@ -18,33 +18,33 @@ export type Database = {
         Row: {
           action: string
           actor_id: string
-          backroom_id: string
           created_at: string
           details: Json | null
           id: string
           ip_address: string | null
+          organization_id: string
           target_id: string | null
           target_type: string
         }
         Insert: {
           action: string
           actor_id: string
-          backroom_id: string
           created_at?: string
           details?: Json | null
           id?: string
           ip_address?: string | null
+          organization_id: string
           target_id?: string | null
           target_type: string
         }
         Update: {
           action?: string
           actor_id?: string
-          backroom_id?: string
           created_at?: string
           details?: Json | null
           id?: string
           ip_address?: string | null
+          organization_id?: string
           target_id?: string | null
           target_type?: string
         }
@@ -57,10 +57,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "audit_logs_backroom_id_fkey"
-            columns: ["backroom_id"]
+            foreignKeyName: "audit_logs_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "backrooms"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -149,6 +149,60 @@ export type Database = {
           {
             foreignKeyName: "backrooms_propietario_id_fkey"
             columns: ["propietario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_signatures: {
+        Row: {
+          created_at: string | null
+          height: number
+          id: string
+          page_number: number
+          pos_x: number
+          pos_y: number
+          recurso_id: string
+          signature_image_url: string
+          usuario_id: string
+          width: number
+        }
+        Insert: {
+          created_at?: string | null
+          height: number
+          id?: string
+          page_number: number
+          pos_x: number
+          pos_y: number
+          recurso_id: string
+          signature_image_url: string
+          usuario_id: string
+          width: number
+        }
+        Update: {
+          created_at?: string | null
+          height?: number
+          id?: string
+          page_number?: number
+          pos_x?: number
+          pos_y?: number
+          recurso_id?: string
+          signature_image_url?: string
+          usuario_id?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_signatures_recurso_id_fkey"
+            columns: ["recurso_id"]
+            isOneToOne: false
+            referencedRelation: "recursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_signatures_usuario_id_fkey"
+            columns: ["usuario_id"]
             isOneToOne: false
             referencedRelation: "usuarios"
             referencedColumns: ["id"]
@@ -315,6 +369,8 @@ export type Database = {
         Row: {
           billing_cycle: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_at_period_end: boolean | null
+          certificate_password: string | null
+          certificate_path: string | null
           created_at: string
           dedicated_schema: string | null
           description: string | null
@@ -333,6 +389,8 @@ export type Database = {
         Insert: {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_at_period_end?: boolean | null
+          certificate_password?: string | null
+          certificate_path?: string | null
           created_at?: string
           dedicated_schema?: string | null
           description?: string | null
@@ -351,6 +409,8 @@ export type Database = {
         Update: {
           billing_cycle?: Database["public"]["Enums"]["billing_cycle"] | null
           cancel_at_period_end?: boolean | null
+          certificate_password?: string | null
+          certificate_path?: string | null
           created_at?: string
           dedicated_schema?: string | null
           description?: string | null
@@ -410,7 +470,6 @@ export type Database = {
           tamano_bytes: number | null
           tipo: string
           url: string
-          visibility_mode?: string
         }
         Insert: {
           created_at?: string
@@ -421,7 +480,6 @@ export type Database = {
           tamano_bytes?: number | null
           tipo: string
           url: string
-          visibility_mode?: string
         }
         Update: {
           created_at?: string
@@ -432,7 +490,6 @@ export type Database = {
           tamano_bytes?: number | null
           tipo?: string
           url?: string
-          visibility_mode?: string
         }
         Relationships: [
           {
@@ -777,4 +834,3 @@ export const Constants = {
     },
   },
 } as const
-
