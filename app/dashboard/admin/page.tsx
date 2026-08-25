@@ -2,6 +2,11 @@ import { requireAuth } from "@/lib/auth/session";
 import { SuperAdminService } from "@/lib/services/superadmin.service";
 import { AdminCharts } from "./admin-charts";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Panel de Administración',
+}
 
 function formatBytes(bytes: number) {
   if (bytes === 0) return '0 Bytes';

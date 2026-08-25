@@ -13,9 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BackRoom — Espacios colaborativos de estudio",
+  title: {
+    template: '%s | BackRoom',
+    default: 'BackRoom | Sistema de Gestión',
+  },
   description:
-    "Plataforma web colaborativa para organizar, compartir y gestionar material de estudio en espacios llamados BackRooms.",
+    "Plataforma web colaborativa para organizar, compartir y gestionar material en espacios llamados BackRooms.",
 };
 
 export default function RootLayout({

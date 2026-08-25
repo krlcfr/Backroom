@@ -2,6 +2,11 @@ import { createClient } from "@/lib/supabase/server"
 import { BackroomsService } from "@/lib/services/backrooms.service"
 import { OrganizationsService } from "@/lib/services/organizations.service"
 import DashboardContent from "./dashboard-content"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+}
 
 interface Backroom {
   id: string

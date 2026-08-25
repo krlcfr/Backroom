@@ -3,6 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { OrganizationsService } from "@/lib/services/organizations.service";
 import { AuditService } from "@/lib/services/audit.service";
 import AuditTable from "./audit-table";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Auditoría',
+}
 
 export default async function AuditoriaPage() {
   const supabase = await createClient();
