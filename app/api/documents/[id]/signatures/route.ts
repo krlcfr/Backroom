@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { handleApiError, ApiError } from "@/lib/api-error";
+import { AuditService } from "@/lib/services/audit.service";
 
 export async function POST(
   request: NextRequest,
@@ -21,20 +22,21 @@ export async function POST(
     const { data: perfil } = await supabase.from("usuarios").select("id").eq("auth_id", user.id).single();
     if (!perfil) throw new ApiError(404, "Usuario interno no encontrado");
 
-    // Verificar si es dueño
+    // Verificar si es dueño o creador
     const { data: recurso } = await supabase
       .from("recursos")
-      .select("salas(backrooms(propietario_id))")
+      .select("usuario_id, salas(backrooms(propietario_id, organizacion_id))")
       .eq("id", recursoId)
       .single();
-    // @ts-ignore - Supabase type inference bug with nested relations
+    // @ts-expect-error - Supabase type inference bug with nested relations
     const isOwner = recurso?.salas?.backrooms?.propietario_id === perfil.id || (recurso?.salas as any)?.[0]?.backrooms?.propietario_id === perfil.id;
+    const isCreator = recurso?.usuario_id === perfil.id;
 
     const upserts = [];
     
     for (const sig of signatures) {
-      // Si la firma es para otro usuario, solo el dueño puede asignarla
-      if (sig.usuario_id && sig.usuario_id !== perfil.id && !isOwner) {
+      // Si la firma es para otro usuario, solo el dueño o el creador puede asignarla
+      if (sig.usuario_id && sig.usuario_id !== perfil.id && !isOwner && !isCreator) {
         throw new ApiError(403, "No puedes asignar o modificar firmas de otros usuarios");
       }
 
@@ -69,6 +71,19 @@ export async function POST(
       if (upsertError) {
         console.error("Error guardando firmas:", upsertError);
         throw new ApiError(500, "No se pudieron guardar las posiciones de las firmas");
+      }
+      
+      // @ts-expect-error - Bug de tipos anidados
+      const orgId = recurso?.salas?.backrooms?.organizacion_id || (recurso?.salas as any)?.[0]?.backrooms?.organizacion_id;
+      if (orgId) {
+        await AuditService.logAction({
+          orgId,
+          actorId: perfil.id,
+          action: "DOCUMENT_SENT_FOR_SIGNATURE",
+          targetType: "resource",
+          targetId: recursoId,
+          details: { signaturesAssigned: upserts.length }
+        }).catch(console.error);
       }
     }
 

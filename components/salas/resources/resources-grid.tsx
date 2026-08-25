@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import FloatingViewer from "./floating-viewer"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import dynamic from "next/dynamic"
+import FloatingViewer from "./floating-viewer"
+import DocumentStatusModal from "../../modals/document-status-modal"
 
 const DocumentEditorModal = dynamic(
   () => import("@/components/modals/document-editor-modal").then(mod => mod.DocumentEditorModal),
@@ -20,6 +21,8 @@ export interface Resource {
   subido_por: string
   created_at: string
   signedUrl?: string
+  is_blind?: boolean
+  pending_signature?: boolean
   usuarios: { nombre_completo: string }
 }
 
@@ -33,6 +36,7 @@ interface ResourcesGridProps {
 export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted }: ResourcesGridProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [activeResource, setActiveResource] = useState<Resource | null>(null)
+  const [statusResource, setStatusResource] = useState<Resource | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
@@ -52,6 +56,10 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
   }
 
   const handleResourceClick = (resource: Resource) => {
+    if (resource.is_blind) {
+      setStatusResource(resource);
+      return;
+    }
     if (resource.tipo === "youtube" || resource.tipo === "video" || resource.tipo === "image" || resource.tipo === "pdf" || resource.tipo === "archivo") {
       setActiveResource(resource)
     } else {
@@ -179,6 +187,13 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
         <DocumentEditorModal 
           recursoId={editingId} 
           onClose={() => setEditingId(null)} 
+        />
+      )}
+
+      {statusResource && (
+        <DocumentStatusModal 
+          recurso={statusResource} 
+          onClose={() => setStatusResource(null)} 
         />
       )}
     </>

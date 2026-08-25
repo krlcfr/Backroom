@@ -14,9 +14,12 @@ export type AuditAction =
   | "RESOURCE_DELETED" 
   | "RESOURCE_DOWNLOADED"
   | "ORG_SETTINGS_UPDATED"
-  | "BILLING_PLAN_CHANGED";
+  | "BILLING_PLAN_CHANGED"
+  | "DOCUMENT_SENT_FOR_SIGNATURE"
+  | "DOCUMENT_SIGNED"
+  | "DOCUMENT_SEALED";
 
-export type TargetType = "member" | "room" | "resource" | "organization" | "billing";
+export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature";
 
 export class AuditService {
   /**
