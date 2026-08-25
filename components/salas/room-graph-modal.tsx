@@ -22,12 +22,23 @@ interface RoomGraphModalProps {
   activeRoomId?: string
   onClose: () => void
   auditMode?: boolean
-  userPermissions?: any[]
+  userPermissions?: { sala_id: string; salas_acceder: boolean }[]
   onNodeAuditClick?: (roomId: string) => void
 }
 
+interface CustomNodeData extends Record<string, unknown> {
+  isRoot: boolean;
+  hasAccess: boolean;
+  icono?: string;
+  auditMode?: boolean;
+  auditAccess?: boolean;
+  isActive?: boolean;
+  nombre: string;
+  roomId: string;
+}
+
 // Custom Node component to show icon and name
-function CustomRoomNode({ data }: { data: any }) {
+function CustomRoomNode({ data }: { data: CustomNodeData }) {
   const isRoot = data.isRoot;
   
   // Lógica de colores para modo normal vs auditoría
@@ -91,8 +102,8 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
 
   // Convert tree into nodes and edges using a radial layout
   const { initialNodes, initialEdges } = useMemo(() => {
-    const nodes: any[] = []
-    const edges: any[] = []
+    const nodes: import("@xyflow/react").Node[] = []
+    const edges: import("@xyflow/react").Edge[] = []
 
     const RADIUS_STEP = 200; // Distancia entre anillos (profundidades)
 
@@ -116,7 +127,7 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
       return leaves;
     }
 
-    const totalLeaves = countLeaves(syntheticBackroom);
+    const totalLeaves = countLeaves(syntheticBackroom); // eslint-disable-line @typescript-eslint/no-unused-vars
 
     // Paso 2: Recorrido asignando ángulos
     function traverse(
@@ -141,7 +152,7 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
         if (depth === 0) {
           auditAccess = true;
         } else {
-          const perm = userPermissions.find((p: any) => p.sala_id === node.id);
+          const perm = userPermissions.find((p) => p.sala_id === node.id);
           // O si no hay fila de permisos pero el usuario es admin o contribuir, depende de la lógica.
           // Para esta visualización, marcaremos en verde si `salas_acceder` es true explícitamente.
           auditAccess = perm?.salas_acceder === true;
@@ -192,21 +203,22 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
     traverse(syntheticBackroom, 0, 0, Math.PI * 2);
 
     return { initialNodes: nodes, initialEdges: edges }
-  }, [tree, backroomId, backroomName, activeRoomId])
+  }, [tree, backroomId, backroomName, activeRoomId, auditMode, userPermissions])
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes)
   const [edges, , onEdgesChange] = useEdgesState(initialEdges)
 
-  const onNodeClickCallback = useCallback((event: any, node: any) => {
+  const onNodeClickCallback = useCallback((event: React.MouseEvent, node: import("@xyflow/react").Node) => {
+    const nodeData = node.data as CustomNodeData;
     if (auditMode && onNodeAuditClick) {
       // En modo auditoría, hacer click en la Backroom raíz (depth 0) puede que no tenga sentido configurarle permisos
       // porque es la backroom. Pero por si acaso, lo habilitamos solo si no es root, o lo controlamos en el padre.
-      if (!node.data.isRoot) {
-        onNodeAuditClick(node.data.roomId)
+      if (!nodeData.isRoot) {
+        onNodeAuditClick(nodeData.roomId)
       }
-    } else if (node.data.hasAccess) {
+    } else if (nodeData.hasAccess) {
       onClose()
-      router.push(`/dashboard/backrooms/${backroomId}/salas/${node.data.roomId}`)
+      router.push(`/dashboard/backrooms/${backroomId}/salas/${nodeData.roomId}`)
     }
   }, [router, backroomId, onClose, auditMode, onNodeAuditClick])
 
