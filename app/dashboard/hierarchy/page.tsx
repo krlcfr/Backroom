@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Organigrama" };
 export default function HierarchyPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -11,3 +13,4 @@ export default function HierarchyPage() {
     </div>
   )
 }
+

@@ -59,12 +59,22 @@ export async function GET(
       filteredRecursos = recursos.filter(res => {
         if (!res.visibility_mode || res.visibility_mode === "sala_completa") return true;
         const isOwner = res.salas?.backrooms?.propietario_id === perfilId;
+        const isCreator = res.usuario_id === perfilId;
         const isAssigned = misRecursosFirmables.has(res.id);
-        return isOwner || isAssigned;
-      }).map(res => ({
-        ...res,
-        pending_signature: misRecursosPendientes.has(res.id)
-      }));
+        return isOwner || isCreator || isAssigned;
+      }).map(res => {
+        const isOwner = res.salas?.backrooms?.propietario_id === perfilId;
+        const isCreator = res.usuario_id === perfilId;
+        const isAssigned = misRecursosFirmables.has(res.id);
+        const isBlind = res.visibility_mode === "solo_firmantes" && !isAssigned && (isCreator || isOwner);
+
+        return {
+          ...res,
+          url: isBlind ? null : res.url,
+          is_blind: isBlind,
+          pending_signature: misRecursosPendientes.has(res.id)
+        };
+      });
     } else {
       filteredRecursos = recursos.map(res => ({ ...res, pending_signature: false }));
     }

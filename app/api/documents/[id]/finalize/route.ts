@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PDFDocument } from "pdf-lib";
 // import signpdf from "@signpdf/signpdf"; // Se usará cuando se tenga el certificado .p12
 import { handleApiError, ApiError } from "@/lib/api-error";
+import { AuditService } from "@/lib/services/audit.service";
 
 export async function POST(
   request: NextRequest,
@@ -26,17 +27,21 @@ export async function POST(
     if (recError || !recurso) throw new ApiError(404, "Documento no encontrado");
 
     const propietarioId = recurso.salas?.backrooms?.propietario_id;
+        const orgId = recurso.salas?.backrooms?.organizacion_id || (recurso.salas as any)?.[0]?.backrooms?.organizacion_id;
+    const creadorId = recurso.usuario_id;
     const { data: perfil } = await supabase.from("usuarios").select("id").eq("auth_id", user.id).single();
-
-    if (propietarioId !== perfil?.id) {
-      throw new ApiError(403, "Solo el administrador del Backroom puede sellar el documento");
-    }
 
     // 2. Obtener todas las firmas virtuales de este documento
     const { data: firmas } = await supabase
       .from("document_signatures")
       .select("*")
       .eq("recurso_id", recursoId);
+
+    const isSigner = firmas?.some(f => f.usuario_id === perfil?.id);
+
+    if (propietarioId !== perfil?.id && creadorId !== perfil?.id && !isSigner) {
+      throw new ApiError(403, "No tienes permiso para sellar este documento");
+    }
 
     if (!firmas || firmas.length === 0) {
       throw new ApiError(400, "No hay firmas para sellar en este documento");
@@ -151,6 +156,16 @@ export async function POST(
 
     // 9. Limpiar las firmas virtuales (Ya están quemadas en el PDF)
     await supabase.from("document_signatures").delete().eq("recurso_id", recursoId);
+
+    if (orgId && perfil) {
+      await AuditService.logAction({
+        orgId,
+        actorId: perfil.id,
+        action: "DOCUMENT_SEALED",
+        targetType: "resource",
+        targetId: recursoId,
+      }).catch(console.error);
+    }
 
     return NextResponse.json({ success: true, message: "Documento sellado exitosamente" });
 

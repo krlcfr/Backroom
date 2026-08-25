@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+export const metadata: Metadata = { title: "Miembros" };
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { OrganizationsService } from "@/lib/services/organizations.service"
@@ -95,3 +97,4 @@ export default async function MiembrosPage() {
     </div>
   )
 }
+

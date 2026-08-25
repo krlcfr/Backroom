@@ -42,6 +42,7 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
   const [loading, setLoading] = useState(true)
   const [clickMenuPos, setClickMenuPos] = useState<{x: number, y: number} | null>(null)
   const [isOwner, setIsOwner] = useState(false)
+  const [isCreator, setIsCreator] = useState(false)
   
   // Nuevos estados para Flujo Avanzado
   const [roomMembers, setRoomMembers] = useState<{id: string, nombre_completo: string, correo: string}[]>([])
@@ -78,11 +79,13 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
             if (perfil) {
               setCurrentUserId(perfil.id)
               const isOwn = recData.salas?.backrooms?.propietario_id === perfil.id
+              const isCreat = recData.usuario_id === perfil.id
               setIsOwner(isOwn)
+              setIsCreator(isCreat)
               
-              // Si es owner, cargar miembros del backroom para asignar firmas
-              if (isOwn) {
-                const orgId = recData.salas?.backrooms?.organization_id;
+              // Si es owner o creador, cargar miembros del backroom para asignar firmas
+              if (isOwn || isCreat) {
+                const orgId = recData.salas?.backrooms?.organization_id || (recData.salas as any)?.[0]?.backrooms?.organizacion_id;
                 if (orgId) {
                   const { data: miembrosData } = await supabase
                     .from("organization_members")
@@ -274,9 +277,9 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
 
           <div className="w-px h-6 bg-gray-700 mx-2"></div>
 
-          {isOwner && (
-            <>
-              <select
+          {(isOwner || isCreator) && (
+              <>
+                <select
                 value={selectedAssignee}
                 onChange={(e) => setSelectedAssignee(e.target.value)}
                 className="bg-[#333535] text-sm text-gray-200 rounded px-3 py-1.5 outline-none border border-gray-600 focus:border-purple-500"
@@ -307,7 +310,7 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
             Guardar Avance
           </button>
           
-          {isOwner && (
+          {((isOwner || isCreator) || signatures.some(s => s.usuario_id === currentUserId)) && (
             <button onClick={handleFinalize} className="text-sm font-medium px-4 py-1.5 rounded bg-purple-600 hover:bg-purple-500 transition-colors text-white shadow-[0_0_15px_rgba(124,58,237,0.4)]">
               Sellar Documento
             </button>
@@ -371,7 +374,7 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
             >
               <button 
                 onClick={() => {
-                  if (isOwner && selectedAssignee) {
+                  if ((isOwner || isCreator) && selectedAssignee) {
                     // Insertar placeholder para el asignado
                     const selectedMember = roomMembers.find(m => m.id === selectedAssignee)
                     setSignatures([...signatures, {
@@ -391,7 +394,7 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
                 }}
                 className="flex items-center gap-2 px-3 py-2 text-sm text-gray-200 hover:bg-purple-600 hover:text-white rounded-md text-left transition-colors"
               >
-                <span className="material-symbols-outlined text-[16px]">edit</span> {isOwner && selectedAssignee ? "Asignar Caja de Firma" : "Insertar firma aquí"}
+                <span className="material-symbols-outlined text-[16px]">edit</span> {(isOwner || isCreator) && selectedAssignee ? "Asignar Caja de Firma" : "Insertar firma aquí"}
               </button>
             </div>
           )}
@@ -437,7 +440,7 @@ export function DocumentEditorModal({ recursoId, onClose }: DocumentEditorModalP
                   </div>
                 )}
 
-                {(isOwner || sig.usuario_id === currentUserId) && (
+                {((isOwner || isCreator) || sig.usuario_id === currentUserId) && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation()
