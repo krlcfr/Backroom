@@ -25,7 +25,7 @@ export async function POST(
     // Verificar si es dueño o creador
     const { data: recurso } = await supabase
       .from("recursos")
-      .select("usuario_id, salas(backrooms(propietario_id, organizacion_id))")
+      .select("usuario_id, salas(backrooms(propietario_id))")
       .eq("id", recursoId)
       .single();
     // @ts-expect-error - Supabase type inference bug with nested relations

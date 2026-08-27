@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 
 import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import RoomTree from "@/components/salas/room-tree"
 import RoomGraphModal from "@/components/salas/room-graph-modal"
@@ -13,6 +13,7 @@ import CreateRoomModal from "@/components/modals/create-room-modal"
 import Breadcrumb from "@/components/ui/breadcrumb"
 import RecursosList from "@/components/salas/recursos-list"
 import { useLimits } from "@/components/providers/limits-provider"
+import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
 
 interface Sala {
   id: string
@@ -39,6 +40,7 @@ interface Backroom {
 export default function SalaPage() {
   const { id, salaId } = useParams<{ id: string; salaId: string }>()
   const router = useRouter()
+  const pathname = usePathname()
   const { canCreateSala } = useLimits()
 
   const [sala, setSala] = useState<Sala | null>(null)
@@ -63,14 +65,14 @@ export default function SalaPage() {
   const [resources, setResources] = useState<Resource[]>([])
   const [canUpload, setCanUpload] = useState(false)
   const [canDeleteRes, setCanDeleteRes] = useState(false)
-  const [showAddResource, setShowAddResource] = useState(false)
-
+  const [addResourceType, setAddResourceType] = useState<'doc' | 'pdf' | 'media' | 'link' | null>(null)
+  const [showCreateDocument, setShowCreateDocument] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
   const menuRef = useRef<HTMLDivElement>(null)
 
-  const atMaxDepth = sala && sala.depth >= 1
+  const atMaxDepth = sala && sala.depth >= 2
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -143,7 +145,7 @@ export default function SalaPage() {
       }
     }
     if (salaId) fetchData()
-  }, [id, salaId])
+  }, [id, salaId, pathname])
 
   const reloadResources = async () => {
     try {
@@ -267,7 +269,12 @@ export default function SalaPage() {
         <div className="flex items-start justify-between">
           <div>
             <Breadcrumb items={breadcrumbItems} />
-            <h1 className="text-[28px] font-bold text-[#e2e2e2] mb-2">{sala.nombre}</h1>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-[28px] font-bold text-[#e2e2e2]">{sala.nombre}</h1>
+              <span className="bg-[#333535] text-[#ccc3d8] text-[10px] px-2 py-1 rounded-full border border-[#4a4455]">
+                Nivel: {sala.depth}
+              </span>
+            </div>
             {sala.descripcion && (
               <p className="text-[#ccc3d8] text-[16px] max-w-2xl">{sala.descripcion}</p>
             )}
@@ -338,11 +345,11 @@ export default function SalaPage() {
             </div>
             {canUpload && (
               <button
-                onClick={() => setShowAddResource(true)}
+                onClick={() => setShowCreateDocument(true)}
                 className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[13px] font-medium"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
-                Añadir Recurso
+                Recursos
               </button>
             )}
           </div>
@@ -525,13 +532,29 @@ export default function SalaPage() {
         </div>
       )}
 
-      {showAddResource && (
+      {addResourceType && (
         <AddResourceModal
           roomId={salaId}
-          onClose={() => setShowAddResource(false)}
+          onClose={() => setAddResourceType(null)}
           onSuccess={() => {
-            setShowAddResource(false)
+            setAddResourceType(null)
             reloadResources()
+          }}
+          initialType={addResourceType}
+          onBack={() => {
+            setAddResourceType(null)
+            setShowCreateDocument(true)
+          }}
+        />
+      )}
+
+      {showCreateDocument && (
+        <DocumentCreationWizardModal
+          orgId={""}
+          onClose={() => setShowCreateDocument(false)}
+          onAddResource={(type) => {
+            setShowCreateDocument(false)
+            setAddResourceType(type)
           }}
         />
       )}

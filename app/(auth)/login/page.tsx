@@ -132,7 +132,14 @@ function LoginForm() {
       )}
 
       {/* Header */}
-      <div className="p-8 pb-6 text-center border-b border-[#4a4455]/50">
+      <div className="p-8 pb-6 text-center border-b border-[#4a4455]/50 relative">
+        <Link 
+          href="/" 
+          className="absolute left-6 top-8 text-[#958da1] hover:text-[#e2e2e2] transition-colors flex items-center justify-center"
+          title="Volver al inicio"
+        >
+          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+        </Link>
         <h1 className="text-[28px] font-semibold leading-9 text-[#d2bbff] tracking-tight mb-2">BackRoom</h1>
         <p className="text-[14px] leading-5 text-[#ccc3d8]">Accede a tu espacio de control</p>
       </div>

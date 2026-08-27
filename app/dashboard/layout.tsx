@@ -8,6 +8,9 @@ import SessionTimeout from "@/components/session-timeout"
 import { UpsellModal } from "@/components/modals/upsell-modal"
 import { LimitsProvider } from "@/components/providers/limits-provider"
 
+import { SidebarProvider } from "@/components/providers/sidebar-provider"
+import SidebarWrapper from "@/components/layout/sidebar-wrapper"
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: sessionData } = await supabase.auth.getSession()
@@ -39,23 +42,25 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <LimitsProvider>
-      <div className="flex min-h-screen flex-col bg-[#121414]">
-        <SessionTimeout />
-        <DashboardHeader userName={userName} userAvatar={userAvatar} />
-        <div className="flex flex-1 pt-16">
-          <DashboardSidebar
-            orgName={org?.name ?? null}
-            orgLogo={org?.logoUrl ?? null}
-            orgUpdatedAt={org?.updatedAt ?? null}
-            esPropietario={esPropietario}
-            isSuperAdmin={isSuperAdmin}
-          />
-          <main className="flex-1 md:ml-[260px] p-4 md:p-8 w-full">
-            {children}
-          </main>
+      <SidebarProvider>
+        <div className="flex min-h-screen flex-col bg-[#121414]">
+          <SessionTimeout />
+          <DashboardHeader userName={userName} userAvatar={userAvatar} />
+          <div className="flex flex-1 pt-16">
+            <DashboardSidebar
+              orgName={org?.name ?? null}
+              orgLogo={org?.logoUrl ?? null}
+              orgUpdatedAt={org?.updatedAt ?? null}
+              esPropietario={esPropietario}
+              isSuperAdmin={isSuperAdmin}
+            />
+            <SidebarWrapper>
+              {children}
+            </SidebarWrapper>
+          </div>
+          <UpsellModal orgId={org?.id} />
         </div>
-        <UpsellModal orgId={org?.id} />
-      </div>
+      </SidebarProvider>
     </LimitsProvider>
   )
 }

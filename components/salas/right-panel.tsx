@@ -36,13 +36,6 @@ export default function RightPanel({ backroom, esPropietario, tree, activeRoomId
     <>
       <aside className="w-80 flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-        <Link
-          href={`/dashboard/backrooms/${backroom.id}/salas`}
-          className="w-full bg-[#7c3aed] text-white hover:bg-[#8b5cf6] transition-colors text-[12px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-2"
-        >
-          <span className="material-symbols-outlined text-[20px]">upload</span>
-          Subir recurso
-        </Link>
         {esPropietario && (
           <Link
             href={`/dashboard/backrooms/${backroom.id}/miembros`}
@@ -56,7 +49,7 @@ export default function RightPanel({ backroom, esPropietario, tree, activeRoomId
 
       <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4">
         <h3 className="text-[12px] text-[#ccc3d8] uppercase tracking-wider mb-4 border-b border-[#3f3f46] pb-2 font-medium">
-          Room Details
+          Detalles de la sala
         </h3>
         <div className="flex flex-col gap-3 text-[14px]">
           <div className="flex justify-between">
