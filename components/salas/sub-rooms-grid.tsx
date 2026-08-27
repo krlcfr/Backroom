@@ -15,9 +15,10 @@ interface SubRoomsGridProps {
   rooms: Sala[]
   backroomId: string
   onCreateClick: () => void
+  canCreate?: boolean
 }
 
-export default function SubRoomsGrid({ rooms, backroomId, onCreateClick }: SubRoomsGridProps) {
+export default function SubRoomsGrid({ rooms, backroomId, onCreateClick, canCreate = true }: SubRoomsGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {rooms.map((room) => (
@@ -39,14 +40,30 @@ export default function SubRoomsGrid({ rooms, backroomId, onCreateClick }: SubRo
       ))}
 
       <button
-        onClick={onCreateClick}
-        className="border-2 border-dashed border-[#4a4455] rounded-xl p-4 hover:bg-[#7c3aed]/10 hover:border-[#7c3aed] transition-colors group flex flex-col items-center justify-center text-center min-h-[160px]"
+        onClick={() => {
+          if (canCreate) {
+            onCreateClick()
+          } else {
+            window.dispatchEvent(new CustomEvent("show-upsell", { detail: { message: "Has alcanzado el límite de jerarquía (niveles de salas) de tu plan actual." } }))
+          }
+        }}
+        className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center min-h-[160px] transition-colors ${
+          canCreate
+            ? "border-[#4a4455] hover:bg-[#7c3aed]/10 hover:border-[#7c3aed] group"
+            : "border-[#3f3f46] bg-[#27272a] opacity-60 cursor-not-allowed"
+        }`}
       >
-        <div className="w-12 h-12 rounded-full bg-[#1e2020] flex items-center justify-center text-[#d2bbff] mb-3 group-hover:bg-[#7c3aed]/20 transition-colors">
-          <span className="material-symbols-outlined text-[32px]">add</span>
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors ${
+          canCreate
+            ? "bg-[#1e2020] text-[#d2bbff] group-hover:bg-[#7c3aed]/20"
+            : "bg-[#333535] text-[#958da1]"
+        }`}>
+          <span className="material-symbols-outlined text-[32px]">{canCreate ? "add" : "lock"}</span>
         </div>
         <h3 className="font-semibold text-[#e2e2e2] text-[16px] mb-1">Crear nueva sala</h3>
-        <p className="text-[#ccc3d8] text-[13px]">Configura un nuevo espacio de trabajo jerárquico.</p>
+        <p className="text-[#ccc3d8] text-[13px]">
+          {canCreate ? "Configura un nuevo espacio de trabajo jerárquico." : "Límite alcanzado"}
+        </p>
       </button>
     </div>
   )

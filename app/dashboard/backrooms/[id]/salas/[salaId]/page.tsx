@@ -12,6 +12,7 @@ import SubRoomsGrid from "@/components/salas/sub-rooms-grid"
 import CreateRoomModal from "@/components/modals/create-room-modal"
 import Breadcrumb from "@/components/ui/breadcrumb"
 import RecursosList from "@/components/salas/recursos-list"
+import { useLimits } from "@/components/providers/limits-provider"
 
 interface Sala {
   id: string
@@ -38,6 +39,7 @@ interface Backroom {
 export default function SalaPage() {
   const { id, salaId } = useParams<{ id: string; salaId: string }>()
   const router = useRouter()
+  const { canCreateSala } = useLimits()
 
   const [sala, setSala] = useState<Sala | null>(null)
   const [children, setChildren] = useState<Sala[]>([])
@@ -314,6 +316,7 @@ export default function SalaPage() {
             rooms={children}
             backroomId={id}
             onCreateClick={() => setShowCreateRoom(true)}
+            canCreate={canCreateSala(sala.depth)}
           />
         )}
 

@@ -6,6 +6,7 @@ import DashboardSidebar from "@/components/layout/dashboard-sidebar"
 import DashboardHeader from "@/components/layout/dashboard-header"
 import SessionTimeout from "@/components/session-timeout"
 import { UpsellModal } from "@/components/modals/upsell-modal"
+import { LimitsProvider } from "@/components/providers/limits-provider"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -37,22 +38,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const userAvatar = sessionData.session?.user?.user_metadata?.avatar_url ?? null
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#121414]">
-      <SessionTimeout />
-      <DashboardHeader userName={userName} userAvatar={userAvatar} />
-      <div className="flex flex-1 pt-16">
-        <DashboardSidebar
-          orgName={org?.name ?? null}
-          orgLogo={org?.logoUrl ?? null}
-          orgUpdatedAt={org?.updatedAt ?? null}
-          esPropietario={esPropietario}
-          isSuperAdmin={isSuperAdmin}
-        />
-        <main className="flex-1 md:ml-[260px] p-4 md:p-8 w-full">
-          {children}
-        </main>
+    <LimitsProvider>
+      <div className="flex min-h-screen flex-col bg-[#121414]">
+        <SessionTimeout />
+        <DashboardHeader userName={userName} userAvatar={userAvatar} />
+        <div className="flex flex-1 pt-16">
+          <DashboardSidebar
+            orgName={org?.name ?? null}
+            orgLogo={org?.logoUrl ?? null}
+            orgUpdatedAt={org?.updatedAt ?? null}
+            esPropietario={esPropietario}
+            isSuperAdmin={isSuperAdmin}
+          />
+          <main className="flex-1 md:ml-[260px] p-4 md:p-8 w-full">
+            {children}
+          </main>
+        </div>
+        <UpsellModal orgId={org?.id} />
       </div>
-      <UpsellModal orgId={org?.id} />
-    </div>
+    </LimitsProvider>
   )
 }

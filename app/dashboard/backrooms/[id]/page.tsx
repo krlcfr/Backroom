@@ -11,6 +11,7 @@ import CreateRoomModal from "@/components/modals/create-room-modal"
 import Breadcrumb from "@/components/ui/breadcrumb"
 import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
+import { useLimits } from "@/components/providers/limits-provider"
 
 interface Backroom {
   id: string
@@ -20,6 +21,7 @@ interface Backroom {
   ownerId: string
   ownerName: string | null
   createdAt: string
+  icono?: string
 }
 
 interface Sala {
@@ -28,6 +30,7 @@ interface Sala {
   descripcion: string | null
   depth: number
   created_at: string
+  icono?: string
 }
 
 interface SalaNode {
@@ -38,8 +41,10 @@ interface SalaNode {
 }
 
 export default function BackRoomPage() {
-  const { id } = useParams<{ id: string }>()
+  const params = useParams()
   const router = useRouter()
+  const { canCreateSala } = useLimits()
+  const id = typeof params.id === "string" ? params.id : params.id?.[0]
 
   const [backroom, setBackroom] = useState<Backroom | null>(null)
   const [rooms, setRooms] = useState<Sala[]>([])
@@ -250,6 +255,7 @@ export default function BackRoomPage() {
           rooms={rooms.filter((r: any) => !r.parent_id)}
           backroomId={backroom.id}
           onCreateClick={() => setShowCreateRoom(true)}
+          canCreate={canCreateSala(0)}
         />
 
         <hr className="border-[#3f3f46] my-4" />

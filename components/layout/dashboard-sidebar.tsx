@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import SidebarTree from "./sidebar-tree"
+import { useLimits } from "@/components/providers/limits-provider"
 
 interface DashboardSidebarProps {
   orgName: string | null
@@ -23,6 +25,7 @@ const NAV_ITEMS = [
 
 export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPropietario, isSuperAdmin }: DashboardSidebarProps) {
   const pathname = usePathname()
+  const { canCreateBackroom } = useLimits()
 
   // Filtramos planes si no es propietario
   let navItems = esPropietario ? [...NAV_ITEMS] : NAV_ITEMS.filter((i) => i.label !== "Planes")
@@ -33,6 +36,10 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
       navItems.push({ label: "Métricas Globales", icon: "public", href: "/dashboard/admin" })
     }
   }
+
+  // Detectar si estamos dentro de un Backroom
+  const backroomMatch = pathname.match(/\/dashboard\/backrooms\/([a-zA-Z0-9-]+)/)
+  const backroomId = backroomMatch ? backroomMatch[1] : null
 
   return (
     <aside className="hidden md:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-[260px] bg-[#1a1c1c] border-r border-[#4a4455] flex-col py-4 gap-2">
@@ -55,7 +62,7 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
         </div>
       )}
 
-      <nav className="flex-1 overflow-y-auto flex flex-col gap-1 px-2">
+      <nav className="flex-none flex flex-col gap-1 px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -75,20 +82,30 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
         })}
       </nav>
 
+      {/* Árbol de navegación si estamos en un BackRoom */}
+      {backroomId && <SidebarTree backroomId={backroomId} />}
+
       <div className="px-4 mt-auto mb-4">
-        <Link
-          href="/dashboard"
+        <button
           onClick={() => {
-            window.dispatchEvent(new CustomEvent("open-create-backroom"))
+            if (canCreateBackroom) {
+              window.dispatchEvent(new CustomEvent("open-create-backroom"))
+            } else {
+              window.dispatchEvent(new CustomEvent("show-upsell", { detail: { message: "Has alcanzado el límite de BackRooms de tu plan actual." } }))
+            }
           }}
-          className="w-full bg-[#7c3aed] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
+          className={`w-full py-2 rounded-lg flex items-center justify-center gap-2 text-[12px] font-medium transition-colors ${
+            canCreateBackroom 
+              ? "bg-[#7c3aed] text-white hover:bg-[#8b5cf6]" 
+              : "bg-[#333535] text-[#ccc3d8] hover:bg-[#4a4455] opacity-80"
+          }`}
         >
-          <span className="material-symbols-outlined text-[18px]">add</span>
+          <span className="material-symbols-outlined text-[18px]">{canCreateBackroom ? "add" : "lock"}</span>
           Nuevo BackRoom
-        </Link>
+        </button>
       </div>
 
-      <div className="border-t border-[#4a4455] pt-2 px-2 flex flex-col gap-1">
+      <div className="border-t border-[#4a4455] pt-2 px-2 flex flex-col gap-1 flex-none">
         <Link
           href="/dashboard"
           className="flex items-center gap-3 text-[#ccc3d8] px-4 py-2 text-[12px] hover:bg-[#282a2b] rounded-lg transition-colors"
