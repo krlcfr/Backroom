@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import CargosModal from "./cargos-modal"
 
 interface Member {
   userId: string
@@ -12,6 +13,8 @@ interface Member {
   username: string | null
   fullName: string | null
   email: string | null
+  cargoId?: string | null
+  cargoName?: string | null
 }
 
 interface MiembrosTableProps {
@@ -20,6 +23,7 @@ interface MiembrosTableProps {
   currentUserId: string | null
   esPropietario: boolean
   miembros: Member[]
+  cargos?: any[]
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -58,12 +62,14 @@ export default function MiembrosTable({
   currentUserId,
   esPropietario,
   miembros,
+  cargos = [],
 }: MiembrosTableProps) {
   const router = useRouter()
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "member">("all")
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "pending">("all")
   const [busyUserId, setBusyUserId] = useState<string | null>(null)
   const [error, setError] = useState("")
+  const [isCargosModalOpen, setIsCargosModalOpen] = useState(false)
   const [removing, setRemoving] = useState<Member | null>(null)
 
   const rows = useMemo(() => {
@@ -77,6 +83,8 @@ export default function MiembrosTable({
         username: null,
         fullName: null,
         email: null,
+        cargoId: null,
+        cargoName: null,
       } as Member,
       ...miembros.filter((m) => m.userId !== ownerUserId),
     ]
@@ -115,6 +123,31 @@ export default function MiembrosTable({
       router.refresh()
     } catch {
       setError("Error de conexión al cambiar el rol")
+    } finally {
+      setBusyUserId(null)
+    }
+  }
+
+  async function handleChangeCargo(member: Member, nextCargoId: string) {
+    setBusyUserId(member.userId)
+    setError("")
+    try {
+      const res = await fetch(
+        `/api/organizations/${orgId}/members/${member.userId}/cargo`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cargo_id: nextCargoId || null }),
+        }
+      )
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        setError(data?.error || "No se pudo cambiar el cargo")
+        return
+      }
+      router.refresh()
+    } catch {
+      setError("Error de conexión al cambiar el cargo")
     } finally {
       setBusyUserId(null)
     }
@@ -209,6 +242,11 @@ export default function MiembrosTable({
           <option value="active">Activos</option>
           <option value="pending">Pendientes</option>
         </select>
+        {esPropietario && (
+          <button onClick={() => setIsCargosModalOpen(true)} className="rounded-lg bg-[#3f3f46] px-3 py-2 text-[13px] text-white hover:bg-[#4a4455]">
+            Gestionar Cargos
+          </button>
+        )}
       </div>
 
       {error && <p className="border-b border-[#3f3f46] px-4 py-3 text-[12px] text-[#ffb4ab]">{error}</p>}
@@ -219,6 +257,7 @@ export default function MiembrosTable({
             <tr className="border-b border-[#3f3f46] text-[11px] uppercase tracking-wide text-[#ccc3d8]/60">
               <th className="px-4 py-3 font-medium">Miembro</th>
               <th className="px-4 py-3 font-medium">Rol</th>
+              <th className="px-4 py-3 font-medium">Cargo</th>
               <th className="px-4 py-3 font-medium">Estado</th>
               <th className="px-4 py-3 font-medium">Fecha unión</th>
               <th className="px-4 py-3 font-medium">Último acceso</th>
@@ -228,7 +267,7 @@ export default function MiembrosTable({
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={esPropietario ? 6 : 5} className="px-4 py-10 text-center text-[#ccc3d8]">
+                <td colSpan={esPropietario ? 7 : 6} className="px-4 py-10 text-center text-[#ccc3d8]">
                   Sin miembros para los filtros seleccionados.
                 </td>
               </tr>
@@ -258,6 +297,25 @@ export default function MiembrosTable({
                       </div>
                     </td>
                     <td className="px-4 py-3">{roleBadge(m.role)}</td>
+                    <td className="px-4 py-3">
+                      {isInvite ? (
+                        <span className="text-[#ccc3d8]/50">—</span>
+                      ) : (esPropietario || isSelf) ? (
+                        <select
+                          value={m.cargoId || ""}
+                          onChange={(e) => handleChangeCargo(m, e.target.value)}
+                          disabled={busy}
+                          className="rounded border border-[#3f3f46] bg-[#18181b] px-2 py-1 text-[12px] text-[#e2e2e2] outline-none focus:border-[#a78bfa] disabled:opacity-50"
+                        >
+                          <option value="">Sin cargo</option>
+                          {cargos.map(c => (
+                            <option key={c.id} value={c.id}>{c.nombre}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-[#ccc3d8]">{m.cargoName || "Sin cargo"}</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">{statusBadge(m.status)}</td>
                     <td className="px-4 py-3 text-[#ccc3d8]">{formatDate(m.joinedAt)}</td>
                     <td className="px-4 py-3 text-[#ccc3d8]">{formatDate(m.lastAccessAt)}</td>
@@ -304,6 +362,8 @@ export default function MiembrosTable({
       </div>
 
       {/* Modal de confirmación */}
+      {isCargosModalOpen && <CargosModal orgId={orgId} cargos={cargos} onClose={() => setIsCargosModalOpen(false)} />}
+
       {removing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md rounded-xl border border-[#3f3f46] bg-[#27272a] p-6">

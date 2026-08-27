@@ -4,6 +4,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { OrganizationsService } from "@/lib/services/organizations.service"
 import { InvitationsService } from "@/lib/services/invitations.service"
+import { CargosService } from "@/lib/services/cargos.service"
 import { getUsuarioInterno } from "@/lib/auth/rbac"
 import MiembrosTable from "./miembros-table"
 import InviteButton from "./invite-button"
@@ -18,6 +19,7 @@ export default async function MiembrosPage() {
   let usuarioInternoId: string | null = null
   let miembros: Awaited<ReturnType<typeof OrganizationsService.listMembers>> = []
   let pendingInvitations: any[] = []
+  let cargos: any[] = []
 
   if (authId) {
     try {
@@ -29,6 +31,7 @@ export default async function MiembrosPage() {
       if (org) {
         miembros = await OrganizationsService.listMembers(org.id)
         pendingInvitations = await InvitationsService.listPendingInvitations(org.id)
+        cargos = await CargosService.listByOrg(authId, org.id)
       }
     } catch {
       org = null
@@ -93,6 +96,7 @@ export default async function MiembrosPage() {
         currentUserId={usuarioInternoId}
         esPropietario={esPropietario}
         miembros={allMembers}
+        cargos={cargos}
       />
     </div>
   )

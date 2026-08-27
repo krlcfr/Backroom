@@ -139,6 +139,14 @@ export class OrganizationsService {
       throw new ApiError(500, "No se pudo crear la organización");
     }
 
+    // Insertar al creador como admin en la organización
+    await supabase.from("organization_members").insert({
+      organization_id: org.id,
+      user_id: usuario.id,
+      role: "admin",
+      status: "active"
+    });
+
     if (logo) {
       const path = `${org.id}/logo${logoExt}`;
       const buffer = await logo.arrayBuffer();
@@ -318,7 +326,7 @@ export class OrganizationsService {
 
     const { data, error } = await adminSupabase
       .from("organization_members")
-      .select("*, usuarios(username, nombre_completo, correo)")
+      .select("*, usuarios(username, nombre_completo, correo), cargos(id, nombre)")
       .eq("organization_id", orgId)
       .order("created_at", { ascending: true });
 
@@ -407,6 +415,36 @@ export class OrganizationsService {
     if (error) {
       throw new ApiError(500, "No se pudo remover el miembro");
     }
+  }
+
+  static async updateMemberCargo(authId: string, orgId: string, userId: string, cargoId: string | null) {
+    const usuario = await getUsuarioInterno(authId);
+    if (!usuario) throw new ApiError(404, "Perfil no encontrado");
+
+    const supabase = await createClient();
+
+    const { data: org, error: orgError } = await supabase.from("organizations").select("owner_id").eq("id", orgId).maybeSingle();
+    if (orgError || !org) throw new ApiError(404, "Organización no encontrada");
+
+    const { data: isAdmin } = await supabase.rpc("is_org_admin", { org: orgId });
+    const isOwner = org.owner_id === usuario.id;
+    const isSelf = usuario.id === userId;
+
+    if (!isOwner && !isAdmin && !isSelf) {
+      throw new ApiError(403, "No tienes permiso para cambiar cargos");
+    }
+
+    const { data, error } = await supabase
+      .from("organization_members")
+      .update({ cargo_id: cargoId, updated_at: new Date().toISOString() })
+      .eq("organization_id", orgId)
+      .eq("user_id", userId)
+      .select("*, usuarios(username, nombre_completo, correo), cargos(id, nombre)")
+      .single();
+
+    if (error || !data) throw new ApiError(404, "Miembro no encontrado");
+
+    return toMemberResponse(data);
   }
 
   private static async isActiveMember(orgId: string) {
