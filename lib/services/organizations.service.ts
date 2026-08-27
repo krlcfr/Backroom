@@ -42,7 +42,9 @@ function toMemberResponse(row: {
   status: string;
   joined_at: string | null;
   last_access_at: string | null;
+  cargo_id?: string | null;
   usuarios?: { username: string; nombre_completo: string; correo: string } | null;
+  cargos?: { id: string; nombre: string } | null;
 }) {
   return {
     userId: row.user_id,
@@ -53,6 +55,8 @@ function toMemberResponse(row: {
     username: row.usuarios?.username ?? null,
     fullName: row.usuarios?.nombre_completo ?? null,
     email: row.usuarios?.correo ?? null,
+    cargoId: row.cargo_id ?? row.cargos?.id ?? null,
+    cargoName: row.cargos?.nombre ?? null,
   };
 }
 
