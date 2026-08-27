@@ -199,6 +199,31 @@ export class InvitationsService {
     return invitation;
   }
 
+  static async getInvitationInfo(token: string) {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("organization_invitations")
+      .select("*, organizations(name, logo_url)")
+      .eq("token", token)
+      .maybeSingle();
+
+    if (error || !data) throw new ApiError(404, "Invitación no encontrada");
+    if (data.status !== "pending") throw new ApiError(400, "La invitación ya fue aceptada, revocada o expiró");
+
+    // Verificar expiración sin mutar
+    const now = new Date();
+    const expiresAt = new Date(data.expires_at);
+    if (now > expiresAt) {
+      throw new ApiError(400, "Esta invitación ha expirado");
+    }
+
+    return {
+      email: data.email,
+      role: data.role,
+      organization: data.organizations
+    };
+  }
+
   static async acceptInvitation(authId: string, token: string) {
     const usuario = await getUsuarioInterno(authId);
     if (!usuario) throw new ApiError(404, "Perfil no encontrado");
@@ -208,6 +233,24 @@ export class InvitationsService {
 
     if (invitation.email.toLowerCase() !== usuario.correo.toLowerCase()) {
       throw new ApiError(403, "Esta invitación fue enviada a otro correo electrónico");
+    }
+
+    // MVP: 1 usuario = 1 organización (como owner o miembro)
+    const { data: ownedOrg } = await admin
+      .from("organizations")
+      .select("id")
+      .eq("owner_id", usuario.id)
+      .maybeSingle();
+
+    const { data: memberOrg } = await admin
+      .from("organization_members")
+      .select("id")
+      .eq("user_id", usuario.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (ownedOrg || memberOrg) {
+      throw new ApiError(409, "Ya perteneces a una organización. Debes abandonarla antes de unirte a otra.");
     }
 
     // Begin transaction-like operations

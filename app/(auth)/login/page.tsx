@@ -43,7 +43,7 @@ function LoginForm() {
       return
     }
 
-    window.location.href = "/login"
+    const inv = searchParams.get("invite"); if (inv) { window.location.href = `/invitar/${inv}` } else { window.location.href = "/login" }
   }
 
   async function handleOAuth(provider: "google" | "github") {
