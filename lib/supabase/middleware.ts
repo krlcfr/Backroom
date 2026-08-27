@@ -78,7 +78,7 @@ export async function updateSession(request: NextRequest) {
     if (url.pathname.startsWith('/dashboard/admin')) {
       const { data: profile } = await supabase.from('usuarios').select('es_superadmin').eq('auth_id', user.id).single()
       if (!profile?.es_superadmin) {
-        url.pathname = '/dashboard' // o /forbidden
+        url.pathname = '/dashboard'
         url.search = ''
         return NextResponse.redirect(url)
       }

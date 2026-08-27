@@ -188,8 +188,9 @@ export default function PermisosSalaPage() {
         </div>
       </div>
 
-      <div className="bg-[#1e2020] border border-[#3f3f46] rounded-xl overflow-x-auto mt-4 w-full">
-        <table className="w-full text-left border-collapse min-w-max">
+      <div className="bg-[#1e2020] border border-[#3f3f46] rounded-xl mt-4 w-full overflow-hidden">
+        <div className="overflow-x-auto w-full max-w-[100vw] sm:max-w-none">
+          <table className="w-full text-left border-collapse min-w-max">
           <thead>
             <tr className="bg-[#27272a] border-b border-[#3f3f46] text-[#958da1] text-[11px] uppercase tracking-wider">
               <th className="px-6 py-4 font-medium sticky left-0 bg-[#27272a] z-10 border-r border-[#3f3f46]">Miembro</th>
@@ -270,6 +271,7 @@ export default function PermisosSalaPage() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

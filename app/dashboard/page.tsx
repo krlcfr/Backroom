@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { BackroomsService } from "@/lib/services/backrooms.service"
 import { OrganizationsService } from "@/lib/services/organizations.service"
+import { redirect } from "next/navigation"
 import DashboardContent from "./dashboard-content"
 import type { Metadata } from "next"
 
@@ -38,6 +39,10 @@ export default async function DashboardPage() {
     } catch {
       org = null
     }
+  }
+
+  if (!org) {
+    redirect("/org/crear")
   }
 
   let backrooms: Backroom[] = []
