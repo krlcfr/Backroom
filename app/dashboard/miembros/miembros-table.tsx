@@ -73,18 +73,19 @@ export default function MiembrosTable({
   const [removing, setRemoving] = useState<Member | null>(null)
 
   const rows = useMemo(() => {
+    const existingOwner = miembros.find((m) => m.userId === ownerUserId);
     const membersPlusOwner = [
       {
         userId: ownerUserId,
         role: "Propietario",
         status: "active",
-        joinedAt: null,
-        lastAccessAt: null,
-        username: null,
-        fullName: null,
-        email: null,
-        cargoId: null,
-        cargoName: null,
+        joinedAt: existingOwner?.joinedAt ?? null,
+        lastAccessAt: existingOwner?.lastAccessAt ?? null,
+        username: existingOwner?.username ?? null,
+        fullName: existingOwner?.fullName ?? null,
+        email: existingOwner?.email ?? null,
+        cargoId: existingOwner?.cargoId ?? null,
+        cargoName: existingOwner?.cargoName ?? null,
       } as Member,
       ...miembros.filter((m) => m.userId !== ownerUserId),
     ]
