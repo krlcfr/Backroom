@@ -97,7 +97,16 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
       {/* Cards Container */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto w-full">
         {/* Free Plan */}
-        <div className="flex flex-col p-8 bg-[#27272a] rounded-2xl border border-[#4a4455] shadow-lg relative">
+        <div className={`flex flex-col p-8 bg-[#27272a] rounded-2xl border transition-all duration-300 relative ${
+          currentPlan === "free"
+            ? "border-[#34d399] shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-[#34d399]"
+            : "border-[#4a4455] shadow-lg"
+        }`}>
+          {currentPlan === "free" && mode === "dashboard" && (
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#34d399] text-[#1e2020] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              Plan Actual
+            </div>
+          )}
           <h3 className="text-xl font-bold text-[#e2e2e2] mb-2">Free</h3>
           <p className="text-sm text-[#ccc3d8] mb-6">Para empezar a organizarte.</p>
           <div className="text-4xl font-extrabold text-[#e2e2e2] mb-8">
@@ -135,9 +144,15 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
         </div>
 
         {/* Pro Plan */}
-        <div className="flex flex-col p-8 bg-[#303036] rounded-2xl border-2 border-[#7c3aed] shadow-[0_0_30px_rgba(124,58,237,0.15)] relative transform md:-translate-y-4">
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#7c3aed] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            Recomendado
+        <div className={`flex flex-col p-8 bg-[#303036] rounded-2xl border-2 transition-all duration-300 relative transform md:-translate-y-4 ${
+          currentPlan === "pro"
+            ? "border-[#34d399] shadow-[0_0_30px_rgba(52,211,153,0.2)] ring-1 ring-[#34d399]"
+            : "border-[#7c3aed] shadow-[0_0_30px_rgba(124,58,237,0.15)]"
+        }`}>
+          <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
+            currentPlan === "pro" && mode === "dashboard" ? "bg-[#34d399] text-[#1e2020]" : "bg-[#7c3aed] text-white"
+          }`}>
+            {currentPlan === "pro" && mode === "dashboard" ? "Plan Actual" : "Recomendado"}
           </div>
           <h3 className="text-xl font-bold text-[#e2e2e2] mb-2">Pro</h3>
           <p className="text-sm text-[#ccc3d8] mb-6">Para equipos en crecimiento.</p>
@@ -185,7 +200,16 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
         </div>
 
         {/* Enterprise Plan */}
-        <div className="flex flex-col p-8 bg-[#27272a] rounded-2xl border border-[#4a4455] shadow-lg relative">
+        <div className={`flex flex-col p-8 bg-[#27272a] rounded-2xl border transition-all duration-300 relative ${
+          currentPlan === "enterprise"
+            ? "border-[#34d399] shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-[#34d399]"
+            : "border-[#4a4455] shadow-lg"
+        }`}>
+          {currentPlan === "enterprise" && mode === "dashboard" && (
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#34d399] text-[#1e2020] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              Plan Actual
+            </div>
+          )}
           <h3 className="text-xl font-bold text-[#e2e2e2] mb-2">Enterprise</h3>
           <p className="text-sm text-[#ccc3d8] mb-6">Máxima seguridad y aislamiento.</p>
           <div className="text-4xl font-extrabold text-[#e2e2e2] mb-8">
