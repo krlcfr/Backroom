@@ -1,20 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PDFService } from "@/lib/services/pdf.service";
 import { WorkflowBuilderModal } from "@/components/workflows/WorkflowBuilderModal";
 
 interface DocumentCreationWizardModalProps {
   onClose: () => void;
   orgId: string;
+  roomId?: string;
   onAddResource?: (type: 'doc' | 'pdf' | 'media' | 'link') => void;
+  editResource?: any;
 }
 
 type Step = 'menu' | 'editor' | 'workflow';
 
-export function DocumentCreationWizardModal({ onClose, orgId, onAddResource }: DocumentCreationWizardModalProps) {
-  const [step, setStep] = useState<Step>('menu');
+export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResource, editResource }: DocumentCreationWizardModalProps) {
+  const [step, setStep] = useState<Step>(editResource ? 'editor' : 'menu');
   const [documentContent, setDocumentContent] = useState("<p>Comienza a escribir tu documento...</p>");
+
+  useEffect(() => {
+    if (editResource && editResource.signedUrl) {
+      fetch(editResource.signedUrl)
+        .then(res => res.text())
+        .then(html => {
+          // Extraer el contenido del body
+          const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+          if (bodyMatch && bodyMatch[1]) {
+            setDocumentContent(bodyMatch[1]);
+          } else {
+            setDocumentContent(html);
+          }
+        })
+        .catch(err => console.error("Error cargando HTML:", err));
+    }
+  }, [editResource]);
+
+  const handleSaveDB = async () => {
+    if (!roomId) {
+      alert("Error: No se encontró la sala.");
+      return;
+    }
+    const docName = "Nuevo_Documento"; // We can prompt for name or get from h1
+    try {
+      let res;
+      if (editResource) {
+        res = await fetch(`/api/rooms/${roomId}/resources/${editResource.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: documentContent, isHTML: true })
+        });
+      } else {
+        res = await fetch(`/api/rooms/${roomId}/resources/create-document`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre: docName, content: documentContent, isHTML: true })
+        });
+      }
+      
+      if (res.ok) {
+        alert("Documento guardado exitosamente en Backroom.");
+        onClose();
+        // If we are in page context, it might be good to force a reload, 
+        // but typically resources refresh automatically or the user can refresh.
+        window.location.reload();
+      } else {
+        const err = await res.json();
+        alert("Error al guardar: " + (err.error || "Desconocido"));
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error al guardar en BD");
+    }
+  };
 
   const handleExportPDF = async () => {
     try {
@@ -179,7 +236,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, onAddResource }: D
                   <select onChange={(e) => document.execCommand('fontName', false, e.target.value)} className="bg-[#18181b] text-[#ccc3d8] text-sm rounded border border-[#3f3f46] p-1 outline-none">
                     <option value="Arial">Arial</option>
                     <option value="Times New Roman">Times New Roman</option>
-                    <option value="Courier New">Courier</option>
+                    <option value="Courier New">Courier New</option>
                   </select>
 
                   <select onChange={(e) => document.execCommand('fontSize', false, e.target.value)} className="bg-[#18181b] text-[#ccc3d8] text-sm rounded border border-[#3f3f46] p-1 px-2 outline-none">
@@ -191,20 +248,49 @@ export function DocumentCreationWizardModal({ onClose, orgId, onAddResource }: D
                   </select>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   <button 
-                    onClick={handleExportPDF}
-                    className="px-4 py-2 bg-[#27272a] border border-[#3f3f46] hover:bg-[#303036] text-[#e2e2e2] rounded-lg text-sm transition-colors flex items-center gap-2"
+                    onClick={() => {
+                      const printWindow = window.open('', '', 'width=800,height=600');
+                      if (printWindow) {
+                        printWindow.document.write('<html><head><title>Imprimir</title></head><body style="padding: 40px; font-family: sans-serif;">');
+                        printWindow.document.write(documentContent);
+                        printWindow.document.write('</body></html>');
+                        printWindow.document.close();
+                        printWindow.focus();
+                        printWindow.print();
+                        printWindow.close();
+                      }
+                    }}
+                    className="p-2 bg-[#27272a] border border-[#3f3f46] hover:bg-[#303036] text-[#ccc3d8] rounded-lg text-sm transition-colors flex items-center"
+                    title="Imprimir"
                   >
-                    <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
-                    Exportar a PDF
+                    <span className="material-symbols-outlined text-[18px]">print</span>
                   </button>
+                  
+                  <div className="relative group">
+                    <button className="px-4 py-2 bg-[#27272a] border border-[#3f3f46] hover:bg-[#303036] text-[#e2e2e2] rounded-lg text-sm transition-colors flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px]">save</span>
+                      Guardar
+                    </button>
+                    <div className="absolute top-full right-0 mt-1 w-48 bg-[#18181b] border border-[#3f3f46] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 overflow-hidden">
+                      <button onClick={handleExportPDF} className="w-full text-left px-4 py-2 text-sm text-[#e2e2e2] hover:bg-[#27272a] flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[16px]">download</span>
+                        Descargar (Local)
+                      </button>
+                      <button onClick={handleSaveDB} className="w-full text-left px-4 py-2 text-sm text-[#e2e2e2] hover:bg-[#27272a] flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
+                        Guardar en Backroom
+                      </button>
+                    </div>
+                  </div>
+
                   <button 
                     onClick={() => setStep('workflow')}
                     className="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white rounded-lg text-sm transition-colors flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[16px]">send</span>
-                    Enviar al Flujo
+                    Asignar Flujo
                   </button>
                 </div>
               </div>
@@ -214,7 +300,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, onAddResource }: D
                 id="document-content-area" 
                 className="flex-1 bg-white rounded-lg p-12 text-black shadow-inner overflow-y-auto min-h-[600px]"
               >
-                <h1 className="text-2xl font-bold mb-4 outline-none" contentEditable>Título del Documento</h1>
+                <h1 className="text-2xl font-bold mb-4 outline-none" contentEditable suppressContentEditableWarning>Título del Documento</h1>
                 <div 
                   contentEditable
                   className="outline-none min-h-full"

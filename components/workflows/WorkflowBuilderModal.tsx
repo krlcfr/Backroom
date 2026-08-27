@@ -35,15 +35,15 @@ const DUMMY_CARGOS: Cargo[] = [
 
 const CircleNode = ({ data }: { data: any }) => {
   return (
-    <div className="w-24 h-24 bg-[#27272a] rounded-full flex flex-col items-center justify-center border-2 border-[#7c3aed] text-center p-2 relative shadow-lg">
-      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-[#d2bbff] !border-none" />
+    <div className="w-16 h-16 bg-[#27272a] rounded-full flex flex-col items-center justify-center border-2 border-[#7c3aed] text-center p-1.5 relative shadow-lg">
+      <Handle type="target" position={Position.Left} className="w-2.5 h-2.5 !bg-[#d2bbff] !border-none" />
       {data.avatar ? (
-        <img src={data.avatar} alt="avatar" className="w-8 h-8 rounded-full mb-1 object-cover" />
+        <img src={data.avatar} alt="avatar" className="w-5 h-5 rounded-full mb-0.5 object-cover" />
       ) : (
-        <span className="material-symbols-outlined text-[24px] text-[#7c3aed] mb-1">person</span>
+        <span className="material-symbols-outlined text-[16px] text-[#7c3aed] mb-0.5">person</span>
       )}
-      <span className="text-[10px] text-[#e2e2e2] font-semibold leading-tight line-clamp-2">{data.label}</span>
-      <Handle type="source" position={Position.Right} className="w-3 h-3 !bg-[#d2bbff] !border-none" />
+      <span className="text-[9px] text-[#e2e2e2] font-semibold leading-tight line-clamp-2">{data.label}</span>
+      <Handle type="source" position={Position.Right} className="w-2.5 h-2.5 !bg-[#d2bbff] !border-none" />
     </div>
   );
 };
@@ -64,32 +64,19 @@ export function WorkflowBuilderModal({ onClose }: { onClose: () => void }) {
   );
 
   const handleCargoClick = (cargo: Cargo) => {
-    // Remove from available
-    setAvailableCargos(prev => prev.filter(c => c.id !== cargo.id));
+    // Generar un ID único para permitir múltiples instancias del mismo cargo
+    const uniqueId = `node_${cargo.id}_${Date.now()}`;
 
-    // Calculate position
-    const lastNode = nodes[nodes.length - 1];
-    const newPosition = lastNode 
-      ? { x: lastNode.position.x + 150, y: lastNode.position.y } 
-      : { x: 50, y: 150 };
+    // Posición en cascada para que no se sobrepongan exactamente
+    const offset = (nodes.length % 5) * 20;
+    const newPosition = { x: 50 + offset, y: 50 + offset };
 
     const newNode: Node = {
-      id: `node_${cargo.id}`,
+      id: uniqueId,
       type: 'circle',
       position: newPosition,
       data: { label: cargo.name, cargo_id: cargo.id, node_type: 'linear', action_required: 'sign' },
     };
-
-    // Auto-connect if there was a previous node
-    if (lastNode) {
-      const newEdge: Edge = {
-        id: `edge_${lastNode.id}-${newNode.id}`,
-        source: lastNode.id,
-        target: newNode.id,
-        style: { stroke: '#7c3aed', strokeWidth: 2 }
-      };
-      setEdges(eds => eds.concat(newEdge));
-    }
 
     setNodes((nds) => nds.concat(newNode));
   };

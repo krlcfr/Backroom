@@ -51,6 +51,8 @@ export default function SalaPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const [editDocResource, setEditDocResource] = useState<any>(null)
+
   const [showCreateRoom, setShowCreateRoom] = useState(false)
   const [isTreeExpanded, setIsTreeExpanded] = useState(true)
 
@@ -359,6 +361,7 @@ export default function SalaPage() {
             roomId={salaId}
             canDelete={canDeleteRes}
             onResourceDeleted={reloadResources}
+            onEditDoc={(res: any) => setEditDocResource(res)}
           />
         </div>
       </main>
@@ -551,11 +554,21 @@ export default function SalaPage() {
       {showCreateDocument && (
         <DocumentCreationWizardModal
           orgId={""}
+          roomId={sala.id}
           onClose={() => setShowCreateDocument(false)}
           onAddResource={(type) => {
             setShowCreateDocument(false)
             setAddResourceType(type)
           }}
+        />
+      )}
+
+      {editDocResource && (
+        <DocumentCreationWizardModal
+          orgId={""}
+          roomId={sala.id}
+          editResource={editDocResource}
+          onClose={() => setEditDocResource(null)}
         />
       )}
     </div>

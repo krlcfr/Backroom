@@ -34,7 +34,7 @@ export async function POST(
     const hasUploadPerm = await checkRoomPermission(user.id, roomId, "recursos.subir");
     if (!hasUploadPerm) throw new ApiError(403, "No tienes permiso para subir/crear archivos");
 
-    const { nombre, content } = await request.json();
+    const { nombre, content, isHTML } = await request.json();
     if (!nombre || !content) {
       throw new ApiError(400, "Nombre y contenido son obligatorios");
     }
@@ -53,49 +53,53 @@ export async function POST(
     const plan = await getOrganizationPlan(org.id);
     const limits = PLAN_LIMITS[plan];
 
-    // Convertir texto a HTML básico para el PDF
-    // Reemplazar saltos de línea con <br/> para respetar el formato
-    const formattedContent = content.replace(/\n/g, '<br/>');
+    let fileBuffer: Buffer | Uint8Array;
+    let mimeType = "application/pdf";
+    let extension = ".pdf";
+    let dbTipo = "pdf";
 
-    const fullHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            padding: 40px;
-            max-width: 800px;
-            margin: 0 auto;
-          }
-        </style>
-      </head>
-      <body>
-        <h1>${nombre}</h1>
-        <div>${formattedContent}</div>
-      </body>
-      </html>
-    `;
+    if (isHTML) {
+      const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${content}</body></html>`;
+      fileBuffer = Buffer.from(fullHtml, 'utf-8');
+      mimeType = "text/html";
+      extension = ".html";
+      dbTipo = "doc";
+    } else {
+      // Convertir texto a HTML básico para el PDF
+      const formattedContent = content.replace(/\n/g, '<br/>');
+      const fullHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 40px; max-width: 800px; margin: 0 auto; }
+          </style>
+        </head>
+        <body>
+          <h1>${nombre}</h1>
+          <div>${formattedContent}</div>
+        </body>
+        </html>
+      `;
 
-    // Convertir a PDF
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    });
-    const page = await browser.newPage();
-    await page.setContent(fullHtml, { waitUntil: "domcontentloaded" });
-    
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "20mm", right: "20mm", bottom: "20mm", left: "20mm" },
-    });
-    await browser.close();
+      // Convertir a PDF
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      });
+      const page = await browser.newPage();
+      await page.setContent(fullHtml, { waitUntil: "domcontentloaded" });
+      
+      fileBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: { top: "20mm", right: "20mm", bottom: "20mm", left: "20mm" },
+      });
+      await browser.close();
+    }
 
-    const fileSizeBytes = pdfBuffer.length;
+    const fileSizeBytes = fileBuffer.length;
 
     // Verificar límites
     if (fileSizeBytes > limits.max_file_bytes) {
@@ -112,13 +116,13 @@ export async function POST(
       throw new ApiError(422, `Almacenamiento insuficiente. Límite de tu plan: ${limits.storage_bytes / (1024*1024)}MB`);
     }
 
-    const fileName = `${roomId}/${uuidv4()}.pdf`;
+    const fileName = `${roomId}/${uuidv4()}${extension}`;
 
     // 1. Subir a Storage
     const { error: storageError } = await supabaseAdmin.storage
       .from("recursos")
-      .upload(fileName, pdfBuffer, {
-        contentType: "application/pdf",
+      .upload(fileName, fileBuffer, {
+        contentType: mimeType,
         upsert: false
       });
 
@@ -127,14 +131,14 @@ export async function POST(
     }
 
     // 2. Guardar en Base de datos
-    const dbName = nombre.endsWith('.pdf') ? nombre : `${nombre}.pdf`;
+    const dbName = nombre.endsWith(extension) ? nombre : `${nombre}${extension}`;
     const { data, error: dbError } = await supabaseAdmin
       .from("recursos")
       .insert([{
         sala_id: roomId,
         subido_por: usuario.id,
         url: fileName,
-        tipo: "pdf",
+        tipo: dbTipo,
         nombre: dbName,
         tamano_bytes: fileSizeBytes
       }])
