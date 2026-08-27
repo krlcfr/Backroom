@@ -42,6 +42,10 @@ export class BackroomsService {
     const { OrganizationsService } = await import("@/lib/services/organizations.service");
     const org = await OrganizationsService.getOrgForUser(authId);
     
+    if (!org) {
+      throw new ApiError(403, "Necesitas una organización para crear BackRooms.");
+    }
+
     if (org) {
       const { data: orgData } = await adminSupabase
         .from("organizations")
