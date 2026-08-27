@@ -43,12 +43,15 @@ export async function POST(
 
     const supabaseAdmin = createAdminClient();
     
-    // Obtener org_id para los límites
-    const { data: backroom } = await supabaseAdmin.from("backrooms").select("organizacion_id").eq("id", sala.backroom_id).single();
-    if (!backroom) throw new ApiError(500, "No se encontró el backroom");
+    // Obtener org_id para los lmites
+    const { data: backroom } = await supabaseAdmin.from("backrooms").select("propietario_id").eq("id", sala.backroom_id).single();
+    if (!backroom) throw new ApiError(500, "No se encontr el backroom");
     
+    const { data: org } = await supabaseAdmin.from("organizations").select("id").eq("owner_id", backroom.propietario_id).single();
+    if (!org) throw new ApiError(500, "No se encontr la organizacin del backroom");
+
     const { getOrganizationPlan, PLAN_LIMITS } = await import("@/lib/limits");
-    const plan = await getOrganizationPlan(backroom.organizacion_id);
+    const plan = await getOrganizationPlan(org.id);
     const limits = PLAN_LIMITS[plan];
 
     // Verificar tamaño máximo de archivo
@@ -110,8 +113,8 @@ export async function POST(
 
     // Auditoría: Registrar la subida del recurso
     await AuditService.logAction({
-      orgId: backroom.organizacion_id,
-      actorId: user.id,
+      orgId: org.id,
+      actorId: usuario.id,
       action: "RESOURCE_UPLOADED",
       targetType: "resource",
       targetId: data.id,

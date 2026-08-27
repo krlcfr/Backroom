@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-export const metadata: Metadata = { title: "Almacenamiento" };
 "use client"
 
 import { useEffect, useState } from "react"
