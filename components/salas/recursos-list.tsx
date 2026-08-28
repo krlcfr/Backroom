@@ -2,13 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import dynamic from "next/dynamic"
-
-// Cargar dinámicamente el modal del editor PDF para evitar el error "DOMMatrix is not defined" en SSR
-const DocumentEditorModal = dynamic(
-  () => import("@/components/modals/document-editor-modal").then(mod => mod.DocumentEditorModal),
-  { ssr: false, loading: () => <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center text-white">Cargando editor PDF...</div> }
-)
 
 interface Recurso {
   id: string
@@ -22,7 +15,6 @@ interface Recurso {
 export default function RecursosList({ salaId }: { salaId: string }) {
   const [recursos, setRecursos] = useState<Recurso[]>([])
   const [loading, setLoading] = useState(true)
-  const [editingId, setEditingId] = useState<string | null>(null)
   
   const supabase = createClient()
 
@@ -84,24 +76,10 @@ export default function RecursosList({ salaId }: { salaId: string }) {
               </div>
               
               <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setEditingId(recurso.id)}
-                  className="w-8 h-8 rounded hover:bg-[#3f3f46] flex items-center justify-center text-[#ccc3d8] transition-colors"
-                  title="Editar y Firmar"
-                >
-                  <span className="material-symbols-outlined text-[16px]">edit</span>
-                </button>
               </div>
             </div>
           ))}
         </div>
-      )}
-
-      {editingId && (
-        <DocumentEditorModal 
-          recursoId={editingId} 
-          onClose={() => setEditingId(null)} 
-        />
       )}
     </div>
   )
