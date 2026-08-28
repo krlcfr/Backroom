@@ -5,12 +5,6 @@ import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import dynamic from "next/dynamic"
 import FloatingViewer from "./floating-viewer"
-import DocumentStatusModal from "../../modals/document-status-modal"
-
-const DocumentEditorModal = dynamic(
-  () => import("@/components/modals/document-editor-modal").then(mod => mod.DocumentEditorModal),
-  { ssr: false, loading: () => <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center text-white">Cargando editor PDF...</div> }
-)
 
 export interface Resource {
   id: string
@@ -36,8 +30,6 @@ interface ResourcesGridProps {
 export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted }: ResourcesGridProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [activeResource, setActiveResource] = useState<Resource | null>(null)
-  const [statusResource, setStatusResource] = useState<Resource | null>(null)
-  const [editingId, setEditingId] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Seguro que deseas eliminar este recurso?")) return;
@@ -57,7 +49,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
 
   const handleResourceClick = (resource: Resource) => {
     if (resource.is_blind) {
-      setStatusResource(resource);
+      alert("Este documento está bajo custodia estricta. Su gestión depende del flujo de firmas.");
       return;
     }
     if (resource.tipo === "youtube" || resource.tipo === "video" || resource.tipo === "image" || resource.tipo === "pdf" || resource.tipo === "archivo") {
@@ -145,15 +137,6 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
               </div>
 
               <div className="flex items-center gap-1">
-                {(res.tipo === "pdf" || res.tipo === "archivo") && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setEditingId(res.id) }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#a78bfa]/10 text-[#a78bfa]"
-                    title="Firmar / Editar Documento"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">draw</span>
-                  </button>
-                )}
                 {canDelete && (
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(res.id) }}
@@ -180,20 +163,6 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
           tipo={activeResource.tipo}
           nombre={activeResource.nombre}
           onClose={() => setActiveResource(null)}
-        />
-      )}
-
-      {editingId && (
-        <DocumentEditorModal 
-          recursoId={editingId} 
-          onClose={() => setEditingId(null)} 
-        />
-      )}
-
-      {statusResource && (
-        <DocumentStatusModal 
-          recurso={statusResource} 
-          onClose={() => setStatusResource(null)} 
         />
       )}
     </>
