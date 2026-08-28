@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { PricingCards } from '@/components/pricing/pricing-cards';
+import { VideoHero } from '@/components/landing/video-hero';
+import { PulseBackground } from '@/components/landing/pulse-background';
 
 export default async function Home() {
   const session = await getSession();
@@ -11,7 +13,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="bg-[#18181B] text-[#e2e2e2] font-sans min-h-screen flex flex-col relative overflow-hidden">
+    <div className="bg-[#18181B] text-[#e2e2e2] font-sans min-h-screen flex flex-col relative overflow-clip">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-[0]">
         {/* Glows */}
@@ -57,13 +59,15 @@ export default async function Home() {
               Ver características
             </Link>
           </div>
-          <div className="mt-16 w-full max-w-5xl mx-auto rounded-xl border border-[#3F3F46] overflow-hidden shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              className="w-full h-auto object-cover border-b border-[#3F3F46]" 
-              alt="Backroom Interface Mockup" 
-              src="/dashboard-mockup.jpg"
-            />
+        </section>
+
+        {/* Full-width Video Section with Pulses */}
+        <section className="relative w-full bg-black py-16 md:py-24 overflow-hidden flex justify-center items-center">
+          <PulseBackground />
+          <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-8">
+            <div className="rounded-2xl border border-white/10 overflow-hidden shadow-[0_0_80px_rgba(124,58,237,0.15)] ring-1 ring-white/5 bg-[#18181B]">
+              <VideoHero />
+            </div>
           </div>
         </section>
 
