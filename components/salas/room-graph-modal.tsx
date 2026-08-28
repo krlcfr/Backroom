@@ -107,6 +107,14 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
 
     const RADIUS_STEP = 200; // Distancia entre anillos (profundidades)
 
+    // Desenvolver la sala raíz si existe para que el BackRoom se conecte directamente a las sub-salas reales
+    let directSalas: RoomNode[] = []
+    if (tree.length === 1 && tree[0].depth === 0) {
+      directSalas = tree[0].children ?? []
+    } else {
+      directSalas = tree.flatMap((node) => (node.depth === 0 ? (node.children ?? []) : [node]))
+    }
+
     // Nodo sintético de la BackRoom que actuará como centro absoluto
     const syntheticBackroom: RoomNode = {
       id: backroomId,
@@ -114,7 +122,7 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
       icono: "domain",
       depth: 0, // Raíz absoluta
       hasAccess: true,
-      children: tree,
+      children: directSalas,
     }
 
     // Paso 1: Contar hojas de cada subárbol para asignar arcos proporcionales
@@ -216,6 +224,9 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
       if (!nodeData.isRoot) {
         onNodeAuditClick(nodeData.roomId)
       }
+    } else if (nodeData.isRoot) {
+      onClose()
+      router.push(`/dashboard/backrooms/${backroomId}`)
     } else if (nodeData.hasAccess) {
       onClose()
       router.push(`/dashboard/backrooms/${backroomId}/salas/${nodeData.roomId}`)

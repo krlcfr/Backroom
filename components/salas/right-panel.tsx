@@ -20,9 +20,10 @@ interface RightPanelProps {
   esPropietario: boolean
   tree?: RoomNode[]
   activeRoomId?: string
+  onUploadClick?: () => void
 }
 
-export default function RightPanel({ backroom, esPropietario, tree, activeRoomId }: RightPanelProps) {
+export default function RightPanel({ backroom, esPropietario, tree, activeRoomId, onUploadClick }: RightPanelProps) {
   const [isTreeExpanded, setIsTreeExpanded] = useState(true)
   const [showGraph, setShowGraph] = useState(false)
 
@@ -36,13 +37,15 @@ export default function RightPanel({ backroom, esPropietario, tree, activeRoomId
     <>
       <aside className="w-80 flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-        <Link
-          href={`/dashboard/backrooms/${backroom.id}/salas`}
-          className="w-full bg-[#7c3aed] text-white hover:bg-[#8b5cf6] transition-colors text-[12px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-2"
-        >
-          <span className="material-symbols-outlined text-[20px]">upload</span>
-          Subir recurso
-        </Link>
+        {onUploadClick && (
+          <button
+            onClick={onUploadClick}
+            className="w-full bg-[#7c3aed] text-white hover:bg-[#8b5cf6] transition-colors text-[12px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[20px]">upload</span>
+            Subir recurso
+          </button>
+        )}
         {esPropietario && (
           <Link
             href={`/dashboard/backrooms/${backroom.id}/miembros`}

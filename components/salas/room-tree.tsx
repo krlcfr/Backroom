@@ -35,9 +35,10 @@ function TreeNode({
   const hasAccess = node.hasAccess !== false
 
   const ItemWrapper = (hasAccess ? Link : "div") as any
-  const wrapperProps = hasAccess
-    ? { href: `/dashboard/backrooms/${backroomId}/salas/${node.id}` }
-    : {}
+  const href = node.depth === 0
+    ? `/dashboard/backrooms/${backroomId}`
+    : `/dashboard/backrooms/${backroomId}/salas/${node.id}`
+  const wrapperProps = hasAccess ? { href } : {}
 
   return (
     <div>
@@ -119,9 +120,22 @@ function TreeNode({
 export default function RoomTree({ rooms, backroomId, activeRoomId }: RoomTreeProps) {
   if (rooms.length === 0) return null
 
+  // Si rooms contiene la sala raíz de depth 0, mostrar directamente sus sub-salas
+  const effectiveRooms = (rooms.length === 1 && rooms[0].depth === 0)
+    ? (rooms[0].children ?? [])
+    : rooms.flatMap((r) => (r.depth === 0 ? (r.children ?? []) : [r]))
+
+  if (effectiveRooms.length === 0) {
+    return (
+      <div className="py-2 text-[12px] text-[#958da1]">
+        Sin subsalas creadas aún.
+      </div>
+    )
+  }
+
   return (
     <div className="py-2">
-      {rooms.map((room) => (
+      {effectiveRooms.map((room) => (
         <TreeNode
           key={room.id}
           node={room}

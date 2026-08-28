@@ -252,7 +252,7 @@ export default function BackRoomPage() {
         </div>
 
         <SubRoomsGrid
-          rooms={rooms.filter((r: any) => !r.parent_id)}
+          rooms={rooms.filter((r: any) => r.id !== rootRoomId && (r.parent_id === rootRoomId || !r.parent_id))}
           backroomId={backroom.id}
           onCreateClick={() => setShowCreateRoom(true)}
           canCreate={canCreateSala(0)}
@@ -293,16 +293,20 @@ export default function BackRoomPage() {
         esPropietario={esPropietario} 
         tree={tree}
         activeRoomId={backroom.id}
+        onUploadClick={canUpload ? () => setShowAddResource(true) : undefined}
       />
 
       {showCreateRoom && (
         <CreateRoomModal
           backroomId={backroom.id}
+          parentRoomId={rootRoomId}
+          parentRoomName={backroom.name}
+          currentDepth={0}
           onClose={() => setShowCreateRoom(false)}
           onCreated={async (room) => {
             setShowCreateRoom(false)
-            setRooms((prev) => [...prev, { ...room, descripcion: null, depth: 0, created_at: new Date().toISOString() }])
-            const rootRoom = rooms.find(r => r.depth === 0) || room
+            setRooms((prev) => [...prev, { ...room, descripcion: null, depth: 1, parent_id: rootRoomId, created_at: new Date().toISOString() }])
+            const rootRoom = rooms.find(r => r.depth === 0)
             if (rootRoom) {
               const treeRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
               if (treeRes.ok) {

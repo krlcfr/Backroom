@@ -97,6 +97,13 @@ export default function SalaPage() {
         if (!salaRes.ok) throw new Error("No se pudo cargar la sala")
         const salaData = await salaRes.json()
         const salaInfo: Sala = salaData.data.room
+
+        // Si es la sala raíz interna, redirigir al BackRoom principal
+        if (salaInfo.depth === 0) {
+          router.replace(`/dashboard/backrooms/${id}`)
+          return
+        }
+
         setSala(salaInfo)
 
         if (salaInfo.parent_id) {
@@ -257,7 +264,7 @@ export default function SalaPage() {
   const breadcrumbItems = [
     { label: "Dashboard", href: "/dashboard" },
     { label: backroom?.name ?? "BackRoom", href: `/dashboard/backrooms/${id}` },
-    ...(parentSala ? [{ label: parentSala.nombre, href: `/dashboard/backrooms/${id}/salas/${parentSala.id}` }] : []),
+    ...(parentSala && parentSala.depth !== 0 ? [{ label: parentSala.nombre, href: `/dashboard/backrooms/${id}/salas/${parentSala.id}` }] : []),
     { label: sala.nombre },
   ]
 
