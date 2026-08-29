@@ -1,31 +1,35 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export function PulseBackground() {
-  // Generamos líneas SVG desde los bordes hacia el centro (donde estará el video).
-  // ViewBox: 1000 x 600. Centro aprox: X(250 a 750), Y(150 a 450)
+  const [lines, setLines] = useState<{path: string, dur: string, begin: string}[]>([]);
   
-  const lines = useMemo(() => {
-    const paths = [];
-    // Función para generar un camino bezier cuadrático
+  useEffect(() => {
+    const newLines = [];
     const createPath = (startX: number, startY: number, endX: number, endY: number, curveX: number, curveY: number) => {
       return `M ${startX} ${startY} Q ${curveX} ${curveY} ${endX} ${endY}`;
     };
 
-    // Generamos 24 líneas (6 por lado)
     for (let i = 0; i < 6; i++) {
-      // Desde la Izquierda
-      paths.push(createPath(0, Math.random() * 600, 250, 150 + Math.random() * 300, 125, Math.random() * 600));
-      // Desde la Derecha
-      paths.push(createPath(1000, Math.random() * 600, 750, 150 + Math.random() * 300, 875, Math.random() * 600));
-      // Desde Arriba
-      paths.push(createPath(Math.random() * 1000, 0, 250 + Math.random() * 500, 150, Math.random() * 1000, 75));
-      // Desde Abajo
-      paths.push(createPath(Math.random() * 1000, 600, 250 + Math.random() * 500, 450, Math.random() * 1000, 525));
+      const p1 = createPath(0, Math.random() * 600, 250, 150 + Math.random() * 300, 125, Math.random() * 600);
+      const p2 = createPath(1000, Math.random() * 600, 750, 150 + Math.random() * 300, 875, Math.random() * 600);
+      const p3 = createPath(Math.random() * 1000, 0, 250 + Math.random() * 500, 150, Math.random() * 1000, 75);
+      const p4 = createPath(Math.random() * 1000, 600, 250 + Math.random() * 500, 450, Math.random() * 1000, 525);
+      
+      [p1, p2, p3, p4].forEach(p => {
+        newLines.push({
+          path: p,
+          dur: `${2 + Math.random() * 3}s`,
+          begin: `${Math.random() * 2}s`
+        });
+      });
     }
-    return paths;
+    setLines(newLines);
   }, []);
+
+  // Evitamos renderizar svg en el servidor si depende de Math.random()
+  if (lines.length === 0) return null;
 
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
@@ -42,11 +46,11 @@ export function PulseBackground() {
           </linearGradient>
         </defs>
 
-        {lines.map((d, i) => (
+        {lines.map((l, i) => (
           <g key={i}>
             {/* Línea base sutil (ruta de la luz) */}
             <path
-              d={d}
+              d={l.path}
               fill="none"
               stroke="#ffffff"
               strokeWidth="0.5"
@@ -54,7 +58,7 @@ export function PulseBackground() {
             />
             {/* Pulso de luz animado */}
             <path
-              d={d}
+              d={l.path}
               fill="none"
               stroke="url(#pulseGradient)"
               strokeWidth="1.5"
@@ -64,8 +68,8 @@ export function PulseBackground() {
               <animate
                 attributeName="stroke-dashoffset"
                 values="1150; -150"
-                dur={`${2 + Math.random() * 3}s`}
-                begin={`${Math.random() * 2}s`}
+                dur={l.dur}
+                begin={l.begin}
                 repeatCount="indefinite"
               />
             </path>
