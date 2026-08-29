@@ -48,9 +48,80 @@ export async function DELETE(
       .delete()
       .eq("id", resourceId);
 
-    if (error) throw new ApiError(500, "Error al eliminar el recurso");
+    if (error) throw new ApiError(500, "Error al eliminar de la base de datos");
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ message: "Eliminado exitosamente" }, { status: 200 });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ roomId: string, resourceId: string }> }
+) {
+  try {
+    const user = await requireAuth();
+    const { roomId, resourceId } = await params;
+
+    const supabase = await createClient();
+    const { data: sala, error: salaError } = await supabase
+      .from("salas")
+      .select("backroom_id")
+      .eq("id", roomId)
+      .single();
+
+    if (salaError || !sala) throw new ApiError(404, "Sala no encontrada");
+
+    // We can require upload permission to edit
+    const hasUploadPerm = await checkRoomPermission(user.id, roomId, "recursos.subir");
+    if (!hasUploadPerm) throw new ApiError(403, "No tienes permiso para editar recursos");
+
+    const { content, isHTML } = await request.json();
+    if (!content || !isHTML) {
+      throw new ApiError(400, "Contenido inválido para actualización");
+    }
+
+    const supabaseAdmin = createAdminClient();
+    
+    const { data: recurso, error: fetchError } = await supabaseAdmin
+      .from("recursos")
+      .select("*")
+      .eq("id", resourceId)
+      .single();
+      
+    if (fetchError || !recurso) throw new ApiError(404, "Recurso no encontrado");
+
+    if (recurso.tipo !== "doc") {
+      throw new ApiError(400, "Solo se pueden editar documentos HTML directamente");
+    }
+
+    const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${content}</body></html>`;
+    const fileBuffer = Buffer.from(fullHtml, 'utf-8');
+    const newSizeBytes = fileBuffer.length;
+
+    // We skip limits check for edit to keep it simple, since it's just replacing text
+    const { error: storageError } = await supabaseAdmin.storage
+      .from("recursos")
+      .upload(recurso.url, fileBuffer, {
+        contentType: "text/html",
+        upsert: true
+      });
+
+    if (storageError) {
+      throw new ApiError(500, "Error al guardar el archivo en la nube: " + storageError.message);
+    }
+
+    const { error: dbError } = await supabaseAdmin
+      .from("recursos")
+      .update({ tamano_bytes: newSizeBytes })
+      .eq("id", resourceId);
+
+    if (dbError) {
+      throw new ApiError(500, "Error al actualizar metadata del archivo");
+    }
+
+    return NextResponse.json({ message: "Actualizado exitosamente" }, { status: 200 });
   } catch (error) {
     return handleApiError(error);
   }

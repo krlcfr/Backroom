@@ -85,7 +85,7 @@ function TreeNode({
           </span>
           <span className="text-[13px] truncate">{node.nombre}</span>
         </ItemWrapper>
-        {hasAccess && (
+        {hasAccess && node.depth < 2 && (
           <button
             onClick={(e) => {
               e.preventDefault()

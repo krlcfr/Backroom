@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
-import { checkPermission, getUsuarioInterno, checkRoomPermission } from "@/lib/auth/rbac";
+import { getUsuarioInterno, checkRoomPermission } from "@/lib/auth/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
 import { AuditService } from "@/lib/services/audit.service";
 import { v4 as uuidv4 } from "uuid";
+import puppeteer from "puppeteer";
 
-// Configuración para el tamaño máximo en Next.js (aunque también lo controlamos en el formData)
 export const maxDuration = 60; // 1 minuto de timeout
 
 export async function POST(
@@ -32,13 +32,11 @@ export async function POST(
 
     // Verificar permiso 'recursos.subir'
     const hasUploadPerm = await checkRoomPermission(user.id, roomId, "recursos.subir");
-    if (!hasUploadPerm) throw new ApiError(403, "No tienes permiso para subir archivos");
+    if (!hasUploadPerm) throw new ApiError(403, "No tienes permiso para subir/crear archivos");
 
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
-    
-    if (!file) {
-      throw new ApiError(400, "No se proporcionó ningún archivo");
+    const { nombre, content, isHTML } = await request.json();
+    if (!nombre || !content) {
+      throw new ApiError(400, "Nombre y contenido son obligatorios");
     }
 
     const supabaseAdmin = createAdminClient();
@@ -55,31 +53,76 @@ export async function POST(
     const plan = await getOrganizationPlan(org.id);
     const limits = PLAN_LIMITS[plan];
 
-    // Verificar tamaño máximo de archivo
-    if (file.size > limits.max_file_bytes) {
-      throw new ApiError(413, `El archivo supera el límite permitido por tu plan (${limits.max_file_bytes / (1024*1024)}MB)`);
+    let fileBuffer: Buffer | Uint8Array;
+    let mimeType = "application/pdf";
+    let extension = ".pdf";
+    let dbTipo = "pdf";
+
+    if (isHTML) {
+      const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${content}</body></html>`;
+      fileBuffer = Buffer.from(fullHtml, 'utf-8');
+      mimeType = "text/html";
+      extension = ".html";
+      dbTipo = "doc";
+    } else {
+      // Convertir texto a HTML básico para el PDF
+      const formattedContent = content.replace(/\n/g, '<br/>');
+      const fullHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 40px; max-width: 800px; margin: 0 auto; }
+          </style>
+        </head>
+        <body>
+          <h1>${nombre}</h1>
+          <div>${formattedContent}</div>
+        </body>
+        </html>
+      `;
+
+      // Convertir a PDF
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      });
+      const page = await browser.newPage();
+      await page.setContent(fullHtml, { waitUntil: "domcontentloaded" });
+      
+      fileBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: { top: "20mm", right: "20mm", bottom: "20mm", left: "20mm" },
+      });
+      await browser.close();
     }
 
-    // Verificar espacio total de almacenamiento disponible
+    const fileSizeBytes = fileBuffer.length;
+
+    // Verificar límites
+    if (fileSizeBytes > limits.max_file_bytes) {
+      throw new ApiError(413, `El archivo generado supera el límite permitido por tu plan (${limits.max_file_bytes / (1024*1024)}MB)`);
+    }
+
     const { data: recursos, error: sumError } = await supabaseAdmin
       .from("recursos")
       .select("tamano_bytes")
-      .limit(10000); // Hack rápido para MVP. Debería ser una suma SQL de los recursos del backroom/org.
+      .limit(10000); 
     
     const usedBytes = recursos?.reduce((acc, curr) => acc + (curr.tamano_bytes || 0), 0) || 0;
-    if (usedBytes + file.size > limits.storage_bytes) {
+    if (usedBytes + fileSizeBytes > limits.storage_bytes) {
       throw new ApiError(422, `Almacenamiento insuficiente. Límite de tu plan: ${limits.storage_bytes / (1024*1024)}MB`);
     }
 
-    const fileExt = file.name.split('.').pop() || '';
-    const fileName = `${roomId}/${uuidv4()}.${fileExt}`;
+    const fileName = `${roomId}/${uuidv4()}${extension}`;
 
     // 1. Subir a Storage
-    const buffer = await file.arrayBuffer();
     const { error: storageError } = await supabaseAdmin.storage
       .from("recursos")
-      .upload(fileName, buffer, {
-        contentType: file.type,
+      .upload(fileName, fileBuffer, {
+        contentType: mimeType,
         upsert: false
       });
 
@@ -87,39 +130,34 @@ export async function POST(
       throw new ApiError(500, "Error al guardar el archivo en la nube: " + storageError.message);
     }
 
-    // Inferir el tipo
-    let tipo = "archivo";
-    if (file.type.startsWith("image/")) tipo = "image";
-    else if (file.type === "application/pdf") tipo = "pdf";
-
     // 2. Guardar en Base de datos
+    const dbName = nombre.endsWith(extension) ? nombre : `${nombre}${extension}`;
     const { data, error: dbError } = await supabaseAdmin
       .from("recursos")
       .insert([{
         sala_id: roomId,
         subido_por: usuario.id,
         url: fileName,
-        tipo,
-        nombre: file.name,
-        tamano_bytes: file.size
+        tipo: dbTipo,
+        nombre: dbName,
+        tamano_bytes: fileSizeBytes
       }])
       .select()
       .single();
 
     if (dbError) {
-      // Intentar rollback del storage
       await supabaseAdmin.storage.from("recursos").remove([fileName]);
       throw new ApiError(500, `Error al registrar el archivo en la base de datos: ${dbError.message}`);
     }
 
-    // Auditoría: Registrar la subida del recurso
+    // Auditoría
     await AuditService.logAction({
       orgId: org.id,
       actorId: user.id,
       action: "RESOURCE_UPLOADED",
       targetType: "resource",
       targetId: data.id,
-      details: { fileName: file.name, size: file.size }
+      details: { fileName: dbName, size: fileSizeBytes, note: "Generado desde editor" }
     });
 
     return NextResponse.json({ data }, { status: 201 });

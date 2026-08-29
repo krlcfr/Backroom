@@ -25,9 +25,10 @@ interface ResourcesGridProps {
   roomId: string
   canDelete: boolean
   onResourceDeleted: () => void
+  onEditDoc?: (res: any) => void
 }
 
-export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted }: ResourcesGridProps) {
+export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted, onEditDoc }: ResourcesGridProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [activeResource, setActiveResource] = useState<Resource | null>(null)
 
@@ -35,13 +36,12 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
     if (!confirm("¿Seguro que deseas eliminar este recurso?")) return;
     setDeleting(id)
     try {
-      const res = await fetch(`/api/rooms/${roomId}/resources/${id}`, {
-        method: "DELETE"
-      })
-      if (!res.ok) throw new Error("Error al eliminar")
+      const res = await fetch(`/api/rooms/${roomId}/resources/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("Error deleting resource")
       onResourceDeleted()
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Error")
+    } catch (error) {
+      console.error(error)
+      alert("No se pudo eliminar el recurso")
     } finally {
       setDeleting(null)
     }
@@ -54,40 +54,45 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
     }
     if (resource.tipo === "youtube" || resource.tipo === "video" || resource.tipo === "image" || resource.tipo === "pdf" || resource.tipo === "archivo") {
       setActiveResource(resource)
-    } else {
-      // Es un link normal externo que no queremos empotrar
+    }
+    if (resource.tipo === "link" && resource.url) {
       window.open(resource.url, "_blank")
+    }
+    if (resource.tipo === "doc") {
+      // Si es doc HTML, intentamos editarlo o verlo
+      if (onEditDoc) {
+        onEditDoc(resource)
+      } else {
+        setActiveResource(resource)
+      }
     }
   }
 
   const getIconAndColor = (tipo: string) => {
     switch (tipo) {
-      case "youtube":
-      case "video":
-        return { icon: "play_circle", color: "text-[#ef4444]", bg: "bg-[#ef4444]/10" }
-      case "image":
-        return { icon: "image", color: "text-[#3b82f6]", bg: "bg-[#3b82f6]/10" }
-      case "pdf":
-      case "archivo":
-        return { icon: "description", color: "text-[#f59e0b]", bg: "bg-[#f59e0b]/10" }
-      default:
-        return { icon: "link", color: "text-[#10b981]", bg: "bg-[#10b981]/10" }
+      case 'doc': return { icon: 'description', color: 'text-blue-400', bg: 'bg-blue-400/10' }
+      case 'pdf': return { icon: 'picture_as_pdf', color: 'text-red-400', bg: 'bg-red-400/10' }
+      case 'image': return { icon: 'image', color: 'text-emerald-400', bg: 'bg-emerald-400/10' }
+      case 'video':
+      case 'youtube': return { icon: 'play_circle', color: 'text-rose-400', bg: 'bg-rose-400/10' }
+      case 'link': return { icon: 'link', color: 'text-indigo-400', bg: 'bg-indigo-400/10' }
+      default: return { icon: 'insert_drive_file', color: 'text-gray-400', bg: 'bg-gray-400/10' }
     }
   }
 
   const formatSize = (bytes: number | null) => {
-    if (!bytes) return "";
-    const mb = bytes / (1024 * 1024);
-    if (mb < 1) return `${Math.round(bytes / 1024)} KB`;
-    return `${mb.toFixed(1)} MB`;
+    if (!bytes) return null
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
   }
 
   if (resources.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center border border-dashed border-[#3f3f46] rounded-xl bg-[#1e2020]/50 mt-4">
-        <span className="material-symbols-outlined text-[48px] text-[#4a4455] mb-4">folder_open</span>
-        <h3 className="text-[#e2e2e2] font-medium mb-1">Sin Recursos</h3>
-        <p className="text-[#958da1] text-sm">Esta sala aún no tiene enlaces ni archivos.</p>
+      <div className="flex flex-col items-center justify-center min-h-[300px] text-center bg-[#1e2020] rounded-xl border border-[#3f3f46] mt-4">
+        <span className="material-symbols-outlined text-[#3f3f46] text-[48px] mb-4">folder_open</span>
+        <h3 className="text-[16px] font-medium text-[#ccc3d8] mb-1">Carpeta Vacía</h3>
+        <p className="text-[#958da1] text-[13px]">No hay archivos ni enlaces en esta sala.</p>
       </div>
     )
   }
@@ -137,6 +142,18 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
               </div>
 
               <div className="flex items-center gap-1">
+                {res.tipo === "doc" && onEditDoc && (
+                  <button
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      onEditDoc(res);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#a78bfa]/10 text-[#a78bfa]"
+                    title="Editar Documento"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">draw</span>
+                  </button>
+                )}
                 {canDelete && (
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(res.id) }}

@@ -26,8 +26,7 @@ export async function POST(
 
     if (recError || !recurso) throw new ApiError(404, "Documento no encontrado");
 
-    const propietarioId = recurso.salas?.backrooms?.propietario_id;
-        const orgId = recurso.salas?.backrooms?.organizacion_id || (recurso.salas as any)?.[0]?.backrooms?.organizacion_id;
+    const propietarioId = recurso.salas?.backrooms?.propietario_id || (recurso.salas as any)?.[0]?.backrooms?.propietario_id;
     const creadorId = recurso.usuario_id;
     const { data: perfil } = await supabase.from("usuarios").select("id").eq("auth_id", user.id).single();
 
@@ -101,17 +100,22 @@ export async function POST(
     // Obtener la organización del recurso para ver si tiene certificado
     const { data: backroom } = await supabase
       .from("backrooms")
-      .select("organization_id")
+      .select("propietario_id")
       .eq("id", recurso.salas.backroom_id)
       .single();
     
-    if (backroom?.organization_id) {
+    let orgData = null;
+    if (backroom?.propietario_id) {
       const { data: org } = await supabase
         .from("organizations")
-        .select("name, certificate_path, certificate_password, plan")
-        .eq("id", backroom.organization_id)
+        .select("id, name, certificate_path, certificate_password, plan")
+        .eq("owner_id", backroom.propietario_id)
         .single();
+      orgData = org;
+    }
       
+    if (orgData) {
+      const org = orgData;
       // Si la org tiene un certificado configurado y está en plan Pro o Enterprise
       if (org && org.certificate_path && org.certificate_password && (org.plan === "pro" || org.plan === "enterprise")) {
         const signpdf = (await import("@signpdf/signpdf")).default;
@@ -157,9 +161,9 @@ export async function POST(
     // 9. Limpiar las firmas virtuales (Ya están quemadas en el PDF)
     await supabase.from("document_signatures").delete().eq("recurso_id", recursoId);
 
-    if (orgId && perfil) {
+    if (orgData?.id && perfil) {
       await AuditService.logAction({
-        orgId,
+        orgId: orgData.id,
         actorId: perfil.id,
         action: "DOCUMENT_SEALED",
         targetType: "resource",

@@ -125,7 +125,14 @@ export default function RegistroPage() {
 
   return (
     <>
-      <div className="p-6 pb-4 text-center border-b border-[#4a4455]/50">
+      <div className="p-6 pb-4 text-center border-b border-[#4a4455]/50 relative">
+        <Link 
+          href="/" 
+          className="absolute left-6 top-6 text-[#958da1] hover:text-[#e2e2e2] transition-colors flex items-center justify-center"
+          title="Volver al inicio"
+        >
+          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+        </Link>
         <h1 className="text-[24px] font-semibold leading-8 text-[#d2bbff] tracking-tight mb-1.5">Crear cuenta</h1>
         <p className="text-[13px] leading-5 text-[#ccc3d8]">Únete a la plataforma para gestionar tu espacio.</p>
       </div>

@@ -46,13 +46,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Chequeo de límites del plan
-    const { data: backroomData } = await adminSupabase.from("backrooms").select("organizacion_id").eq("id", input.backroom_id).single();
-    if (backroomData && backroomData.organizacion_id) {
-      const { getOrganizationPlan, PLAN_LIMITS } = await import("@/lib/limits");
-      const plan = await getOrganizationPlan(backroomData.organizacion_id);
-      const limits = PLAN_LIMITS[plan];
-      if (depth > limits.max_depth) {
-        throw new ApiError(422, `Límite de profundidad alcanzado para el plan ${plan.toUpperCase()} (máximo ${limits.max_depth} niveles)`);
+    const { data: backroomData } = await adminSupabase.from("backrooms").select("propietario_id").eq("id", input.backroom_id).single();
+    if (backroomData && backroomData.propietario_id) {
+      const { data: orgData } = await adminSupabase.from("organizations").select("id").eq("owner_id", backroomData.propietario_id).single();
+      if (orgData) {
+        const { getOrganizationPlan, PLAN_LIMITS } = await import("@/lib/limits");
+        const plan = await getOrganizationPlan(orgData.id);
+        const limits = PLAN_LIMITS[plan];
+        if (depth > limits.max_depth) {
+          throw new ApiError(422, `Límite de profundidad alcanzado para el plan ${plan.toUpperCase()} (máximo ${limits.max_depth} niveles)`);
+        }
       }
     }
 

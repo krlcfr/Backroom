@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { createBrowserClient } from "@supabase/ssr"
 import RoomTree from "@/components/salas/room-tree"
@@ -12,6 +12,7 @@ import Breadcrumb from "@/components/ui/breadcrumb"
 import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 import { useLimits } from "@/components/providers/limits-provider"
+import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
 
 interface Backroom {
   id: string
@@ -43,6 +44,7 @@ interface SalaNode {
 export default function BackRoomPage() {
   const params = useParams()
   const router = useRouter()
+  const pathname = usePathname()
   const { canCreateSala } = useLimits()
   const id = typeof params.id === "string" ? params.id : params.id?.[0]
 
@@ -68,7 +70,8 @@ export default function BackRoomPage() {
   const [resources, setResources] = useState<Resource[]>([])
   const [canUpload, setCanUpload] = useState(false)
   const [canDeleteRes, setCanDeleteRes] = useState(false)
-  const [showAddResource, setShowAddResource] = useState(false)
+  const [addResourceType, setAddResourceType] = useState<'doc' | 'pdf' | 'media' | 'link' | null>(null)
+  const [showCreateDocument, setShowCreateDocument] = useState(false)
   const [rootRoomId, setRootRoomId] = useState<string | null>(null)
 
   const esPropietario = currentUserId !== null && backroom?.ownerId === currentUserId
@@ -128,7 +131,7 @@ export default function BackRoomPage() {
       }
     }
     if (id) fetchData()
-  }, [id])
+  }, [id, pathname])
 
   const reloadResources = async () => {
     if (!rootRoomId) return
@@ -269,11 +272,11 @@ export default function BackRoomPage() {
               </div>
               {canUpload && (
                 <button
-                  onClick={() => setShowAddResource(true)}
+                  onClick={() => setShowCreateDocument(true)}
                   className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[13px] font-medium"
                 >
                   <span className="material-symbols-outlined text-[18px]">add</span>
-                  Añadir Recurso
+                  Recursos
                 </button>
               )}
             </div>
@@ -293,7 +296,7 @@ export default function BackRoomPage() {
         esPropietario={esPropietario} 
         tree={tree}
         activeRoomId={backroom.id}
-        onUploadClick={canUpload ? () => setShowAddResource(true) : undefined}
+        onUploadClick={canUpload ? () => setShowCreateDocument(true) : undefined}
       />
 
       {showCreateRoom && (
@@ -306,7 +309,7 @@ export default function BackRoomPage() {
           onCreated={async (room) => {
             setShowCreateRoom(false)
             setRooms((prev) => [...prev, { ...room, descripcion: null, depth: 1, parent_id: rootRoomId, created_at: new Date().toISOString() }])
-            const rootRoom = rooms.find(r => r.depth === 0)
+            const rootRoom = rooms.find(r => r.depth === 0) || room
             if (rootRoom) {
               const treeRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
               if (treeRes.ok) {
@@ -414,13 +417,25 @@ export default function BackRoomPage() {
         </div>
       )}
       
-      {showAddResource && rootRoomId && (
+      {addResourceType && rootRoomId && (
         <AddResourceModal
           roomId={rootRoomId}
-          onClose={() => setShowAddResource(false)}
+          onClose={() => setAddResourceType(null)}
           onSuccess={() => {
-            setShowAddResource(false)
+            setAddResourceType(null)
             reloadResources()
+          }}
+          initialType={addResourceType}
+        />
+      )}
+
+      {showCreateDocument && (
+        <DocumentCreationWizardModal
+          orgId={""}
+          onClose={() => setShowCreateDocument(false)}
+          onAddResource={(type) => {
+            setShowCreateDocument(false)
+            setAddResourceType(type)
           }}
         />
       )}
