@@ -119,10 +119,19 @@ export default async function Home() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="py-24 bg-[#1e2020]/50 border-t border-b border-[#3F3F46]">
-          <div className="max-w-7xl mx-auto flex flex-col items-center px-4 md:px-8">
-            <h2 className="text-2xl md:text-3xl font-semibold text-[#e2e2e2] mb-4">Planes que escalan contigo</h2>
-            <p className="text-[#ccc3d8] mb-12 text-center">Empieza gratis y mejora cuando tu equipo lo necesite.</p>
+        <section id="pricing" className="relative py-32 bg-black border-t border-[#3F3F46] overflow-hidden">
+          {/* Pure Light Beam & Volumetric Glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl flex flex-col items-center pointer-events-none z-0">
+            {/* The laser line */}
+            <div className="w-[400px] h-[2px] bg-gradient-to-r from-transparent via-[#7c3aed] to-transparent opacity-80 blur-[1px]"></div>
+            <div className="w-[200px] h-[1px] -mt-[1px] bg-white opacity-80 shadow-[0_0_15px_#fff]"></div>
+            {/* The diffused glow projection */}
+            <div className="w-full h-[500px] bg-gradient-to-b from-[#7c3aed]/15 via-[#7c3aed]/5 to-transparent blur-3xl opacity-70"></div>
+          </div>
+          
+          <div className="relative z-10 max-w-7xl mx-auto flex flex-col items-center px-4 md:px-8 mt-4">
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 text-center tracking-tight drop-shadow-2xl">Planes que escalan contigo</h2>
+            <p className="text-[#ccc3d8] mb-16 text-center text-lg max-w-xl">Empieza gratis y mejora cuando tu equipo lo necesite.</p>
             
             <PricingCards mode="landing" />
           </div>

@@ -9,6 +9,54 @@ interface PricingCardsProps {
   currentPlan?: "free" | "pro" | "enterprise";
 }
 
+function InteractiveCard({ children, isPro, currentPlan }: { children: React.ReactNode, isPro?: boolean, currentPlan?: string }) {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+  };
+
+  // Determine accent color
+  const isEnterprise = currentPlan === "enterprise";
+  const accentColor = isPro ? "rgba(52,211,153,0.5)" : "rgba(124,58,237,0.5)";
+  const borderBase = isPro ? "border-[#34d399]/30" : "border-[#3f3f46]/50";
+
+  return (
+    <div 
+      onMouseMove={handleMouseMove}
+      className={`relative group p-[1px] rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl ${isPro ? 'md:-translate-y-4 hover:shadow-[#34d399]/10' : 'hover:shadow-[#7c3aed]/10'}`}
+    >
+      {/* Capa base del borde estático */}
+      <div className="absolute inset-0 bg-[#27272a] rounded-2xl" />
+
+      {/* Efecto de borde brillante reactivo al mouse */}
+      <div 
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+        style={{
+          background: `radial-gradient(400px circle at var(--mouse-x, 0) var(--mouse-y, 0), ${accentColor}, transparent 40%)`
+        }}
+      />
+      
+      {/* Fondo mate de la tarjeta (Tapa el brillo interno y solo deja el borde expuesto) */}
+      <div className={`relative h-full flex flex-col p-8 rounded-[15px] bg-[#121214] z-10 border border-transparent`}>
+        {/* Un glow interno aún más suave */}
+        <div 
+          className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-700 pointer-events-none rounded-[15px]"
+          style={{
+            background: `radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), ${accentColor}, transparent 40%)`
+          }}
+        />
+        
+        <div className="relative z-20 flex flex-col flex-1">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PricingCards({ mode, organizationId, currentPlan = "free" }: PricingCardsProps) {
   const [isAnnual, setIsAnnual] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -28,24 +76,21 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
         body: JSON.stringify({ organizationId, priceId }),
       });
       const data = await res.json();
-      if (res.ok && data.url) {
+
+      if (data.url) {
         window.location.href = data.url;
       } else {
-        setErrorMsg("Error al iniciar checkout: " + (data.error || "Desconocido"));
+        setErrorMsg(data.error || "Error al procesar el pago");
         setLoading(false);
       }
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg("Error al conectar con la pasarela: " + err.message);
+    } catch (err) {
+      setErrorMsg("Error de red");
       setLoading(false);
     }
   };
 
   const handlePortal = async () => {
-    if (!organizationId) {
-      setErrorMsg("No hay organización seleccionada.");
-      return;
-    }
+    if (!organizationId) return;
     setLoading(true);
     setErrorMsg(null);
     try {
@@ -55,61 +100,49 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
         body: JSON.stringify({ organizationId }),
       });
       const data = await res.json();
-      if (res.ok && data.url) {
+      if (data.url) {
         window.location.href = data.url;
       } else {
-        setErrorMsg("Error al abrir portal: " + (data.error || "Desconocido"));
+        setErrorMsg("Error al abrir el portal");
         setLoading(false);
       }
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg("Error de conexión: " + err.message);
+    } catch (err) {
+      setErrorMsg("Error de red");
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
-      {/* Toggle */}
-      <div className="flex items-center gap-3 mb-12">
-        <div className="flex items-center gap-3">
-          <span className={`text-sm font-medium ${!isAnnual ? "text-[#e2e2e2]" : "text-[#ccc3d8]"}`}>Mensual</span>
-          <button 
-            onClick={() => setIsAnnual(!isAnnual)}
-            className="w-12 h-6 bg-[#333535] rounded-full relative transition-colors focus:outline-none"
-          >
-            <div className={`absolute top-1 w-4 h-4 rounded-full bg-[#d2bbff] transition-transform ${isAnnual ? "left-7" : "left-1"}`} />
-          </button>
-          <span className={`text-sm font-medium flex items-center gap-2 ${isAnnual ? "text-[#e2e2e2]" : "text-[#ccc3d8]"}`}>
-            Anual
-            <span className="bg-[#7c3aed]/20 text-[#d2bbff] text-[10px] px-2 py-0.5 rounded-full border border-[#7c3aed]/30">-20%</span>
-          </span>
-        </div>
+    <div className="w-full max-w-6xl mx-auto flex flex-col items-center">
+      {/* Annual/Monthly Toggle */}
+      <div className="flex items-center gap-3 mb-16 bg-[#18181b] p-1.5 rounded-full border border-[#3f3f46]/50 shadow-inner">
+        <span className={`text-sm font-medium px-4 py-1.5 rounded-full transition-colors cursor-pointer ${!isAnnual ? "text-[#e2e2e2] bg-[#333535]" : "text-[#958da1]"}`} onClick={() => setIsAnnual(false)}>
+          Mensual
+        </span>
+        <button
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isAnnual ? "bg-[#7c3aed]" : "bg-[#4a4455]"}`}
+          onClick={() => setIsAnnual(!isAnnual)}
+        >
+          <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isAnnual ? "translate-x-6" : "translate-x-1"}`} />
+        </button>
+        <span className={`text-sm font-medium px-4 py-1.5 rounded-full transition-colors cursor-pointer flex items-center gap-2 ${isAnnual ? "text-[#e2e2e2] bg-[#333535]" : "text-[#958da1]"}`} onClick={() => setIsAnnual(true)}>
+          Anual <span className="text-[10px] bg-[#7c3aed]/20 text-[#d2bbff] px-2 py-0.5 rounded-full font-bold border border-[#7c3aed]/30">-20%</span>
+        </span>
       </div>
 
       {errorMsg && (
-        <div className="max-w-xl mx-auto mb-8 p-3 bg-[#ffb4ab]/10 border border-[#ffb4ab]/30 rounded-lg flex items-center gap-3 text-[#ffb4ab]">
-          <span className="material-symbols-outlined text-[20px]">error</span>
-          <p className="text-sm">{errorMsg}</p>
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400 text-sm w-full max-w-md text-center">
+          {errorMsg}
         </div>
       )}
 
-      {/* Cards Container */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full relative z-10">
+        
         {/* Free Plan */}
-        <div className={`flex flex-col p-8 bg-[#27272a] rounded-2xl border transition-all duration-300 relative ${
-          currentPlan === "free"
-            ? "border-[#34d399] shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-[#34d399]"
-            : "border-[#4a4455] shadow-lg"
-        }`}>
-          {currentPlan === "free" && mode === "dashboard" && (
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#34d399] text-[#1e2020] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              Plan Actual
-            </div>
-          )}
-          <h3 className="text-xl font-bold text-[#e2e2e2] mb-2">Free</h3>
+        <InteractiveCard>
+          <h3 className="text-xl font-bold text-[#e2e2e2] mb-2 tracking-tight">Free</h3>
           <p className="text-sm text-[#ccc3d8] mb-6">Para empezar a organizarte.</p>
-          <div className="text-4xl font-extrabold text-[#e2e2e2] mb-8">
+          <div className="text-4xl font-extrabold text-[#e2e2e2] mb-8 tracking-tight">
             $0<span className="text-lg font-medium text-[#958da1]">/mes</span>
           </div>
           
@@ -132,87 +165,85 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
             </li>
           </ul>
 
-          {mode === "landing" ? (
-            <Link href="/registro" className="w-full py-3 px-4 rounded-lg border border-[#4a4455] text-center text-[#e2e2e2] font-medium hover:bg-[#333535] transition-colors">
-              Comenzar Gratis
-            </Link>
-          ) : currentPlan === "free" ? (
-            <button disabled className="w-full py-3 px-4 rounded-lg bg-[#333535] text-[#958da1] font-medium cursor-not-allowed">
-              Plan Actual
-            </button>
-          ) : null}
-        </div>
+          <div className="mt-auto">
+            {mode === "landing" ? (
+              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-[#27272a] hover:border-[#7c3aed]/50 hover:shadow-[0_0_15px_rgba(124,58,237,0.2)] hover:scale-[1.02]">
+                Comenzar Gratis
+              </Link>
+            ) : currentPlan === "free" ? (
+              <button disabled className="w-full py-3 px-4 rounded-xl bg-[#27272a] text-[#958da1] font-semibold cursor-not-allowed border border-[#3f3f46]/50">
+                Plan Actual
+              </button>
+            ) : null}
+          </div>
+        </InteractiveCard>
 
         {/* Pro Plan */}
-        <div className={`flex flex-col p-8 bg-[#303036] rounded-2xl border-2 transition-all duration-300 relative transform md:-translate-y-4 ${
-          currentPlan === "pro"
-            ? "border-[#34d399] shadow-[0_0_30px_rgba(52,211,153,0.2)] ring-1 ring-[#34d399]"
-            : "border-[#7c3aed] shadow-[0_0_30px_rgba(124,58,237,0.15)]"
-        }`}>
-          <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
-            currentPlan === "pro" && mode === "dashboard" ? "bg-[#34d399] text-[#1e2020]" : "bg-[#7c3aed] text-white"
+        <InteractiveCard isPro>
+          <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-lg ${
+            currentPlan === "pro" && mode === "dashboard" 
+              ? "bg-[#34d399] text-[#064e3b] shadow-[#34d399]/20" 
+              : "bg-[#7c3aed] text-white shadow-[#7c3aed]/30"
           }`}>
             {currentPlan === "pro" && mode === "dashboard" ? "Plan Actual" : "Recomendado"}
           </div>
-          <h3 className="text-xl font-bold text-[#e2e2e2] mb-2">Pro</h3>
+          <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Pro</h3>
           <p className="text-sm text-[#ccc3d8] mb-6">Para equipos en crecimiento.</p>
-          <div className="text-4xl font-extrabold text-[#e2e2e2] mb-8">
+          <div className="text-4xl font-extrabold text-white mb-8 tracking-tight drop-shadow-md">
             ${isAnnual ? "12" : "15"}
             <span className="text-lg font-medium text-[#958da1]">/mes</span>
           </div>
           
           <ul className="flex flex-col gap-4 mb-8 flex-1">
             <li className="flex items-start gap-3 text-[#ccc3d8] text-sm">
-              <span className="material-symbols-outlined text-[#7c3aed] text-[20px]">check_circle</span>
+              <span className="material-symbols-outlined text-[#34d399] text-[20px]">check_circle</span>
               BackRooms Ilimitados
             </li>
             <li className="flex items-start gap-3 text-[#ccc3d8] text-sm">
-              <span className="material-symbols-outlined text-[#7c3aed] text-[20px]">check_circle</span>
+              <span className="material-symbols-outlined text-[#34d399] text-[20px]">check_circle</span>
               Hasta 15 Miembros
             </li>
             <li className="flex items-start gap-3 text-[#ccc3d8] text-sm">
-              <span className="material-symbols-outlined text-[#7c3aed] text-[20px]">check_circle</span>
+              <span className="material-symbols-outlined text-[#34d399] text-[20px]">check_circle</span>
               Subida de archivos pesados
             </li>
             <li className="flex items-start gap-3 text-[#ccc3d8] text-sm">
-              <span className="material-symbols-outlined text-[#7c3aed] text-[20px]">check_circle</span>
+              <span className="material-symbols-outlined text-[#34d399] text-[20px]">check_circle</span>
               Retención de archivos: 6 meses
             </li>
           </ul>
 
-          {mode === "landing" ? (
-            <Link href="/registro" className="w-full py-3 px-4 rounded-lg bg-[#7c3aed] text-center text-white font-medium hover:bg-[#6d28d9] transition-colors shadow-lg shadow-[#7c3aed]/20">
-              Elegir Pro
-            </Link>
-          ) : currentPlan === "free" ? (
-            <button 
-              onClick={() => handleCheckout(isAnnual ? "price_pro_annual" : "price_pro_monthly")}
-              disabled={loading}
-              className="w-full py-3 px-4 rounded-lg bg-[#7c3aed] text-center text-white font-medium hover:bg-[#6d28d9] transition-colors shadow-lg shadow-[#7c3aed]/20 disabled:opacity-50"
-            >
-              {loading ? "Redirigiendo..." : "Mejorar a Pro"}
-            </button>
-          ) : currentPlan === "pro" ? (
-            <button onClick={handlePortal} disabled={loading} className="w-full py-3 px-4 rounded-lg border border-[#7c3aed] text-[#e2e2e2] font-medium hover:bg-[#7c3aed]/10 transition-colors">
-              Administrar Suscripción
-            </button>
-          ) : null}
-        </div>
+          <div className="mt-auto">
+            {mode === "landing" ? (
+              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl bg-[#7c3aed] text-center text-white font-semibold transition-all duration-300 hover:bg-[#6d28d9] hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:scale-[1.02] border border-[#8b5cf6]/50">
+                Elegir Pro
+              </Link>
+            ) : currentPlan === "free" ? (
+              <button 
+                onClick={() => handleCheckout(isAnnual ? "price_pro_annual" : "price_pro_monthly")}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-[#7c3aed] text-center text-white font-semibold transition-all duration-300 hover:bg-[#6d28d9] hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:scale-[1.02] disabled:opacity-50 border border-[#8b5cf6]/50"
+              >
+                {loading ? "Redirigiendo..." : "Mejorar a Pro"}
+              </button>
+            ) : currentPlan === "pro" ? (
+              <button onClick={handlePortal} disabled={loading} className="w-full py-3 px-4 rounded-xl border border-[#7c3aed] text-[#e2e2e2] font-semibold hover:bg-[#7c3aed]/10 transition-colors">
+                Administrar Suscripción
+              </button>
+            ) : null}
+          </div>
+        </InteractiveCard>
 
         {/* Enterprise Plan */}
-        <div className={`flex flex-col p-8 bg-[#27272a] rounded-2xl border transition-all duration-300 relative ${
-          currentPlan === "enterprise"
-            ? "border-[#34d399] shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-[#34d399]"
-            : "border-[#4a4455] shadow-lg"
-        }`}>
+        <InteractiveCard currentPlan="enterprise">
           {currentPlan === "enterprise" && mode === "dashboard" && (
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#34d399] text-[#1e2020] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#34d399] text-[#064e3b] text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-[#34d399]/20">
               Plan Actual
             </div>
           )}
-          <h3 className="text-xl font-bold text-[#e2e2e2] mb-2">Enterprise</h3>
+          <h3 className="text-xl font-bold text-[#e2e2e2] mb-2 tracking-tight">Enterprise</h3>
           <p className="text-sm text-[#ccc3d8] mb-6">Máxima seguridad y aislamiento.</p>
-          <div className="text-4xl font-extrabold text-[#e2e2e2] mb-8">
+          <div className="text-4xl font-extrabold text-[#e2e2e2] mb-8 tracking-tight">
             ${isAnnual ? "40" : "50"}
             <span className="text-lg font-medium text-[#958da1]">/mes</span>
           </div>
@@ -236,24 +267,26 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
             </li>
           </ul>
 
-          {mode === "landing" ? (
-            <Link href="/registro" className="w-full py-3 px-4 rounded-lg border border-[#4a4455] text-center text-[#e2e2e2] font-medium hover:bg-[#333535] transition-colors">
-              Contactar Ventas
-            </Link>
-          ) : currentPlan === "enterprise" ? (
-            <button onClick={handlePortal} disabled={loading} className="w-full py-3 px-4 rounded-lg border border-[#4a4455] text-[#e2e2e2] font-medium hover:bg-[#333535] transition-colors">
-              Administrar Suscripción
-            </button>
-          ) : (
-            <button 
-              onClick={() => handleCheckout(isAnnual ? "price_ent_annual" : "price_ent_monthly")}
-              disabled={loading}
-              className="w-full py-3 px-4 rounded-lg border border-[#4a4455] text-center text-[#e2e2e2] font-medium hover:bg-[#333535] transition-colors disabled:opacity-50"
-            >
-              {loading ? "Redirigiendo..." : "Mejorar a Enterprise"}
-            </button>
-          )}
-        </div>
+          <div className="mt-auto">
+            {mode === "landing" ? (
+              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-[#27272a] hover:border-[#7c3aed]/50 hover:shadow-[0_0_15px_rgba(124,58,237,0.2)] hover:scale-[1.02]">
+                Contactar Ventas
+              </Link>
+            ) : currentPlan === "enterprise" ? (
+              <button onClick={handlePortal} disabled={loading} className="w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-[#e2e2e2] font-semibold hover:bg-[#27272a] transition-all duration-300">
+                Administrar Suscripción
+              </button>
+            ) : (
+              <button 
+                onClick={() => handleCheckout(isAnnual ? "price_ent_annual" : "price_ent_monthly")}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-[#27272a] hover:border-[#7c3aed]/50 hover:shadow-[0_0_15px_rgba(124,58,237,0.2)] hover:scale-[1.02] disabled:opacity-50"
+              >
+                {loading ? "Redirigiendo..." : "Mejorar a Enterprise"}
+              </button>
+            )}
+          </div>
+        </InteractiveCard>
       </div>
     </div>
   );
