@@ -95,10 +95,10 @@ function RenderTree({ nodes, backroomId, level = 0 }: { nodes: TreeNode[]; backr
 export default function SidebarTree({ backroomId }: { backroomId: string }) {
   const [loading, setLoading] = useState(true);
   const [tree, setTree] = useState<TreeNode[]>([]);
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     async function loadSalas() {
-      const supabase = createClient();
       const { data } = await supabase
         .from("salas")
         .select("id, nombre, parent_id, icono")

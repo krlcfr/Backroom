@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { InvitationsService } from "@/lib/services/invitations.service"
 import Link from "next/link"
+import Image from "next/image"
 import { redirect } from "next/navigation"
 
 export default async function InvitationLandingPage({ params }: { params: Promise<{ token: string }> }) {
@@ -40,10 +41,12 @@ export default async function InvitationLandingPage({ params }: { params: Promis
         ) : (
           <div className="text-center">
             {invitation.organizations?.logo_url ? (
-              <img
+              <Image
                 src={invitation.organizations.logo_url}
                 alt="Logo"
-                className="mx-auto mb-4 h-16 w-16 rounded-lg object-cover"
+                width={64}
+                height={64}
+                className="mx-auto mb-4 rounded-lg object-cover"
               />
             ) : (
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-[#27272a] text-xl font-bold text-[#fafafa]">

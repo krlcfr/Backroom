@@ -16,7 +16,7 @@ export default function RecursosList({ salaId }: { salaId: string }) {
   const [recursos, setRecursos] = useState<Recurso[]>([])
   const [loading, setLoading] = useState(true)
   
-  const supabase = createClient()
+  const [supabase] = useState(() => createClient())
 
   useEffect(() => {
     async function loadRecursos() {

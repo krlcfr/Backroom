@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import Image from "next/image"
 
 interface DashboardHeaderProps {
   userName: string
@@ -50,10 +51,9 @@ export default function DashboardHeader({ userName, userAvatar }: DashboardHeade
         >
           {loading ? "Saliendo…" : "Cerrar sesión"}
         </button>
-        <div className="w-8 h-8 rounded-full border border-[#4a4455] bg-[#282a2b] flex items-center justify-center overflow-hidden">
+        <div className="w-8 h-8 rounded-full border border-[#4a4455] bg-[#282a2b] flex items-center justify-center overflow-hidden relative">
           {userAvatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={userAvatar} alt={userName} className="w-full h-full object-cover" />
+            <Image src={userAvatar} alt={userName} width={32} height={32} className="object-cover w-full h-full" />
           ) : (
             <span className="text-[12px] font-medium text-[#d2bbff]">
               {userName.charAt(0).toUpperCase()}

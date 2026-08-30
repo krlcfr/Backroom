@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 import Button from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, ArrowRight, LogOut } from "lucide-react";
@@ -28,7 +29,7 @@ export default function InvitationClient({
 }: InvitationClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const isEmailMismatch = currentUserEmail && currentUserEmail.toLowerCase() !== email.toLowerCase();
 
@@ -66,10 +67,12 @@ export default function InvitationClient({
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center pb-2">
           {organization.logo_url ? (
-            <div className="mx-auto h-16 w-16 overflow-hidden rounded-md border bg-muted mb-4">
-              <img
+            <div className="mx-auto h-16 w-16 overflow-hidden rounded-md border bg-muted mb-4 relative">
+              <Image
                 src={organization.logo_url}
                 alt={organization.name}
+                width={64}
+                height={64}
                 className="h-full w-full object-cover"
               />
             </div>

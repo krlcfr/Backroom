@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { useLimits } from "@/components/providers/limits-provider"
 import { useSidebar } from "@/components/providers/sidebar-provider"
 
@@ -55,10 +56,9 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
 
       {orgName && (
         <div className={`px-4 mb-4 flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
-          <div className="w-10 h-10 rounded-lg bg-[#333535] flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="w-10 h-10 rounded-lg bg-[#333535] flex items-center justify-center shrink-0 overflow-hidden relative">
             {orgLogo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={orgUpdatedAt ? `${orgLogo}?v=${encodeURIComponent(orgUpdatedAt)}` : orgLogo ?? ""} alt={orgName} className="w-full h-full object-cover" />
+              <Image src={orgUpdatedAt ? `${orgLogo}?v=${encodeURIComponent(orgUpdatedAt)}` : orgLogo ?? ""} alt={orgName ?? ""} width={40} height={40} className="object-cover w-full h-full" />
             ) : (
               <span className="material-symbols-outlined text-[#d2bbff]">apartment</span>
             )}

@@ -3,7 +3,12 @@
 import { useState } from "react"
 import Link from "next/link"
 import RoomTree, { RoomNode } from "./room-tree"
-import RoomGraphModal from "./room-graph-modal"
+import dynamic from "next/dynamic"
+
+const RoomGraphModal = dynamic(() => import("./room-graph-modal"), {
+  loading: () => <p className="p-4 text-center text-sm text-[#958da1]">Cargando mapa...</p>,
+  ssr: false
+})
 
 interface Backroom {
   id: string
