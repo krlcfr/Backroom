@@ -18,32 +18,32 @@ function InteractiveCard({ children, isPro, currentPlan }: { children: React.Rea
     e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
   };
 
-  // Determine accent color
+  // Determine accent color - making the glow much stronger and wider
   const isEnterprise = currentPlan === "enterprise";
-  const accentColor = isPro ? "rgba(52,211,153,0.5)" : "rgba(124,58,237,0.5)";
+  const accentColor = isPro ? "rgba(52,211,153,1)" : "rgba(124,58,237,1)";
   const borderBase = isPro ? "border-[#34d399]/30" : "border-[#3f3f46]/50";
 
   return (
     <div 
       onMouseMove={handleMouseMove}
-      className={`relative group p-[1px] rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-2xl ${isPro ? 'md:-translate-y-4 hover:shadow-[#34d399]/10' : 'hover:shadow-[#7c3aed]/10'}`}
+      className={`relative group p-[2px] rounded-2xl overflow-visible transition-all duration-500 ease-out z-10 hover:z-30 hover:-translate-y-2 hover:scale-[1.03] ${isPro ? 'md:-translate-y-4 hover:md:-translate-y-6 hover:shadow-[0_20px_40px_-15px_rgba(52,211,153,0.4)]' : 'hover:shadow-[0_20px_40px_-15px_rgba(124,58,237,0.4)]'}`}
     >
       {/* Capa base del borde estático */}
       <div className="absolute inset-0 bg-[#27272a] rounded-2xl" />
 
-      {/* Efecto de borde brillante reactivo al mouse */}
+      {/* Efecto de borde brillante reactivo al mouse (mucho más intenso) */}
       <div 
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{
-          background: `radial-gradient(400px circle at var(--mouse-x, 0) var(--mouse-y, 0), ${accentColor}, transparent 40%)`
+          background: `radial-gradient(600px circle at var(--mouse-x, 0) var(--mouse-y, 0), ${accentColor}, transparent 40%)`
         }}
       />
       
-      {/* Fondo mate de la tarjeta (Tapa el brillo interno y solo deja el borde expuesto) */}
+      {/* Fondo mate de la tarjeta */}
       <div className={`relative h-full flex flex-col p-8 rounded-[15px] bg-[#121214] z-10 border border-transparent`}>
         {/* Un glow interno aún más suave */}
         <div 
-          className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-700 pointer-events-none rounded-[15px]"
+          className="absolute inset-0 opacity-0 group-hover:opacity-15 transition-opacity duration-500 pointer-events-none rounded-[15px]"
           style={{
             background: `radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), ${accentColor}, transparent 40%)`
           }}
