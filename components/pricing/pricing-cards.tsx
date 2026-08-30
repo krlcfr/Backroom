@@ -167,7 +167,7 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
 
           <div className="mt-auto">
             {mode === "landing" ? (
-              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-[#27272a] hover:border-[#7c3aed]/50 hover:shadow-[0_0_15px_rgba(124,58,237,0.2)] hover:scale-[1.02]">
+              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-[#7c3aed] hover:border-[#7c3aed] hover:text-white hover:shadow-[0_0_20px_rgba(124,58,237,0.6)] hover:scale-[1.02]">
                 Comenzar Gratis
               </Link>
             ) : currentPlan === "free" ? (
@@ -215,19 +215,19 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
 
           <div className="mt-auto">
             {mode === "landing" ? (
-              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl bg-[#7c3aed] text-center text-white font-semibold transition-all duration-300 hover:bg-[#6d28d9] hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:scale-[1.02] border border-[#8b5cf6]/50">
+              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl bg-[#34d399] text-center text-[#064e3b] font-bold transition-all duration-300 hover:bg-[#10b981] hover:text-white hover:shadow-[0_0_25px_rgba(52,211,153,0.6)] hover:scale-[1.02] border border-[#34d399]">
                 Elegir Pro
               </Link>
             ) : currentPlan === "free" ? (
               <button 
                 onClick={() => handleCheckout(isAnnual ? "price_pro_annual" : "price_pro_monthly")}
                 disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-[#7c3aed] text-center text-white font-semibold transition-all duration-300 hover:bg-[#6d28d9] hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] hover:scale-[1.02] disabled:opacity-50 border border-[#8b5cf6]/50"
+                className="w-full py-3 px-4 rounded-xl bg-[#34d399] text-center text-[#064e3b] font-bold transition-all duration-300 hover:bg-[#10b981] hover:text-white hover:shadow-[0_0_25px_rgba(52,211,153,0.6)] hover:scale-[1.02] disabled:opacity-50 border border-[#34d399]"
               >
                 {loading ? "Redirigiendo..." : "Mejorar a Pro"}
               </button>
             ) : currentPlan === "pro" ? (
-              <button onClick={handlePortal} disabled={loading} className="w-full py-3 px-4 rounded-xl border border-[#7c3aed] text-[#e2e2e2] font-semibold hover:bg-[#7c3aed]/10 transition-colors">
+              <button onClick={handlePortal} disabled={loading} className="w-full py-3 px-4 rounded-xl border border-[#34d399] text-[#e2e2e2] font-semibold hover:bg-[#34d399]/20 transition-colors">
                 Administrar Suscripción
               </button>
             ) : null}
@@ -269,7 +269,7 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
 
           <div className="mt-auto">
             {mode === "landing" ? (
-              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-[#27272a] hover:border-[#7c3aed]/50 hover:shadow-[0_0_15px_rgba(124,58,237,0.2)] hover:scale-[1.02]">
+              <Link href="/registro" className="block w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-white hover:border-white hover:text-black hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] hover:scale-[1.02]">
                 Contactar Ventas
               </Link>
             ) : currentPlan === "enterprise" ? (
@@ -280,7 +280,7 @@ export function PricingCards({ mode, organizationId, currentPlan = "free" }: Pri
               <button 
                 onClick={() => handleCheckout(isAnnual ? "price_ent_annual" : "price_ent_monthly")}
                 disabled={loading}
-                className="w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-[#27272a] hover:border-[#7c3aed]/50 hover:shadow-[0_0_15px_rgba(124,58,237,0.2)] hover:scale-[1.02] disabled:opacity-50"
+                className="w-full py-3 px-4 rounded-xl border border-[#3f3f46] text-center text-[#e2e2e2] font-semibold transition-all duration-300 hover:bg-white hover:border-white hover:text-black hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] hover:scale-[1.02] disabled:opacity-50"
               >
                 {loading ? "Redirigiendo..." : "Mejorar a Enterprise"}
               </button>
