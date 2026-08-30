@@ -17,6 +17,8 @@ export function VideoHero() {
     "/videos/scene-3.mp4"
   ];
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     // Attempt to play the current video whenever the index changes
     const currentVideo = videoRefs[currentVideoIndex].current;
@@ -31,10 +33,20 @@ export function VideoHero() {
         ref.current.pause();
       }
     });
+
+    // Cleanup function to clear timeout if the component unmounts or index changes manually
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [currentVideoIndex]);
 
   const handleVideoEnd = () => {
-    setCurrentVideoIndex((prev) => (prev + 1) % videos.length);
+    // Esperar 6 segundos en el último frame antes de pasar al siguiente video
+    timeoutRef.current = setTimeout(() => {
+      setCurrentVideoIndex((prev) => (prev + 1) % videos.length);
+    }, 6000);
   };
 
   return (
