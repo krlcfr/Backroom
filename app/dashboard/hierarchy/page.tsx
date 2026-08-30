@@ -10,7 +10,7 @@ export default async function HierarchyPage() {
   if (!session) return null;
 
   // Obtenemos los backrooms del usuario para permitirle seleccionar cuál jerarquía ver
-  const backrooms = await BackroomsService.getByUser(session.id);
+  const backrooms = await BackroomsService.listForUser();
 
   return (
     <div className="w-full h-full p-6">
