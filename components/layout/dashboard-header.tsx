@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import Image from "next/image"
+import { NotificationBell } from "./NotificationBell"
 
 interface DashboardHeaderProps {
   userName: string
@@ -29,7 +30,7 @@ export default function DashboardHeader({ userName, userAvatar }: DashboardHeade
           <Link href="/dashboard" className="text-[#d2bbff] font-medium border-b-2 border-[#d2bbff] pb-1">
             Dashboard
           </Link>
-          <Link href="/dashboard" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
+          <Link href="/dashboard/auditoria" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
             Registros
           </Link>
           <Link href="/dashboard/configuracion" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
@@ -38,12 +39,16 @@ export default function DashboardHeader({ userName, userAvatar }: DashboardHeade
         </nav>
       </div>
       <div className="flex items-center gap-4">
-        <button className="text-[#ccc3d8] hover:text-[#d2bbff] transition-colors">
-          <span className="material-symbols-outlined text-[20px]">notifications</span>
-        </button>
-        <button className="text-[#ccc3d8] hover:text-[#d2bbff] transition-colors">
+        
+        <NotificationBell />
+
+        <Link 
+          href="/dashboard/support" 
+          className="relative p-2 rounded-full text-[#ccc3d8] hover:text-[#e2e2e2] hover:bg-[#27272a] transition-colors flex items-center justify-center"
+        >
           <span className="material-symbols-outlined text-[20px]">help_outline</span>
-        </button>
+        </Link>
+        
         <button
           onClick={handleLogout}
           disabled={loading}

@@ -120,17 +120,7 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
 
       <div className="border-t border-[#4a4455] pt-2 px-2 flex flex-col gap-1 flex-none">
         <Link
-          href="/dashboard"
-          title={collapsed ? "Documentación" : undefined}
-          className={`flex items-center gap-3 text-[#ccc3d8] py-2 text-[12px] hover:bg-[#282a2b] rounded-lg transition-all ${
-            collapsed ? "justify-center px-0" : "px-4"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">description</span>
-          {!collapsed && <span>Documentación</span>}
-        </Link>
-        <Link
-          href="/dashboard"
+          href="/dashboard/support"
           title={collapsed ? "Soporte" : undefined}
           className={`flex items-center gap-3 text-[#ccc3d8] py-2 text-[12px] hover:bg-[#282a2b] rounded-lg transition-all ${
             collapsed ? "justify-center px-0" : "px-4"
