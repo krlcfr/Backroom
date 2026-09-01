@@ -1,5 +1,4 @@
-"use client"
-
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -27,35 +26,35 @@ const METRIC_CARDS: Array<{
 }> = [
   {
     key: "storage",
-    icon: "dns",
-    iconColor: "text-amber-400",
-    title: "Almacenamiento",
-    description: "Capacidad total para documentos encriptados de tu BackRoom.",
+    icon: "hard_drive",
+    iconColor: "text-amber-500",
+    title: "Almacenamiento Total",
+    description: "Capacidad utilizada para todos los documentos de tu organización.",
   },
   {
     key: "members",
     icon: "group",
-    iconColor: "text-blue-400",
+    iconColor: "text-blue-500",
     title: "Miembros Activos",
-    description: "Usuarios con acceso concurrente al BackRoom.",
+    description: "Usuarios con acceso a la plataforma corporativa.",
   },
   {
     key: "depth",
     icon: "account_tree",
-    iconColor: "text-purple-400",
-    title: "Niveles de Sala",
-    description: "Profundidad máxima de la estructura jerárquica de salas.",
+    iconColor: "text-purple-500",
+    title: "Profundidad de Salas",
+    description: "Niveles máximos de anidación permitidos para las salas.",
   },
   {
     key: "resources",
-    icon: "token",
-    iconColor: "text-green-400",
-    title: "Recursos de API",
-    description: "Recursos compartidos dentro de cada sala del BackRoom.",
+    icon: "folder_open",
+    iconColor: "text-emerald-500",
+    title: "Recursos por Sala",
+    description: "Límite de documentos o archivos por cada sala individual.",
   },
 ]
 
-export default function DemoLimitesPage() {
+export default function StoragePage() {
   const [data, setData] = useState<LimitsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -76,18 +75,15 @@ export default function DemoLimitesPage() {
   }
 
   useEffect(() => {
-    const id = setTimeout(() => {
-      load()
-    }, 0)
-    return () => clearTimeout(id)
+    load()
   }, [])
 
   if (loading) {
     return (
-      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
-        <div className="flex items-center gap-3 text-[#ccc3d8]">
-          <span className="material-symbols-outlined animate-spin text-[#d2bbff]">progress_activity</span>
-          <span>Cargando métricas...</span>
+      <div className="flex h-full min-h-[500px] items-center justify-center">
+        <div className="flex items-center gap-3 text-[#958da1]">
+          <span className="material-symbols-outlined animate-spin text-[#7c3aed]">refresh</span>
+          <span className="text-sm font-medium">Calculando métricas de almacenamiento...</span>
         </div>
       </div>
     )
@@ -95,14 +91,14 @@ export default function DemoLimitesPage() {
 
   if (error || !data) {
     return (
-      <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center gap-4 px-6 text-center">
-        <span className="material-symbols-outlined text-[#ffb4ab] text-[40px]">error</span>
-        <p className="text-[#e2e2e2] text-[15px]">{error || "No se pudieron cargar los límites."}</p>
+      <div className="flex h-full min-h-[500px] flex-col items-center justify-center gap-4 px-6 text-center">
+        <span className="material-symbols-outlined text-red-500 text-5xl">cloud_off</span>
+        <p className="text-[#e2e2e2] text-sm font-medium">{error || "No se pudieron cargar los límites."}</p>
         <button
           onClick={load}
-          className="rounded-lg bg-[#7c3aed] px-4 py-2 text-[12px] font-medium text-white hover:bg-[#8B5CF6] transition-colors"
+          className="mt-2 rounded-lg bg-[#3f3f46] hover:bg-[#52525b] px-4 py-2 text-xs font-medium text-white transition-colors"
         >
-          Reintentar
+          Reintentar conexión
         </button>
       </div>
     )
@@ -121,55 +117,98 @@ export default function DemoLimitesPage() {
       pct: data.storage_percentage,
     },
     members: { value: `${current_usage.members} / ${limits.max_members}`, pct: membersPct },
-    depth: { value: `Nivel ${depthReached} de ${depthLevels}`, pct: depthPct },
+    depth: { value: `${depthReached} / ${depthLevels} niveles`, pct: depthPct },
     resources: { value: `${current_usage.resources} / ${limits.max_resources_per_room}`, pct: resourcesPct },
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-start justify-center px-8 py-12">
-      <div className="w-full max-w-4xl flex flex-col items-center">
-        <div className="flex flex-col items-center text-center mb-12">
-          <span className="inline-flex items-center gap-2 bg-[#7c3aed]/20 border border-[#7c3aed]/40 rounded-full px-3 py-1 text-[#d2bbff] text-[11px] font-medium tracking-wider uppercase">
-            Plan {data.plan || "Free"}
-          </span>
-          <h1 className="mt-4 text-[36px] font-bold text-[#e2e2e2]">Consumo y Límites</h1>
-          <p className="mt-3 max-w-xl text-[15px] text-[#ccc3d8]">
-            Monitorea el uso de los recursos de tu organización. Si necesitas más capacidad, actualiza tu plan en Configuración.
+    <div className="w-full max-w-5xl mx-auto p-6 md:p-8">
+      {/* Encabezado Corporativo */}
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[#e2e2e2] flex items-center gap-2 mb-2">
+            <span className="material-symbols-outlined text-[#7c3aed] text-3xl">data_usage</span>
+            Almacenamiento y Límites
+          </h1>
+          <p className="text-sm text-[#958da1]">
+            Visualiza el consumo de recursos de tu organización en tiempo real.
           </p>
         </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-[#958da1] uppercase font-bold tracking-wider">Plan Actual</span>
+          <span className="bg-[#7c3aed]/10 border border-[#7c3aed]/30 text-[#d2bbff] px-4 py-1.5 rounded-lg text-sm font-semibold uppercase">
+            {data.plan || "Gratuito"}
+          </span>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12">
-          {METRIC_CARDS.map((card) => {
-            const metric = metricValues[card.key]
-            return (
-              <div key={card.key} className="bg-[#27272A] border border-[#3F3F46] rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-[#121414] border border-[#3F3F46] flex items-center justify-center">
-                      <span className={`material-symbols-outlined ${card.iconColor}`}>{card.icon}</span>
-                    </div>
-                    <h3 className="text-[16px] font-semibold text-[#e2e2e2]">{card.title}</h3>
+      {/* Grid de Métricas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {METRIC_CARDS.map((card) => {
+          const metric = metricValues[card.key]
+          
+          return (
+            <div key={card.key} className="bg-[#18181b] border border-[#3f3f46] rounded-xl p-6 relative overflow-hidden transition-all hover:border-[#52525b]">
+              
+              {/* Decoración de fondo sutil */}
+              <div className="absolute -right-6 -top-6 opacity-[0.03] pointer-events-none">
+                <span className="material-symbols-outlined text-[120px]">{card.icon}</span>
+              </div>
+
+              <div className="flex justify-between items-start mb-6 relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#121414] border border-[#3f3f46] flex items-center justify-center">
+                    <span className={`material-symbols-outlined text-[24px] ${card.iconColor}`}>{card.icon}</span>
                   </div>
-                  <span
-                    className="bg-[#121414] border border-[#3F3F46] rounded-full px-3 py-1 text-[12px] text-[#d2bbff] whitespace-nowrap"
-                    style={{ fontFamily: "'Courier Prime', monospace" }}
-                  >
-                    {metric.value}
-                  </span>
-                </div>
-                <p className="text-[13px] text-[#ccc3d8] mb-5">{card.description}</p>
-                <div className="w-full h-2 bg-[#121414] rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${barColor(metric.pct)} rounded-full transition-all duration-700`}
-                    style={{ width: `${Math.min(metric.pct, 100)}%` }}
-                  />
+                  <div>
+                    <h3 className="text-base font-semibold text-[#e2e2e2]">{card.title}</h3>
+                    <p className="text-xs text-[#958da1] mt-0.5 line-clamp-1">{card.description}</p>
+                  </div>
                 </div>
               </div>
-            )
-          })}
+
+              <div className="relative z-10">
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-2xl font-bold text-[#e2e2e2] font-mono tracking-tight">
+                    {metric.value.split('/')[0].trim()}
+                  </span>
+                  <span className="text-sm text-[#958da1] font-mono mb-1">
+                    / {metric.value.split('/')[1]?.trim() || ''}
+                  </span>
+                </div>
+
+                <div className="w-full h-2 bg-[#27272a] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${barColor(metric.pct)} rounded-full transition-all duration-1000 ease-out`}
+                    style={{ width: `${Math.min(Math.max(metric.pct, 2), 100)}%` }}
+                  />
+                </div>
+                
+                <div className="mt-2 text-right">
+                  <span className="text-[10px] font-bold text-[#958da1]">
+                    {metric.pct.toFixed(1)}% utilizado
+                  </span>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="mt-8 bg-[#121414] border border-[#3f3f46] rounded-xl p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-[#7c3aed]">rocket_launch</span>
+          <p className="text-sm text-[#c4b5d6]">
+            ¿Necesita más capacidad para su equipo corporativo?
+          </p>
         </div>
+        <Link 
+          href="/dashboard/configuracion" 
+          className="px-6 py-2 bg-[#e2e2e2] hover:bg-white text-[#0c0f0f] text-sm font-bold rounded-lg transition-colors whitespace-nowrap"
+        >
+          Mejorar Plan
+        </Link>
       </div>
     </div>
   )
 }
-
