@@ -1,11 +1,6 @@
 import { requireAuth } from "@/lib/auth/session";
 import { SuperAdminService } from "@/lib/services/superadmin.service";
-import dynamic from "next/dynamic";
-
-const AdminCharts = dynamic(() => import("./admin-charts").then((mod) => mod.AdminCharts), {
-  loading: () => <div className="h-64 w-full flex items-center justify-center border border-[#4a4455] rounded-xl bg-[#282a2b] text-[#958da1] animate-pulse">Cargando gráficos...</div>,
-  ssr: false
-});
+import { AdminChartsClient } from "./admin-charts-client";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -115,7 +110,7 @@ export default async function AdminPage() {
 
       </div>
 
-      <AdminCharts metrics={metrics} />
+      <AdminChartsClient metrics={metrics} />
     </div>
   );
 }

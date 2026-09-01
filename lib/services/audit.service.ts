@@ -17,9 +17,16 @@ export type AuditAction =
   | "BILLING_PLAN_CHANGED"
   | "DOCUMENT_SENT_FOR_SIGNATURE"
   | "DOCUMENT_SIGNED"
-  | "DOCUMENT_SEALED";
+  | "DOCUMENT_SEALED"
+  | "WORKFLOW_CREATED"
+  | "WORKFLOW_STEP_APPROVED"
+  | "WORKFLOW_STEP_SIGNED"
+  | "WORKFLOW_REJECTED"
+  | "WORKFLOW_COMPLETED"
+  | "ANNOTATION_CREATED"
+  | "ANNOTATION_RESOLVED";
 
-export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature";
+export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature" | "workflow" | "workflow_node";
 
 export class AuditService {
   /**

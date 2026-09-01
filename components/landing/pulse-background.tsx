@@ -6,7 +6,7 @@ export function PulseBackground() {
   const [lines, setLines] = useState<{path: string, dur: string, begin: string}[]>([]);
   
   useEffect(() => {
-    const newLines = [];
+    const newLines: {path: string, dur: string, begin: string}[] = [];
     const createPath = (startX: number, startY: number, endX: number, endY: number, curveX: number, curveY: number) => {
       return `M ${startX} ${startY} Q ${curveX} ${curveY} ${endX} ${endY}`;
     };
