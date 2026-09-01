@@ -20,9 +20,13 @@ export type AuditAction =
   | "DOCUMENT_SEALED"
   | "WORKFLOW_CREATED"
   | "WORKFLOW_STEP_APPROVED"
-  | "WORKFLOW_REJECTED";
+  | "WORKFLOW_REJECTED"
+  | "WORKFLOW_STEP_SIGNED"
+  | "WORKFLOW_COMPLETED"
+  | "ANNOTATION_CREATED"
+  | "ANNOTATION_RESOLVED";
 
-export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature" | "workflow";
+export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature" | "workflow" | "workflow_node";
 
 export class AuditService {
   /**
