@@ -28,3 +28,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const documentId = req.nextUrl.searchParams.get("document_id");
+    if (!documentId) {
+      throw new ApiError(400, "Falta el document_id");
+    }
+
+    const workflow = await WorkflowsService.getWorkflowByDocument(documentId);
+    if (!workflow) {
+      return NextResponse.json({ data: null }, { status: 200 });
+    }
+
+    return NextResponse.json({ data: workflow }, { status: 200 });
+  } catch (error: any) {
+    console.error("[GET /api/workflows]", error);
+    if (error instanceof ApiError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
+}
