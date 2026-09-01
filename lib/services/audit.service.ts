@@ -17,9 +17,12 @@ export type AuditAction =
   | "BILLING_PLAN_CHANGED"
   | "DOCUMENT_SENT_FOR_SIGNATURE"
   | "DOCUMENT_SIGNED"
-  | "DOCUMENT_SEALED";
+  | "DOCUMENT_SEALED"
+  | "WORKFLOW_CREATED"
+  | "WORKFLOW_STEP_APPROVED"
+  | "WORKFLOW_REJECTED";
 
-export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature";
+export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature" | "workflow";
 
 export class AuditService {
   /**
@@ -39,9 +42,14 @@ export class AuditService {
     try {
       const adminSupabase = createAdminClient();
       
+      // Asegurarnos de que el actorId sea el UUID interno de la tabla 'usuarios' 
+      // y no el de supabase auth, ya que la llave foránea apunta a usuarios(id).
+      const perfil = await getUsuarioInterno(params.actorId);
+      const internalActorId = perfil ? perfil.id : params.actorId;
+      
       const { error } = await adminSupabase.from("audit_logs").insert({
         organization_id: params.orgId,
-        actor_id: params.actorId,
+        actor_id: internalActorId,
         action: params.action,
         target_type: params.targetType,
         target_id: params.targetId,
@@ -55,6 +63,29 @@ export class AuditService {
     } catch (err) {
       console.error("[AuditService] Unexpected error logging action:", err);
     }
+  }
+
+  /**
+   * Lista los registros de auditoría de un documento específico.
+   */
+  static async listLogsByDocument(authId: string, documentId: string) {
+    const supabase = await createClient();
+    const perfil = await getUsuarioInterno(authId);
+    if (!perfil) throw new ApiError(404, "Perfil no encontrado");
+
+    // Traemos logs asociados a ese documento. (Dependiendo del target_id)
+    const { data, error } = await supabase
+      .from("audit_logs")
+      .select("*, actor:usuarios!actor_id(username, nombre_completo, correo)")
+      .eq("target_id", documentId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("[AuditService] listLogsByDocument Error:", error);
+      throw new ApiError(500, "Error obteniendo logs del documento");
+    }
+
+    return data;
   }
 
   /**

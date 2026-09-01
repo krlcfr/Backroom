@@ -42,6 +42,14 @@ export default function AuditTable({ initialLogs, orgId }: { initialLogs: AuditL
       case "ORG_SETTINGS_UPDATED":
       case "BILLING_PLAN_CHANGED":
         return <span className="rounded bg-purple-500/20 px-2 py-1 text-xs font-medium text-purple-400">Organización</span>;
+      case "WORKFLOW_CREATED":
+      case "WORKFLOW_STEP_APPROVED":
+      case "WORKFLOW_REJECTED":
+        return <span className="rounded bg-purple-500/20 px-2 py-1 text-xs font-medium text-purple-400">Flujograma</span>;
+      case "DOCUMENT_SENT_FOR_SIGNATURE":
+      case "DOCUMENT_SIGNED":
+      case "DOCUMENT_SEALED":
+        return <span className="rounded bg-teal-500/20 px-2 py-1 text-xs font-medium text-teal-400">Firmas</span>;
       default:
         return <span className="rounded bg-gray-500/20 px-2 py-1 text-xs font-medium text-gray-400">{action}</span>;
     }
@@ -61,6 +69,12 @@ export default function AuditTable({ initialLogs, orgId }: { initialLogs: AuditL
       RESOURCE_DELETED: "Eliminó un recurso",
       ORG_SETTINGS_UPDATED: "Actualizó la configuración general",
       BILLING_PLAN_CHANGED: "Cambió el plan de facturación",
+      WORKFLOW_CREATED: "Asignó un flujograma al documento",
+      WORKFLOW_STEP_APPROVED: "Aprobó un paso del flujo",
+      WORKFLOW_REJECTED: "Rechazó un paso del flujo",
+      DOCUMENT_SENT_FOR_SIGNATURE: "Envió el documento para firma",
+      DOCUMENT_SIGNED: "Firmó el documento",
+      DOCUMENT_SEALED: "Selló el documento (Finalizado)",
     };
     return dict[action] || action;
   };
