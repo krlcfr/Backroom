@@ -14,6 +14,7 @@ import Breadcrumb from "@/components/ui/breadcrumb"
 import RecursosList from "@/components/salas/recursos-list"
 import { useLimits } from "@/components/providers/limits-provider"
 import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
+import { WorkflowBuilderModal } from "@/components/workflows/WorkflowBuilderModal"
 
 interface Sala {
   id: string
@@ -68,6 +69,8 @@ export default function SalaPage() {
   const [canUpload, setCanUpload] = useState(false)
   const [canDeleteRes, setCanDeleteRes] = useState(false)
   const [addResourceType, setAddResourceType] = useState<'doc' | 'pdf' | 'media' | 'link' | null>(null)
+  const [workflowResource, setWorkflowResource] = useState<any>(null)
+  const [currentOrgId, setCurrentOrgId] = useState<string>("")
   const [showCreateDocument, setShowCreateDocument] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -91,11 +94,12 @@ export default function SalaPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [salaRes, roomsRes, backroomRes, resourcesRes] = await Promise.all([
+        const [salaRes, roomsRes, backroomRes, resourcesRes, orgRes] = await Promise.all([
           fetch(`/api/rooms/${salaId}`),
           fetch(`/api/backrooms/${id}/rooms`),
           fetch(`/api/backrooms/${id}`),
           fetch(`/api/rooms/${salaId}/resources`),
+          fetch('/api/organizations/current'),
         ])
 
         if (!salaRes.ok) throw new Error("No se pudo cargar la sala")
@@ -146,6 +150,11 @@ export default function SalaPage() {
           setResources(resData.data)
           setCanUpload(resData.canUpload)
           setCanDeleteRes(resData.canDelete)
+        }
+
+        if (orgRes && orgRes.ok) {
+          const orgData = await orgRes.json()
+          setCurrentOrgId(orgData.orgId)
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error desconocido")
@@ -369,9 +378,23 @@ export default function SalaPage() {
             canDelete={canDeleteRes}
             onResourceDeleted={reloadResources}
             onEditDoc={(res: any) => setEditDocResource(res)}
+            onAssignWorkflow={(res: any) => setWorkflowResource(res)}
           />
         </div>
       </main>
+
+      {workflowResource && backroom && currentOrgId && (
+        <WorkflowBuilderModal
+          orgId={currentOrgId}
+          documentId={workflowResource.id}
+          documentTitle={workflowResource.nombre}
+          onClose={() => setWorkflowResource(null)}
+          onSaveWorkflow={() => {
+            setWorkflowResource(null);
+            reloadResources();
+          }}
+        />
+      )}
 
       <aside className="w-80 flex flex-col gap-6 hidden md:flex">
         {tree && tree.length > 0 && (
@@ -560,8 +583,9 @@ export default function SalaPage() {
 
       {showCreateDocument && (
         <DocumentCreationWizardModal
-          orgId={""}
+          orgId={currentOrgId}
           roomId={sala.id}
+          resources={resources}
           onClose={() => setShowCreateDocument(false)}
           onAddResource={(type) => {
             setShowCreateDocument(false)
@@ -572,8 +596,9 @@ export default function SalaPage() {
 
       {editDocResource && (
         <DocumentCreationWizardModal
-          orgId={""}
+          orgId={currentOrgId}
           roomId={sala.id}
+          resources={resources}
           editResource={editDocResource}
           onClose={() => setEditDocResource(null)}
         />

@@ -26,9 +26,10 @@ interface ResourcesGridProps {
   canDelete: boolean
   onResourceDeleted: () => void
   onEditDoc?: (res: any) => void
+  onAssignWorkflow?: (res: any) => void
 }
 
-export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted, onEditDoc }: ResourcesGridProps) {
+export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted, onEditDoc, onAssignWorkflow }: ResourcesGridProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [activeResource, setActiveResource] = useState<Resource | null>(null)
 
@@ -142,6 +143,18 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
               </div>
 
               <div className="flex items-center gap-1">
+                {(res.tipo === "doc" || res.tipo === "pdf" || res.tipo === "archivo") && onAssignWorkflow && (
+                  <button
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      onAssignWorkflow(res);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#10b981]/10 text-[#10b981]"
+                    title="Asignar Flujo de Trabajo"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">account_tree</span>
+                  </button>
+                )}
                 {res.tipo === "doc" && onEditDoc && (
                   <button
                     onClick={(e) => { 

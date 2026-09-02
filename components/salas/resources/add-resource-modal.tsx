@@ -98,24 +98,6 @@ export default function AddResourceModal({ roomId, onClose, onSuccess, initialTy
 
     try {
       let finalFile = file;
-      
-      // Si es un archivo de Word, convertirlo a PDF primero usando nuestro backend con Mammoth
-      if (file.name.endsWith('.docx')) {
-        const convertFormData = new FormData();
-        convertFormData.append("file", file);
-        const convertRes = await fetch('/api/documents/convert', { 
-          method: 'POST', 
-          body: convertFormData 
-        });
-        
-        if (!convertRes.ok) {
-          const err = await convertRes.json();
-          throw new Error(err.error || "Error al convertir el Word a PDF");
-        }
-        
-        const pdfBlob = await convertRes.blob();
-        finalFile = new File([pdfBlob], file.name.replace('.docx', '.pdf'), { type: 'application/pdf' });
-      }
 
       const formData = new FormData();
       formData.append("file", finalFile);

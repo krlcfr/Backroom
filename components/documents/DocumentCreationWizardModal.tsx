@@ -10,11 +10,12 @@ interface DocumentCreationWizardModalProps {
   roomId?: string;
   onAddResource?: (type: 'doc' | 'pdf' | 'media' | 'link') => void;
   editResource?: any;
+  resources?: any[];
 }
 
-type Step = 'menu' | 'editor' | 'workflow';
+type Step = 'menu' | 'editor' | 'workflow' | 'select-resource';
 
-export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResource, editResource }: DocumentCreationWizardModalProps) {
+export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResource, editResource, resources = [] }: DocumentCreationWizardModalProps) {
   const [step, setStep] = useState<Step>(editResource ? 'editor' : 'menu');
   const [documentContent, setDocumentContent] = useState("<p>Comienza a escribir tu documento...</p>");
   const [savedDocumentId, setSavedDocumentId] = useState<string | null>(editResource?.id || null);
@@ -198,17 +199,23 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
         const data = await res.json();
         if (!savedDocumentId && data.resource?.id) {
           setSavedDocumentId(data.resource.id);
+        } else if (!savedDocumentId && data.data?.id) {
+          // create-document API might return data.data.id
+          setSavedDocumentId(data.data.id);
         }
         if (showAlert) alert("Documento guardado exitosamente en Backroom.");
+        return true;
       } else {
         if (showAlert) {
           const err = await res.json();
           alert("Error al guardar: " + (err.error || "Desconocido"));
         }
+        return false;
       }
     } catch (error) {
       console.error(error);
       if (showAlert) alert("Error al guardar en BD");
+      return false;
     }
   };
 
@@ -316,17 +323,82 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
                 </button>
 
                 <button 
-                  onClick={() => savedDocumentId ? setStep('workflow') : alert("Primero debes guardar un documento para asignarle un flujo.")}
-                  className={`w-full h-44 border rounded-xl flex flex-col items-center justify-center gap-4 transition-all group ${savedDocumentId ? 'bg-[#27272a] hover:bg-[#303036] border-[#3f3f46] hover:border-[#7c3aed] cursor-pointer' : 'bg-[#18181b] border-[#27272a] opacity-50 cursor-not-allowed'}`}
+                  onClick={() => setStep('select-resource')}
+                  className="w-full h-44 border rounded-xl flex flex-col items-center justify-center gap-4 transition-all group bg-[#27272a] hover:bg-[#303036] border-[#3f3f46] hover:border-[#7c3aed] cursor-pointer"
                 >
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${savedDocumentId ? 'bg-[#18181b] group-hover:bg-[#3b0764]' : 'bg-[#121414]'}`}>
-                    <span className={`material-symbols-outlined text-[24px] ${savedDocumentId ? 'text-[#7c3aed]' : 'text-[#3f3f46]'}`}>account_tree</span>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-[#18181b] group-hover:bg-[#3b0764]">
+                    <span className="material-symbols-outlined text-[24px] text-[#7c3aed]">account_tree</span>
                   </div>
                   <div className="text-center px-2">
-                    <span className={`block text-sm font-semibold ${savedDocumentId ? 'text-[#e2e2e2]' : 'text-[#3f3f46]'}`}>Asignar Flujo</span>
+                    <span className="block text-sm font-semibold text-[#e2e2e2]">Asignar Flujo</span>
                   </div>
                 </button>
 
+              </div>
+            </div>
+          )}
+
+          {step === 'select-resource' && (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 relative">
+              <button 
+                onClick={() => setStep('menu')}
+                className="absolute top-8 left-8 flex items-center gap-2 text-[#a1a1aa] hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                Regresar al Menú
+              </button>
+              
+              <h2 className="text-2xl font-bold text-white mb-2">Seleccionar Documento</h2>
+              <p className="text-[#a1a1aa] text-center mb-8 max-w-md">
+                Elige un documento existente en esta sala o sube uno nuevo para asignarle un flujo de aprobación.
+              </p>
+
+              <div className="w-full max-w-lg space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                {resources
+                  .filter(r => r.tipo === 'doc' || r.tipo === 'pdf' || r.tipo === 'archivo')
+                  .map(res => (
+                  <button
+                    key={res.id}
+                    onClick={() => {
+                      setSavedDocumentId(res.id);
+                      setDocumentTitle(res.nombre);
+                      setStep('workflow');
+                    }}
+                    className="w-full flex items-center gap-3 p-4 rounded-xl bg-[#27272a] hover:bg-[#303036] border border-[#3f3f46] hover:border-[#7c3aed] transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-[#7c3aed]">
+                      {res.tipo === 'pdf' ? 'picture_as_pdf' : 'description'}
+                    </span>
+                    <span className="text-[#e2e2e2] font-medium flex-1 truncate">{res.nombre}</span>
+                  </button>
+                ))}
+                
+                {resources.filter(r => r.tipo === 'doc' || r.tipo === 'pdf' || r.tipo === 'archivo').length === 0 && (
+                  <div className="text-center p-6 text-[#a1a1aa] bg-[#27272a] rounded-xl border border-[#3f3f46] border-dashed">
+                    No hay documentos en esta sala.
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-[#3f3f46] w-full max-w-lg flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    if (onAddResource) onAddResource('doc');
+                  }}
+                  className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-[#3f3f46] hover:bg-[#4a4a52] text-white transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[20px]">upload_file</span>
+                  Subir nuevo documento (.doc, .docx, .txt)
+                </button>
+                <button
+                  onClick={() => {
+                    if (onAddResource) onAddResource('pdf');
+                  }}
+                  className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-[#3f3f46] hover:bg-[#4a4a52] text-white transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                  Subir nuevo PDF
+                </button>
               </div>
             </div>
           )}
@@ -414,9 +486,20 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
                   </div>
 
                   <button 
-                    onClick={() => savedDocumentId ? setStep('workflow') : alert("Primero debes guardar el documento (botón 'Guardar en Backroom') para asignarle un flujo.")}
-                    className={`px-4 py-2 text-white rounded-lg text-sm transition-colors flex items-center gap-2 ${savedDocumentId ? 'bg-[#7c3aed] hover:bg-[#6d28d9]' : 'bg-[#3f3f46] cursor-not-allowed opacity-50'}`}
-                    title={savedDocumentId ? "Asignar Flujo" : "Guarda el documento primero"}
+                    onClick={async () => {
+                      if (savedDocumentId) {
+                        setStep('workflow');
+                      } else {
+                        const success = await handleSaveDB(false);
+                        if (success) {
+                          setStep('workflow');
+                        } else {
+                          alert("No se pudo guardar automáticamente el documento para asignarle un flujo.");
+                        }
+                      }
+                    }}
+                    className="px-4 py-2 text-white rounded-lg text-sm transition-colors flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9]"
+                    title="Asignar Flujo"
                   >
                     <span className="material-symbols-outlined text-[16px]">send</span>
                     Asignar Flujo
