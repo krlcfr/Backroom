@@ -14,11 +14,11 @@ const createAnnotationSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ roomId: string; docId: string }> }
+  { params }: { params: Promise<{ roomId: string; resourceId: string }> }
 ) {
   try {
     await requireAuth(); // Solo usuarios autenticados
-    const { docId } = await params;
+    const { resourceId } = await params;
     const supabase = await createClient();
 
     const { data: annotations, error } = await supabase
@@ -30,7 +30,7 @@ export async function GET(
           avatar_url
         )
       `)
-      .eq("document_id", docId)
+      .eq("document_id", resourceId)
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -45,11 +45,11 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ roomId: string; docId: string }> }
+  { params }: { params: Promise<{ roomId: string; resourceId: string }> }
 ) {
   try {
     const user = await requireAuth();
-    const { docId } = await params;
+    const { resourceId } = await params;
     const body = await req.json();
 
     const validatedData = createAnnotationSchema.parse(body);
@@ -59,7 +59,7 @@ export async function POST(
       .from("document_annotations")
       .insert({
         id: validatedData.id,
-        document_id: docId,
+        document_id: resourceId,
         user_id: user.id, // from auth
         quote: validatedData.quote,
         comment: validatedData.comment,
@@ -82,7 +82,7 @@ export async function POST(
     const { data: docData } = await supabase
       .from("recursos")
       .select("salas (backrooms (organizacion_id))")
-      .eq("id", docId)
+      .eq("id", resourceId)
       .single();
     
     // @ts-ignore
@@ -103,7 +103,7 @@ export async function POST(
           // @ts-ignore (We will add ANNOTATION_CREATED to audit.service.ts)
           action: "ANNOTATION_CREATED",
           targetType: "resource",
-          targetId: docId,
+          targetId: resourceId,
           details: {
             annotation_id: annotation.id,
             quote: validatedData.quote
