@@ -3,6 +3,7 @@ import { getUsuarioInterno } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
 import { z } from "zod";
 import { Resend } from "resend";
+import { NotificationService } from "@/lib/services/notification.service";
 
 export const createInvitationSchema = z.object({
   email: z.string().email(),
@@ -21,7 +22,7 @@ export class InvitationsService {
     // Verify user is owner or admin
     const { data: org, error: orgError } = await admin
       .from("organizations")
-      .select("owner_id")
+      .select("name, owner_id")
       .eq("id", orgId)
       .maybeSingle();
 
@@ -65,7 +66,7 @@ export class InvitationsService {
     // Verify if target email is already the owner or a member
     const { data: existingUser } = await admin
       .from("usuarios")
-      .select("id")
+      .select("id, auth_id, nombre_completo, username")
       .eq("correo", emailLower)
       .maybeSingle();
 
@@ -123,6 +124,27 @@ export class InvitationsService {
       throw new ApiError(500, "Error al crear la invitación");
     }
 
+    // Enviar notificación in-app si el usuario ya existe en el sistema
+    if (existingUser?.auth_id) {
+      const orgName = org.name || "la organización";
+      const roleText = input.role === "admin" ? "Administrador" : "Miembro";
+      await NotificationService.send({
+        userId: existingUser.auth_id,
+        organizationId: orgId,
+        type: "INVITATION",
+        title: `Invitación a ${orgName}`,
+        message: `Has sido invitado a unirte a ${orgName} como ${roleText}.`,
+        actionUrl: `/invitaciones/${token}`,
+        actionData: {
+          invitation_id: invitation.id,
+          token: token,
+          organization_id: orgId,
+          org_name: orgName,
+          role: input.role,
+        },
+      });
+    }
+
     // Send email using Resend
     if (process.env.RESEND_API_KEY) {
       try {
@@ -142,7 +164,7 @@ export class InvitationsService {
             subject: "Has sido invitado a unirte a un BackRoom",
             html: `
               <h2>¡Hola!</h2>
-              <p>Has sido invitado a unirte a una organización en BackRoom.</p>
+              <p>Has sido invitado a unirte a la organización <strong>${org.name || 'BackRoom'}</strong>.</p>
               <p>Tu rol asignado será: <strong>${input.role}</strong>.</p>
               <br/>
               <p>Haz clic en el siguiente enlace para aceptar la invitación:</p>
@@ -293,7 +315,55 @@ export class InvitationsService {
       details: { role: invitation.role }
     });
 
+    // Marcar la notificación como leída
+    try {
+      await admin
+        .from("notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", authId)
+        .eq("type", "INVITATION")
+        .filter("action_data->>token", "eq", token);
+    } catch (e) {
+      console.warn("Could not mark notification as read:", e);
+    }
+
     return { organization_id: invitation.organization_id };
+  }
+
+  static async rejectInvitation(authId: string, token: string) {
+    const usuario = await getUsuarioInterno(authId);
+    if (!usuario) throw new ApiError(404, "Perfil no encontrado");
+
+    const admin = createAdminClient();
+    const invitation = await this.getInvitationByToken(token); // Validates expiration and status
+
+    if (invitation.email.toLowerCase() !== usuario.correo.toLowerCase()) {
+      throw new ApiError(403, "Esta invitación fue enviada a otro correo electrónico");
+    }
+
+    const { error: updateError } = await admin
+      .from("organization_invitations")
+      .update({ status: "revoked", updated_at: new Date().toISOString() })
+      .eq("id", invitation.id);
+
+    if (updateError) {
+      console.error("Error rejecting invitation:", updateError);
+      throw new ApiError(500, "No se pudo rechazar la invitación");
+    }
+
+    // Marcar la notificación como leída
+    try {
+      await admin
+        .from("notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", authId)
+        .eq("type", "INVITATION")
+        .filter("action_data->>token", "eq", token);
+    } catch (e) {
+      console.warn("Could not mark notification as read:", e);
+    }
+
+    return { success: true };
   }
 
   static async revokeInvitation(authId: string, orgId: string, invitationId: string) {
