@@ -2,144 +2,80 @@
 
 Plataforma web colaborativa de estudio y organización del conocimiento. Crea espacios (BackRooms), organiza salas temáticas, comparte recursos académicos y controla permisos de acceso.
 
-Proyecto de grado — Tecnología en Análisis y Desarrollo de Software (ADSO), SENA.
+**Mockup en Stitch:** [https://stitch.withgoogle.com/projects/7610019985253129332?pli=1](https://stitch.withgoogle.com/projects/7610019985253129332?pli=1)
+**Repositorio de Documentación Institucional:** [https://github.com/cxcristian/BackRomm](https://github.com/cxcristian/BackRomm)
 
-## Mockup (Stitch)
+---
 
-El diseño de referencia de la interfaz se mantiene en Stitch:
+## 1. Identificación y Propósito del Proyecto
 
-- **Mockup completo:** [https://stitch.withgoogle.com/projects/7610019985253129332?pli=1](https://stitch.withgoogle.com/projects/7610019985253129332?pli=1)
+* **Nombre del Producto:** BackRoom.
+* **Código del Proyecto:** PRJ-ADSO-BR-2026.
+* **Problema Abordado:** Gestión descentralizada e insegura de recursos digitales en organizaciones y carencia de una estructura jerárquica con permisos granulares.
+* **Objetivo General:** Plataforma web para la gestión de espacios privados orientada a organizaciones, con almacenamiento seguro, permisos granulares por sala y auditoría.
+* **Equipo Responsable:** Santiago Pinzón (Líder y Responsable Técnico) y Cristian Giraldo (Responsable Funcional).
+* **Licencia:** Privada / Uso Académico SENA (Proyecto de Grado - ADSO Ficha 3114227).
 
-Es la fuente de verdad visual para las pantallas (login, registro, dashboard, salas, permisos, etc.). Las pantallas se van adaptando a código siguiendo el plan de mapeo mockup → UI → endpoint → página.
+---
 
-## Stack
+## 2. Stack Tecnológico y Arquitectura
 
-| Capa | Tecnología |
-|------|-----------|
-| Framework | Next.js 16 (App Router) — frontend y backend en un solo proyecto |
-| UI | React 19, Tailwind CSS v4 |
-| Lenguaje | TypeScript 5 |
-| Base de datos | Supabase PostgreSQL (con Row Level Security) |
-| Autenticación | Supabase Auth + `@supabase/ssr` (sesión vía cookies HTTP-only) |
-| Validación | Zod |
-| Correo transaccional | Resend (SMTP) |
-| Despliegue previsto | Railway o Render |
+Arquitectura Monolítica Modular sobre Next.js:
 
-La justificación de estas decisiones técnicas y su historial están en [`docs/ESTADO_PROYECTO.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/ESTADO_PROYECTO.md) (secciones "Stack Tecnológico" y "Decisiones Técnicas") del [repositorio de documentación](#documentación).
+* **Frontend:** Next.js 16 (React 19) y Tailwind CSS v4.
+* **Backend / API:** Next.js Route Handlers con endpoints asegurados mediante JWT y validación con Zod.
+* **Base de Datos y Seguridad:** Supabase (PostgreSQL 15+) implementando Políticas de Seguridad a Nivel de Fila (RLS) para el aislamiento de datos y logs de auditoría (org_audit_logs).
+* **Pagos / Facturación:** Stripe SDK para la gestión de suscripciones y webhooks.
+* **Correo transaccional:** Resend (SMTP).
 
-## Requisitos
+---
 
-- Node.js 20+ (recomendado; probado también en v22)
-- npm
-- Cuenta en Supabase (plan gratuito)
-- Cuenta en Resend (plan gratuito, para correos de recuperación de contraseña)
+## 3. Estado del Alcance Entregado (MVP v9.0)
 
-## Configuración inicial
+Este archivo declara explícitamente los componentes operativos y las limitaciones actuales del repositorio, de acuerdo al Principio de Transparencia y la versión actual real (v9.0).
 
-1. Clonar el repositorio:
-   ```bash
+**Módulos Completos:**
+* Autenticación segura vía OAuth2 (Supabase Auth) y credenciales tradicionales.
+* Configuración y autoservicio de perfiles organizacionales, junto con la gestión de cargos (M-17).
+* Roles fijos (Propietario, Administrador, Miembro).
+* Gestión de BackRooms y árbol recursivo de salas (limitado a 3 niveles en Demo) apoyado por un Mapa de Flujo de Salas Radial.
+* Carga de recursos multiformato (docx, pptx, multimedia y links) con visores inmersivos.
+* Control de accesos mediante matriz de permisos granulares (RBAC).
+* Módulo de invitaciones y control de límites para cuentas Demo (100MB / 4 usuarios).
+* Pasarela de pagos funcional integrada con Stripe (pp/api/stripe).
+* Notificaciones in-app y alertas de sistema (M-16).
+
+**Deuda Técnica e Implementaciones Parciales:**
+* **Auditoría de Seguridad:** Las políticas SQL y RLS están configuradas en la base de datos, y los eventos se registran correctamente en org_audit_logs, pero el módulo no está construido completamente de forma visual en la interfaz de usuario con todos sus filtros avanzados.
+* **Flujos de Trabajo (Workflows / Firmas):** Aunque la lógica backend (rutas /api/workflows y /api/documents/*/signatures) está implementada y es capaz de gestionar aprobaciones y firmas de documentos, el lienzo canvas en React para dibujar diagramas es funcional e interactivo pero está catalogado como inestable debido a problemas parciales de conexión con el motor de ejecución y de persistencia directa desde la interfaz a la base de datos.
+
+---
+
+## 4. Requisitos para Despliegue y Configuración Local
+
+El siguiente manual de operación rápida guía al evaluador a reconstruir el entorno local:
+
+1. **Requisitos Previos:** Node.js 20+, npm, cuentas en Supabase y Resend.
+2. **Clonar e Instalar:**
+   `ash
    git clone <repo-url>
    cd backroom
-   ```
-
-2. Instalar dependencias:
-   ```bash
    npm install
-   ```
+   `
+3. **Variables de Entorno Mínimas:** Proveer un archivo .env.local creado a partir de .env.example (libre de secretos reales), que detalle los campos requeridos para conectar las instancias locales de Supabase, Stripe y Resend.
+4. **Comando de Arranque:** 
+pm run dev para levantar el entorno de desarrollo local (servidor en http://localhost:3000).
+5. **Ambiente de Demostración Inicial:** Al iniciar sesión por primera vez sin organización, el usuario accede a una Cuenta Demo local sin organización habilitada por defecto.
+6. **Estrategia de Datos Semilla:** Uso del script seeds/superadmin.ts para levantar el primer administrador del sistema mediante 
+pm run seed:superadmin.
 
-3. Crear archivo `.env.local` a partir del ejemplo:
-   ```bash
-   cp .env.example .env.local
-   ```
+---
 
-4. Completar las variables en `.env.local` con los valores reales de tu proyecto Supabase y Resend. Cada variable en `.env.example` incluye una descripción de dónde obtenerla.
+## 5. Advertencias y Defectos Conocidos (Sección de Alerta)
 
-5. Iniciar el servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
-
-6. Abrir [http://localhost:3000](http://localhost:3000).
-
-## Scripts disponibles
-
-| Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Servidor de desarrollo (Turbopack) |
-| `npm run build` | Build de producción |
-| `npm start` | Iniciar servidor de producción (requiere `build` previo) |
-| `npm run lint` | Ejecutar ESLint |
-| `npm run seed:superadmin` | Crear el usuario SuperAdmin inicial (requiere `SUPERADMIN_EMAIL` y `SUPERADMIN_PASSWORD` en `.env.local`) |
-
-## Estructura del proyecto
-
-```
-app/
-├── api/                    # Route Handlers — la API (auth, backrooms, etc.)
-├── (auth)/                 # Login, registro, recuperar contraseña
-├── dashboard/               # Área autenticada: BackRooms, salas, recursos
-├── admin/                   # Panel SuperAdmin
-├── proxy.ts                 # Enrutamiento y redirecciones (no es el único límite de seguridad)
-├── layout.tsx, page.tsx      # Layout raíz y landing page
-lib/
-├── auth/                    # Sesión (requireAuth, getSession) y permisos (RBAC)
-├── services/                 # Lógica de negocio por dominio
-├── supabase/                 # Clientes de Supabase (browser, server, admin)
-├── validations/               # Esquemas de validación (Zod)
-└── api-error.ts               # Manejo centralizado de errores HTTP
-components/                  # Componentes de UI reutilizables
-seeds/                       # Scripts de inicialización de datos (ej. SuperAdmin)
-```
-
-## Estado actual del proyecto
-
-Este proyecto está en desarrollo activo. Estado honesto, sin maquillar, al momento de este README:
-
-- ✅ Completo y probado: Autenticación, Perfil, CRUD de BackRooms, Facturación/Stripe (Planes), Salas (CRUD, Jerarquía en árbol, Mapa Radial, Íconos custom), Sistema de Permisos (RBAC global, Matriz granular, Flujograma de Auditoría) y Gestión de Recursos (Archivos físicos y Visor flotante).
-- ⬜ Pendiente (En progreso): Invitaciones formales a miembros de la organización.
-- ⬜ Pendiente (Futuro): Pruebas automatizadas, CI/CD, despliegue, autenticación multifactor.
-
-## Pruebas
-
-Actualmente el proyecto no cuenta con pruebas automatizadas. Es una limitación conocida y registrada, en proceso de corrección — ver [`docs/ESTADO_PROYECTO.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/ESTADO_PROYECTO.md).
-
-## Despliegue
-
-El proyecto está planeado para desplegarse en Railway o Render como Node.js standalone (no Vercel, debido a límites de tamaño de archivos en el plan gratuito frente al requerimiento de subida de recursos de hasta 50MB). Aún no desplegado — ver estado en [`docs/ESTADO_PROYECTO.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/ESTADO_PROYECTO.md).
-
-## Documentación
-
-La documentación completa del proyecto (análisis, diseño, arquitectura, decisiones técnicas, plan de implementación) vive en un repositorio separado, gestionado aparte del código fuente:
-
-- **Repositorio de documentación:** [https://github.com/cxcristian/BackRomm](https://github.com/cxcristian/BackRomm)
-
-### Documentos de referencia
-
-| Documento | Ubicación |
-|-----------|-----------|
-| Estado del proyecto (módulos IN/OUT, roles, decisiones técnicas) | [`docs/ESTADO_PROYECTO.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/ESTADO_PROYECTO.md) |
-| Acta de constitución | [`docs/analisis/acta.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/acta.md) |
-| Documento de alcance | [`docs/analisis/alcance.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/alcance.md) |
-| Requerimientos funcionales y no funcionales | [`docs/analisis/requerimientos.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/requerimientos.md) |
-| Historias de usuario | [`docs/analisis/historias.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/historias.md) |
-| Casos de uso | [`docs/analisis/casos_de_uso.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/casos_de_uso.md) |
-| Stakeholders y roles | [`docs/analisis/stakeholders.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/analisis/stakeholders.md) |
-| Arquitectura del software | [`docs/diseno/arquitectura.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/arquitectura.md) |
-| Modelo entidad-relación | [`docs/diseno/modelo_er.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/modelo_er.md) |
-| Diagramas UML | [`docs/diseno/diagramas_uml.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/diagramas_uml.md) |
-| Wireframes y mockups | [`docs/diseno/wireframes.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/wireframes.md) |
-| Sistema de diseño | [`docs/diseno/sistema_diseno.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/sistema_diseno.md) |
-| Catálogo de endpoints API | [`docs/diseno/endpoints_api.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/diseno/endpoints_api.md) |
-| Plan de implementación | [`docs/plan.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/plan.md) |
-| Asignación de tareas | [`docs/tareas.md`](https://github.com/cxcristian/BackRomm/blob/main/docs/tareas.md) |
-
-## Autores
-
-| Nombre | Rol |
-|--------|-----|
-| Santiago Pinzón Gallego | Backend |
-| Cristian David | Frontend |
-
-## Licencia
-
-Uso educativo — Proyecto de grado, SENA (ADSO).
+> **Puntos Críticos de Atención Técnica:**
+>
+> * **[DEF-01]** El lienzo visual de flujos no almacena datos de forma robusta debido a la falta de conexión estable entre el botón de guardar del Frontend y el Backend.
+> * **[DEF-02]** Existe un problema de experiencia de usuario (UX) que permite dibujar diagramas sin haber creado o guardado previamente un documento asociado.
+> * **[DEF-03]** El sistema carece actualmente de transacciones con soporte "Rollback" en la base de datos ante fallos en la inserción de múltiples nodos de flujos de trabajo.
+> * **[DEF-04]** Limitación conocida de pruebas automatizadas y CI/CD pendientes por configurar en el futuro despliegue sobre entornos standalone (Railway/Render).
