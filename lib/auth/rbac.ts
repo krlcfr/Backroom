@@ -73,15 +73,25 @@ export async function checkRoomPermission(authId: string, roomId: string, permis
   if (esDueno) return true;
 
   // Consultar permisos específicos de la sala
+  const allowedPermissions = [
+    "salas_ver", "salas_acceder", "salas_crear", "salas_editar", "salas_eliminar",
+    "recursos_ver", "recursos_subir", "recursos_eliminar", "configuracion_editar", "miembros_gestionar", "archivos_subir"
+  ];
+  
+  const colName = permisoRequerido.replace(".", "_");
+  if (!allowedPermissions.includes(colName)) {
+    return false;
+  }
+
   const { data: permiso } = await supabase
     .from("sala_permisos")
-    .select(permisoRequerido.replace(".", "_"))
+    .select(colName)
     .eq("sala_id", roomId)
     .eq("usuario_id", usuario.id)
     .maybeSingle();
 
-  if (permiso) {
-    return (permiso as any)[permisoRequerido.replace(".", "_")] === true;
+  if (permiso && typeof (permiso as any)[colName] === "boolean") {
+    return (permiso as any)[colName] === true;
   }
 
   // Fallback: si no hay permisos específicos, usamos el rol general?

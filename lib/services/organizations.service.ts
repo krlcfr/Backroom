@@ -325,7 +325,11 @@ export class OrganizationsService {
     }
   }
 
-  static async listMembers(orgId: string) {
+  static async listMembers(authId: string, orgId: string) {
+    // Verificar que el usuario pertenece a la organización
+    // getById lanza un ApiError si no es miembro o dueño.
+    await this.getById(authId, orgId);
+
     const adminSupabase = createAdminClient();
 
     const { data, error } = await adminSupabase

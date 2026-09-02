@@ -13,12 +13,7 @@ export async function GET(
     const user = await requireAuth();
     const { orgId } = await params;
 
-    const organization = await OrganizationsService.getById(user.id, orgId);
-    if (!organization) {
-      throw new ApiError(404, "Organización no encontrada");
-    }
-
-    const members = await OrganizationsService.listMembers(orgId);
+    const members = await OrganizationsService.listMembers(user.id, orgId);
 
     return NextResponse.json({ data: { members } }, { status: 200 });
   } catch (error) {
