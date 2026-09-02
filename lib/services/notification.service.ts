@@ -1,4 +1,4 @@
-﻿import { createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -72,16 +72,16 @@ export class NotificationService {
         from: "Backroom App <no-reply@backroom.com>",
         to: params.recipientEmails,
         subject: "Acción requerida: " + params.documentTitle,
-        html: 
+        html: `
           <div style="font-family: sans-serif; max-w-600px; margin: 0 auto; color: #333;">
             <h2>Tienes un documento pendiente de acción</h2>
             <p>Hola,</p>
-            <p><strong> + params.creatorName + </strong> te ha asignado el primer paso del flujo de trabajo <strong> + params.workflowTitle + </strong>.</p>
-            <p>Se requiere que ingreses a la plataforma para <strong> + actionText + </strong> el documento: <strong> + params.documentTitle + </strong>.</p>
+            <p><strong>${params.creatorName}</strong> te ha asignado el primer paso del flujo de trabajo <strong>${params.workflowTitle}</strong>.</p>
+            <p>Se requiere que ingreses a la plataforma para <strong>${actionText}</strong> el documento: <strong>${params.documentTitle}</strong>.</p>
             <br/>
             <p>Saludos,<br/>El equipo de Backroom</p>
           </div>
-        
+        `
       });
       console.log("[NotificationService] Sent workflow assignment email to " + params.recipientEmails.join(', '));
     } catch (error) {

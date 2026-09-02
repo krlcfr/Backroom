@@ -1,4 +1,4 @@
-﻿import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { ApiError } from "@/lib/api-error";
 import { AuditService } from "@/lib/services/audit.service";
 import { NotificationService } from "@/lib/services/notification.service";
@@ -149,14 +149,14 @@ export class WorkflowsService {
     const supabase = await createClient();
     const { data: workflow, error } = await supabase
       .from("document_workflows")
-      .select(\
+      .select(`
         *,
         nodes:workflow_nodes(
           *,
           cargo:cargos(nombre),
           assigned_user:usuarios!workflow_nodes_assigned_user_id_fkey(nombre_completo, correo)
         )
-      \)
+      `)
       .eq("document_id", documentId)
       .single();
 

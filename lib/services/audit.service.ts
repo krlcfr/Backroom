@@ -24,7 +24,8 @@ export type AuditAction =
   | "WORKFLOW_STEP_SIGNED"
   | "WORKFLOW_COMPLETED"
   | "ANNOTATION_CREATED"
-  | "ANNOTATION_RESOLVED";
+  | "ANNOTATION_RESOLVED"
+  | "DOCUMENT_PKI_SIGNED";
 
 export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature" | "workflow" | "workflow_node";
 

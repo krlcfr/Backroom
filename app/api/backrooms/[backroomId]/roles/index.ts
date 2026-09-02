@@ -4,10 +4,10 @@ import { createClient } from '@/lib/supabase/server';
 import { ApiError } from '@/lib/api-error';
 
 // GET /api/backrooms/[backroomId]/roles
-export async function GET(request: NextRequest, { params }: { params: { backroomId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ backroomId: string }> }) {
   try {
     await requireAuth();
-    const { backroomId } = params;
+    const { backroomId } = await params;
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('backroom_miembros')

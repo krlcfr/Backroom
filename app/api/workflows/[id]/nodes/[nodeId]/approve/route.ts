@@ -1,12 +1,13 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { WorkflowsService } from "@/lib/services/workflows.service";
 import { ApiError } from "@/lib/api-error";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string; nodeId: string } }
+  { params }: { params: Promise<{ id: string; nodeId: string }> }
 ) {
   try {
+    const { id, nodeId } = await params;
     const body = await req.json();
     const action = body.action; // 'approved' o 'rejected'
 
@@ -14,7 +15,7 @@ export async function POST(
       throw new ApiError(400, "Acción inválida. Debe ser 'approved' o 'rejected'.");
     }
 
-    const result = await WorkflowsService.approveNode(params.id, params.nodeId, action);
+    const result = await WorkflowsService.approveNode(id, nodeId, action);
     
     return NextResponse.json(result, { status: 200 });
   } catch (error: any) {
