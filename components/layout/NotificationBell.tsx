@@ -29,9 +29,10 @@ export function NotificationBell() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Suscribirse a Realtime
+      // Suscribirse a Realtime con nombre de canal único
+      const channelName = `schema-db-changes-${user.id}-${Date.now()}`;
       const channel = supabase
-        .channel('schema-db-changes')
+        .channel(channelName)
         .on(
           'postgres_changes',
           {
