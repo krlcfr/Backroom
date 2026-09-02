@@ -38,15 +38,11 @@ export async function GET(
   { params }: { params: Promise<{ orgId: string }> }
 ) {
   try {
-    await requireAuth(); // We just need auth, the service checks RBAC later if needed, but wait:
-    // listPendingInvitations currently doesn't check authId inside the service, it just lists. 
-    // Wait, the service listPendingInvitations(orgId) should probably be protected.
-    // I'll add protection here instead.
+    const user = await requireAuth();
     
     const { orgId } = await params;
     
-    // For now, assume any authenticated user can list if they are in the org (this is usually handled in service, but we'll let it pass or add a check).
-    const invitations = await InvitationsService.listPendingInvitations(orgId);
+    const invitations = await InvitationsService.listPendingInvitations(user.id, orgId);
 
     return NextResponse.json({ data: invitations });
   } catch (error) {

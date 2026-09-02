@@ -343,7 +343,11 @@ export class InvitationsService {
     }
   }
 
-  static async listPendingInvitations(orgId: string) {
+  static async listPendingInvitations(authId: string, orgId: string) {
+    const { OrganizationsService } = await import("@/lib/services/organizations.service");
+    // Verificar que el usuario pertenece a la organización
+    await OrganizationsService.getById(authId, orgId);
+
     const admin = createAdminClient();
 
     const { data, error } = await admin
