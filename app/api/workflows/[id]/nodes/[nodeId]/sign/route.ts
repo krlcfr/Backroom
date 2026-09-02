@@ -9,11 +9,11 @@ import { AuditService } from "@/lib/services/audit.service";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ workflowId: string; nodeId: string }> }
+  { params }: { params: Promise<{ id: string; nodeId: string }> }
 ) {
   try {
     const user = await requireAuth();
-    const { workflowId, nodeId } = await params;
+    const { id, nodeId } = await params;
     const body = await req.json();
     
     // We expect the user's login password for confirmation (2FA-like)
@@ -42,7 +42,7 @@ export async function POST(
     const { data: workflow } = await supabase
       .from("document_workflows")
       .select("organization_id, document_id")
-      .eq("id", workflowId)
+      .eq("id", id)
       .single();
     
     if (!workflow) throw new ApiError(404, "Workflow no encontrado");
@@ -104,7 +104,7 @@ export async function POST(
     const { error: sigError } = await supabase.from("document_signatures").insert({
       recurso_id: workflow.document_id,
       usuario_id: perfil.id,
-      workflow_id: workflowId,
+      workflow_id: id,
       node_id: nodeId,
       signature_hash: signatureBase64,
       certificate_serial: serial,
@@ -131,7 +131,7 @@ export async function POST(
     });
 
     // 8. Advance Workflow
-    await WorkflowsService.approveNode(workflowId, nodeId, "approved");
+    await WorkflowsService.approveNode(id, nodeId, "approved");
 
     return NextResponse.json({ 
       success: true, 
