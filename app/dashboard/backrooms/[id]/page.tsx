@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { createBrowserClient } from "@supabase/ssr"
@@ -55,6 +55,7 @@ export default function BackRoomPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -85,6 +86,18 @@ export default function BackRoomPage() {
       setCurrentUserId(data.session?.user?.id ?? null)
     })
   }, [])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [menuOpen])
 
   useEffect(() => {
     async function fetchData() {
