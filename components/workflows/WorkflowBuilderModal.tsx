@@ -118,7 +118,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
         strokeWidth: 2,
         stroke: '#7c3aed',
       },
-    }, eds)),
+    } as any, eds)),
     [setEdges]
   );
 
