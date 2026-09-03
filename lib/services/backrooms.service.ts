@@ -109,7 +109,28 @@ export class BackroomsService {
     return toBackroomResponse(backroom, authId);
   }
 
-  static async listForUser() {
+  static async listForUser(authId?: string) {
+    const admin = createAdminClient();
+
+    if (authId) {
+      const { OrganizationsService } = await import("@/lib/services/organizations.service");
+      const org = await OrganizationsService.getOrgForUser(authId);
+      if (org) {
+        // Traer todos los backrooms del propietario de la organización
+        const { data, error } = await admin
+          .from("backrooms")
+          .select("*, usuarios(auth_id, username)")
+          .eq("propietario_id", org.ownerId)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          throw new ApiError(500, "No se pudieron obtener las BackRooms");
+        }
+
+        return data.map((row) => toBackroomResponse(row));
+      }
+    }
+
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -125,9 +146,9 @@ export class BackroomsService {
   }
 
   static async getById(backroomId: string) {
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("backrooms")
       .select("*, usuarios(auth_id, username)")
       .eq("id", backroomId)
