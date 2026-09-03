@@ -243,15 +243,58 @@ export default function BackRoomPage() {
   return (
     <div className="flex gap-6">
       <main className="flex-1 flex flex-col gap-6 min-w-0">
-        <div>
-          <Breadcrumb items={[
-            { label: "Dashboard", href: "/dashboard" },
-            { label: backroom.name },
-          ]} />
-          <h1 className="text-[28px] font-bold text-[#e2e2e2] mb-2">{backroom.name}</h1>
-          {backroom.description && (
-            <p className="text-[#ccc3d8] text-[16px] max-w-2xl">{backroom.description}</p>
-          )}
+        <div className="flex items-start justify-between">
+          <div>
+            <Breadcrumb items={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: backroom.name },
+            ]} />
+            <h1 className="text-[28px] font-bold text-[#e2e2e2] mb-2">{backroom.name}</h1>
+            {backroom.description && (
+              <p className="text-[#ccc3d8] text-[16px] max-w-2xl">{backroom.description}</p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {rootRoomId && (esPropietario || canCreateSala(0)) && (
+              <Link
+                href={`/dashboard/backrooms/${id}/salas/${rootRoomId}/permisos`}
+                className="flex items-center gap-2 bg-[#27272a] hover:bg-[#333535] border border-[#4a4455] text-[#ccc3d8] hover:text-[#e2e2e2] px-3 py-1.5 rounded-lg transition-colors text-[13px] font-medium"
+              >
+                <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+                Matriz de Permisos
+              </Link>
+            )}
+
+            {esPropietario && (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#333535] text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-44 bg-[#27272a] border border-[#4a4455] rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.4)] z-50 py-1">
+                    <button
+                      onClick={openEdit}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-[13px] text-[#ccc3d8] hover:bg-[#333535] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">edit</span>
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => { setMenuOpen(false); setConfirmDelete(true) }}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-left text-[13px] text-[#ffb4ab] hover:bg-[#333535] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <SubRoomsGrid
@@ -295,7 +338,8 @@ export default function BackRoomPage() {
         backroom={backroom} 
         esPropietario={esPropietario} 
         tree={tree}
-        activeRoomId={backroom.id}
+        activeRoomId={rootRoomId || backroom.id}
+        rootRoomId={rootRoomId ?? undefined}
         onUploadClick={canUpload ? () => setShowCreateDocument(true) : undefined}
       />
 

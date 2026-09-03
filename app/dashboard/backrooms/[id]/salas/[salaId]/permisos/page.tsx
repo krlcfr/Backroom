@@ -168,7 +168,7 @@ export default function PermisosSalaPage() {
   ]
 
   return (
-    <div className="min-h-screen p-4 md:p-8 w-full max-w-7xl mx-auto flex flex-col gap-6 overflow-x-hidden">
+    <div className="min-h-screen p-4 md:p-8 w-full max-w-7xl mx-auto flex flex-col gap-6">
       <Breadcrumb
         items={[
           { label: "Dashboard", href: "/dashboard" },
@@ -188,29 +188,33 @@ export default function PermisosSalaPage() {
         </div>
       </div>
 
-      <div className="bg-[#1e2020] border border-[#3f3f46] rounded-xl mt-4 w-full overflow-hidden">
-        <div className="overflow-x-auto w-full max-w-[100vw] sm:max-w-none">
-          <table className="w-full text-left border-collapse min-w-max">
+      <div className="bg-[#1e2020] border border-[#3f3f46] rounded-xl mt-4 w-full shadow-xl overflow-hidden flex flex-col">
+        <div className="overflow-x-auto w-full max-w-full">
+          <table className="w-full text-left border-collapse min-w-[960px]">
           <thead>
             <tr className="bg-[#27272a] border-b border-[#3f3f46] text-[#958da1] text-[11px] uppercase tracking-wider">
-              <th className="px-6 py-4 font-medium sticky left-0 bg-[#27272a] z-10 border-r border-[#3f3f46]">Miembro</th>
+              <th className="px-6 py-4 font-medium sticky left-0 bg-[#27272a] z-20 border-r border-[#3f3f46] shadow-[2px_0_6px_-2px_rgba(0,0,0,0.4)]">
+                Miembro
+              </th>
               {permisosList.map(p => (
-                <th key={p.key} className="px-4 py-4 font-medium text-center border-r border-[#3f3f46]/50 last:border-0">
+                <th key={p.key} className="px-4 py-4 font-medium text-center border-r border-[#3f3f46]/50 last:border-0 min-w-[95px]">
                   <div className="flex flex-col items-center gap-1">
                     <span className="material-symbols-outlined text-[16px] text-[#ccc3d8]">
                       {p.key.includes("archivos") ? "description" : "meeting_room"}
                     </span>
-                    {p.label}
+                    <span className="text-[10px] leading-tight text-center">{p.label}</span>
                   </div>
                 </th>
               ))}
               {sala?.parent_id && (
-                <th className="px-6 py-4 font-medium text-center">Heredar</th>
+                <th className="px-6 py-4 font-medium text-center min-w-[80px]">Heredar</th>
               )}
             </tr>
           </thead>
           <tbody className="divide-y divide-[#3f3f46]">
             {matriz.map((member) => {
+              const displayName = member.nombre_completo || member.username || member.correo || "Usuario";
+              const initial = displayName.charAt(0).toUpperCase();
               const p = member.permisos_especificos || {
                 salas_ver: false,
                 salas_acceder: false,
@@ -224,14 +228,14 @@ export default function PermisosSalaPage() {
 
               return (
                 <tr key={member.usuario_id} className={`hover:bg-[#2a2a2e]/50 transition-colors ${saving === member.usuario_id ? 'opacity-50' : ''}`}>
-                  <td className="px-6 py-4 sticky left-0 bg-[#1e2020] z-10 border-r border-[#3f3f46]">
+                  <td className="px-6 py-4 sticky left-0 bg-[#1e2020] z-10 border-r border-[#3f3f46] shadow-[2px_0_6px_-2px_rgba(0,0,0,0.4)]">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#7c3aed]/20 flex items-center justify-center text-[#d2bbff] font-semibold text-[14px]">
-                        {member.nombre_completo.charAt(0).toUpperCase()}
+                      <div className="w-8 h-8 rounded-full bg-[#7c3aed]/20 flex items-center justify-center text-[#d2bbff] font-semibold text-[14px] shrink-0">
+                        {initial}
                       </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#e2e2e2] truncate max-w-[150px]">
-                          {member.nombre_completo}
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-medium text-[#e2e2e2] truncate max-w-[170px]" title={displayName}>
+                          {displayName}
                         </div>
                         <div className="text-[11px] text-[#958da1] uppercase tracking-wider">
                           {member.rol_general}
@@ -244,6 +248,7 @@ export default function PermisosSalaPage() {
                       <button
                         onClick={() => handleToggle(member.usuario_id, perm.key, p[perm.key])}
                         disabled={saving !== null}
+                        aria-label={`${perm.label} para ${displayName}`}
                         className={`w-10 h-6 rounded-full transition-colors relative inline-flex items-center justify-center ${
                           p[perm.key] ? 'bg-[#7c3aed]' : 'bg-[#4a4455]'
                         } ${saving !== null ? 'cursor-not-allowed' : 'cursor-pointer'}`}
