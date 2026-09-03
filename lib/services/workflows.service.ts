@@ -47,7 +47,7 @@ export class WorkflowsService {
         organization_id: input.organization_id,
         document_id: input.document_id,
         title: input.title,
-        status: 'pending',
+        status: 'in_progress',
         flow_graph_json: input.flow_graph_json
       })
       .select()

@@ -104,7 +104,20 @@ export function WorkflowStatusViewer({ documentId }: WorkflowStatusViewerProps) 
           });
 
           setNodes(visualNodes);
-          setEdges(graphJson.edges || []);
+          const rawEdges = graphJson.edges || [];
+          setEdges(rawEdges.map((e: any) => ({
+            ...e,
+            markerEnd: {
+              type: 'arrowclosed',
+              width: 20,
+              height: 20,
+              color: '#7c3aed',
+            },
+            style: {
+              strokeWidth: 2,
+              stroke: '#7c3aed',
+            }
+          })));
         } else {
           setError("El flujo guardado no contiene información gráfica válida.");
         }

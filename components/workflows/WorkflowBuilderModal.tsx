@@ -13,6 +13,7 @@ import {
   Edge,
   Node,
   Handle,
+  MarkerType,
   Position,
   NodeMouseHandler
 } from "@xyflow/react";
@@ -105,7 +106,19 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
   }, [orgId]);
 
   const onConnect = useCallback(
-    (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection | Edge) => setEdges((eds) => addEdge({
+      ...params,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 20,
+        height: 20,
+        color: '#7c3aed',
+      },
+      style: {
+        strokeWidth: 2,
+        stroke: '#7c3aed',
+      },
+    }, eds)),
     [setEdges]
   );
 
@@ -330,8 +343,10 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                 onConnect={onConnect}
                 onInit={setReactFlowInstance}
                 onNodeClick={onNodeClick}
+                onEdgeDoubleClick={(_, edge) => setEdges(eds => eds.filter(e => e.id !== edge.id))}
                 onPaneClick={onPaneClick}
                 nodeTypes={nodeTypes}
+                deleteKeyCode={['Backspace', 'Delete']}
                 fitView
                 className="bg-[#0c0f0f]"
               >
