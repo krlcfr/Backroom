@@ -108,6 +108,8 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge({
       ...params,
+      type: 'straight',
+      animated: true,
       markerEnd: {
         type: MarkerType.ArrowClosed,
         width: 20,
