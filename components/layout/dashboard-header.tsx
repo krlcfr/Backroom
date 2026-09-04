@@ -9,9 +9,11 @@ import { NotificationBell } from "./NotificationBell"
 interface DashboardHeaderProps {
   userName: string
   userAvatar: string | null
+  esPropietario: boolean
+  isOrgAdmin: boolean
 }
 
-export default function DashboardHeader({ userName, userAvatar }: DashboardHeaderProps) {
+export default function DashboardHeader({ userName, userAvatar, esPropietario, isOrgAdmin }: DashboardHeaderProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
@@ -30,12 +32,16 @@ export default function DashboardHeader({ userName, userAvatar }: DashboardHeade
           <Link href="/dashboard" className="text-[#d2bbff] font-medium border-b-2 border-[#d2bbff] pb-1">
             Dashboard
           </Link>
-          <Link href="/dashboard/auditoria" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
-            Registros
-          </Link>
-          <Link href="/dashboard/configuracion" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
-            Configuración
-          </Link>
+          {(esPropietario || isOrgAdmin) && (
+            <Link href="/dashboard/auditoria" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
+              Registros
+            </Link>
+          )}
+          {esPropietario && (
+            <Link href="/dashboard/configuracion" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
+              Configuración
+            </Link>
+          )}
         </nav>
       </div>
       <div className="flex items-center gap-4">

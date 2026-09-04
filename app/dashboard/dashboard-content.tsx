@@ -28,9 +28,10 @@ interface DashboardContentProps {
   backrooms: Backroom[]
   org: Org | null
   currentUserId: string | null
+  esPropietario: boolean
 }
 
-export default function DashboardContent({ backrooms: initialBackrooms, org, currentUserId }: DashboardContentProps) {
+export default function DashboardContent({ backrooms: initialBackrooms, org, currentUserId, esPropietario }: DashboardContentProps) {
   const router = useRouter()
   
   const [backrooms, setBackrooms] = useState<Backroom[]>(initialBackrooms)
@@ -211,13 +212,15 @@ export default function DashboardContent({ backrooms: initialBackrooms, org, cur
             {org ? `Gestiona los espacios de trabajo seguros de ${orgName}.` : "Tus espacios de trabajo personales."}
           </p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg flex items-center gap-2 self-start md:self-auto text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
-        >
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          Nueva BackRoom
-        </button>
+        {esPropietario && (
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg flex items-center gap-2 self-start md:self-auto text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            Nueva BackRoom
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -319,18 +322,22 @@ export default function DashboardContent({ backrooms: initialBackrooms, org, cur
               <div className="w-16 h-16 rounded-full bg-[#333535] flex items-center justify-center mb-4">
                 <span className="material-symbols-outlined text-[#958da1] text-[32px]">inventory_2</span>
               </div>
-              <h3 className="text-[20px] font-semibold text-[#e2e2e2] mb-2">No hay BackRooms</h3>
+              <h3 className="text-[20px] font-semibold text-[#e2e2e2] mb-2">
+                {esPropietario ? "No hay BackRooms" : "Aún no tienes acceso a ninguna BackRoom"}
+              </h3>
               <p className="text-[#ccc3d8] max-w-md mb-6">
-                {org
+                {esPropietario 
                   ? "Crea la primera BackRoom de tu organización para empezar a organizar archivos y salas."
-                  : "Creá tu primera BackRoom para empezar a organizar archivos y salas."}
+                  : "Para ver archivos o colaborar, solicítale al Propietario de la organización que te invite a una BackRoom."}
               </p>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
-              >
-                Crear primera BackRoom
-              </button>
+              {esPropietario && (
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-[#7c3aed] text-white px-4 py-2 rounded-lg text-[12px] font-medium hover:bg-[#8b5cf6] transition-colors"
+                >
+                  Crear primera BackRoom
+                </button>
+              )}
             </div>
           )}
         </div>
