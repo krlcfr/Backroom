@@ -6,10 +6,10 @@ import { isOrgAdminOrOwner } from '@/lib/auth/rbac'; // Supongamos que existe, s
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const documentId = params.id;
+    const { id: documentId } = await params;
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 

@@ -9,9 +9,10 @@ const submitSchema = z.object({
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -19,7 +20,7 @@ export async function POST(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const workflowId = params.id;
+    const workflowId = id;
 
     // Ejecutar la transacción RPC
     const { data: rpcData, error: rpcError } = await supabase.rpc('submit_workflow_transaction', {
