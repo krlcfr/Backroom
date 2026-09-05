@@ -92,7 +92,7 @@ export async function GET(
     });
 
     // Retornar el archivo como blob descargable
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
