@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { PdfStampService } from '@/lib/services/pdf-stamp.service';
 import { AuditService } from '@/lib/services/audit.service';
-import { isOrgAdminOrOwner } from '@/lib/auth/rbac'; // Supongamos que existe, si no lo resolvemos con DB
+
 
 export async function GET(
   req: Request,
