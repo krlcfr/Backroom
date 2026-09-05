@@ -19,7 +19,9 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
   const [step, setStep] = useState<Step>(editResource ? 'editor' : 'menu');
   const [documentContent, setDocumentContent] = useState("<p>Comienza a escribir tu documento...</p>");
   const [savedDocumentId, setSavedDocumentId] = useState<string | null>(editResource?.id || null);
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [documentTitle, setDocumentTitle] = useState(editResource?.nombre || "Nuevo_Documento");
+  const [batchId, setBatchId] = useState<string | null>(null);
 
   // Annotations state
   const [annotations, setAnnotations] = useState<any[]>([]);
@@ -70,6 +72,51 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
       });
     });
   }, [documentContent, annotations]);
+
+  const handleUploadBatch = async (files: FileList) => {
+    if (!files || files.length === 0 || !roomId) return;
+    const uploadedIds: string[] = [];
+
+    // Optional: show loading state
+    const loadingToastId = alert("Subiendo documentos...");
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch(`/api/rooms/${roomId}/resources/upload`, {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok && data.id) {
+          uploadedIds.push(data.id);
+        } else {
+          console.error("Error subiendo archivo:", file.name, data.error);
+        }
+      } catch (err) {
+        console.error("Error subiendo archivo:", file.name, err);
+      }
+    }
+
+    if (uploadedIds.length > 0) {
+      setSelectedDocumentIds(prev => [...prev, ...uploadedIds]);
+      alert("¡Archivos subidos exitosamente!");
+      // Optionally trigger a re-fetch of resources if needed, though they will be pre-selected.
+    }
+  };
+
+  const toggleDocumentSelection = (id: string, name: string) => {
+    setSelectedDocumentIds(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(docId => docId !== id);
+      }
+      return [...prev, id];
+    });
+    setDocumentTitle(name);
+  };
 
   const handleMarkClick = (id: string) => {
     setShowAnnotations(true);
@@ -348,25 +395,28 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
                 Regresar al Menú
               </button>
               
-              <h2 className="text-2xl font-bold text-white mb-2">Seleccionar Documento</h2>
+              <h2 className="text-2xl font-bold text-white mb-2">Seleccionar Documentos</h2>
               <p className="text-[#a1a1aa] text-center mb-8 max-w-md">
-                Elige un documento existente en esta sala o sube uno nuevo para asignarle un flujo de aprobación.
+                Elige uno o varios documentos existentes en esta sala o sube nuevos para agruparlos en un flujo.
               </p>
 
-              <div className="w-full max-w-lg space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="w-full max-w-lg space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
                 {resources
                   .filter(r => r.tipo === 'doc' || r.tipo === 'pdf' || r.tipo === 'archivo')
                   .map(res => (
                   <button
                     key={res.id}
-                    onClick={() => {
-                      setSavedDocumentId(res.id);
-                      setDocumentTitle(res.nombre);
-                      setStep('workflow');
-                    }}
-                    className="w-full flex items-center gap-3 p-4 rounded-xl bg-[#27272a] hover:bg-[#303036] border border-[#3f3f46] hover:border-[#7c3aed] transition-colors text-left"
+                    onClick={() => toggleDocumentSelection(res.id, res.nombre)}
+                    className={`w-full flex items-center gap-3 p-4 rounded-xl transition-colors text-left border ${
+                      selectedDocumentIds.includes(res.id)
+                        ? "bg-[#303036] border-[#7c3aed]"
+                        : "bg-[#27272a] border-[#3f3f46] hover:border-[#7c3aed] hover:bg-[#303036]"
+                    }`}
                   >
-                    <span className="material-symbols-outlined text-[#7c3aed]">
+                    <div className={`w-5 h-5 rounded flex items-center justify-center border ${selectedDocumentIds.includes(res.id) ? 'bg-[#7c3aed] border-[#7c3aed]' : 'border-[#958da1]'}`}>
+                      {selectedDocumentIds.includes(res.id) && <span className="material-symbols-outlined text-white text-[16px]">check</span>}
+                    </div>
+                    <span className={`material-symbols-outlined ${selectedDocumentIds.includes(res.id) ? 'text-[#7c3aed]' : 'text-[#a1a1aa]'}`}>
                       {res.tipo === 'pdf' ? 'picture_as_pdf' : 'description'}
                     </span>
                     <span className="text-[#e2e2e2] font-medium flex-1 truncate">{res.nombre}</span>
@@ -380,25 +430,41 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
                 )}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-[#3f3f46] w-full max-w-lg flex flex-col gap-3">
-                <button
-                  onClick={() => {
-                    if (onAddResource) onAddResource('doc');
+              <div className="mt-8 pt-6 border-t border-[#3f3f46] w-full max-w-lg flex flex-col gap-3 relative">
+                <input 
+                  type="file" 
+                  multiple 
+                  accept=".doc,.docx,.txt,.pdf"
+                  onChange={(e) => {
+                    if (e.target.files) handleUploadBatch(e.target.files);
                   }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                <button
                   className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-[#3f3f46] hover:bg-[#4a4a52] text-white transition-colors"
                 >
                   <span className="material-symbols-outlined text-[20px]">upload_file</span>
-                  Subir nuevo documento (.doc, .docx, .txt)
+                  Subir uno o varios documentos
                 </button>
-                <button
-                  onClick={() => {
-                    if (onAddResource) onAddResource('pdf');
-                  }}
-                  className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-[#3f3f46] hover:bg-[#4a4a52] text-white transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-                  Subir nuevo PDF
-                </button>
+
+                {selectedDocumentIds.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (selectedDocumentIds.length === 1) {
+                        setSavedDocumentId(selectedDocumentIds[0]);
+                      } else {
+                        // Generate a pseudo-batch-id for now until backend supports it fully
+                        const newBatchId = crypto.randomUUID();
+                        setBatchId(newBatchId);
+                      }
+                      setStep('workflow');
+                    }}
+                    className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-lg bg-[#7c3aed] hover:bg-[#6d28d9] text-white transition-colors font-semibold"
+                  >
+                    Continuar al Mapa Mental ({selectedDocumentIds.length})
+                    <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -617,10 +683,10 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
             </aside>
           )}
 
-          {step === 'workflow' && savedDocumentId && (
+          {step === 'workflow' && (savedDocumentId || selectedDocumentIds.length > 0) && (
             <WorkflowBuilderModal 
               orgId={orgId}
-              documentId={savedDocumentId}
+              documentId={savedDocumentId || selectedDocumentIds[0]}
               documentTitle={documentTitle}
               onClose={() => setStep(editResource ? 'editor' : 'menu')}
               onSaveWorkflow={() => {
