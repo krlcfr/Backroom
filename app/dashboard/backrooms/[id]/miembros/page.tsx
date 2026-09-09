@@ -6,6 +6,7 @@ import Link from "next/link"
 import Breadcrumb from "@/components/ui/breadcrumb"
 import { createBrowserClient } from "@supabase/ssr"
 import RoomGraphModal from "@/components/salas/room-graph-modal"
+import InviteBackroomModal from "@/components/modals/invite-backroom-modal"
 
 interface RoomNode {
   id: string;
@@ -49,6 +50,7 @@ export default function MiembrosPage() {
   const [auditTree, setAuditTree] = useState<RoomNode[]>([])
   const [isAuditing, setIsAuditing] = useState(false)
   const [auditLoading, setAuditLoading] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
   
   useEffect(() => {
     async function loadData() {
@@ -193,7 +195,10 @@ export default function MiembrosPage() {
           <p className="text-[#958da1] text-[14px] mt-1">Gestiona los accesos y roles globales de los usuarios en este proyecto.</p>
         </div>
         {esPropietario && (
-          <button className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[14px] font-medium">
+          <button 
+            onClick={() => setShowInviteModal(true)}
+            className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[14px] font-medium"
+          >
             <span className="material-symbols-outlined text-[18px]">person_add</span>
             Invitar Miembro
           </button>
@@ -301,6 +306,17 @@ export default function MiembrosPage() {
           auditMode={true}
           userPermissions={auditPermissions}
           onNodeAuditClick={handleNodeAuditClick}
+        />
+      )}
+
+      {showInviteModal && (
+        <InviteBackroomModal
+          backroomId={backroom.id}
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={(invitationData) => {
+            setShowInviteModal(false)
+            alert(`Invitación generada con éxito. El enlace será enviado a ${invitationData.email}`)
+          }}
         />
       )}
     </div>
