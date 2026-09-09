@@ -43,7 +43,7 @@ export default function AddBackroomMemberModal({ backroomId, existingMembersIds,
         const membersData = await membersRes.json()
 
         // Filter out those who are already in the backroom
-        const availableMembers = membersData.data?.filter((m: OrgMember) => !existingMembersIds.includes(m.userId)) || []
+        const availableMembers = membersData.data?.members?.filter((m: OrgMember) => !existingMembersIds.includes(m.userId)) || []
         setOrgMembers(availableMembers)
         
         if (availableMembers.length > 0) {
@@ -91,13 +91,22 @@ export default function AddBackroomMemberModal({ backroomId, existingMembersIds,
   }
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
       <div 
         className="w-full max-w-md rounded-2xl bg-[#18181b] border border-[#27272a] shadow-2xl animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-[#fafafa] mb-2">Añadir miembro de Organización</h2>
+        <div className="p-6 relative">
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 text-[#a1a1aa] hover:text-[#fafafa] transition-colors"
+          >
+            <span className="material-symbols-outlined text-[20px]">close</span>
+          </button>
+          <h2 className="text-xl font-semibold text-[#fafafa] mb-2 pr-8">Añadir miembro de Organización</h2>
           <p className="text-sm text-[#a1a1aa] mb-6">
             Selecciona un miembro de tu organización para darle acceso directo a este Backroom.
           </p>
