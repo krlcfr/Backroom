@@ -110,12 +110,12 @@ export class PdfStampService {
       if (!imageUrl) continue;
 
       try {
-        let imageBytes: ArrayBuffer;
+        let imageBytes: ArrayBuffer | Uint8Array;
         let isPng = true;
 
         if (imageUrl.startsWith('data:image')) {
           const base64Data = imageUrl.split(',')[1];
-          imageBytes = Buffer.from(base64Data, 'base64');
+          imageBytes = new Uint8Array(Buffer.from(base64Data, 'base64'));
           if (imageUrl.includes('jpeg') || imageUrl.includes('jpg')) isPng = false;
         } else {
           const resp = await fetch(imageUrl);

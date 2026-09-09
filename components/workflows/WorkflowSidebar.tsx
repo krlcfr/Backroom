@@ -5,7 +5,7 @@ import { useState } from "react"
 interface Cargo {
   id: string
   nombre: string
-  departamento: {
+  departamento?: {
     nombre: string
   }
 }

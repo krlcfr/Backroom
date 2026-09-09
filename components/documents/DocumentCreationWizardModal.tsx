@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { PDFService } from "@/lib/services/pdf.service";
 import { WorkflowBuilderModal } from "@/components/workflows/WorkflowBuilderModal";
+import { SignersSummaryModal } from "@/components/workflows/SignersSummaryModal";
+import { DocumentSignatureCanvas } from "@/components/documents/DocumentSignatureCanvas";
 
 interface DocumentCreationWizardModalProps {
   onClose: () => void;
@@ -13,7 +15,7 @@ interface DocumentCreationWizardModalProps {
   resources?: any[];
 }
 
-type Step = 'menu' | 'editor' | 'workflow' | 'select-resource';
+type Step = 'menu' | 'editor' | 'workflow' | 'select-resource' | 'sign_summary' | 'sign_canvas';
 
 export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResource, editResource, resources = [] }: DocumentCreationWizardModalProps) {
   const [step, setStep] = useState<Step>(editResource ? 'editor' : 'menu');
@@ -22,6 +24,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [documentTitle, setDocumentTitle] = useState(editResource?.nombre || "Nuevo_Documento");
   const [batchId, setBatchId] = useState<string | null>(null);
+  const [workflowData, setWorkflowData] = useState<any>(null);
 
   // Annotations state
   const [annotations, setAnnotations] = useState<any[]>([]);
@@ -689,7 +692,38 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
               documentId={savedDocumentId || selectedDocumentIds[0]}
               documentTitle={documentTitle}
               onClose={() => setStep(editResource ? 'editor' : 'menu')}
-              onSaveWorkflow={() => {
+              onSaveWorkflow={(workflowData) => {
+                const firmantesNodes = workflowData?.nodes?.filter((n: any) => n.action_required === 'sign') || [];
+                if (firmantesNodes.length > 0) {
+                  setWorkflowData(workflowData);
+                  setStep('sign_summary');
+                } else {
+                  onClose();
+                  window.location.reload();
+                }
+              }}
+            />
+          )}
+
+          {step === 'sign_summary' && workflowData && (
+            <SignersSummaryModal
+              signersCount={workflowData.nodes.filter((n: any) => n.action_required === 'sign').length}
+              onContinue={() => setStep('sign_canvas')}
+              onClose={() => {
+                onClose();
+                window.location.reload();
+              }}
+            />
+          )}
+
+          {step === 'sign_canvas' && workflowData && (
+            <DocumentSignatureCanvas
+              workflowData={workflowData}
+              onFinish={() => {
+                onClose();
+                window.location.reload();
+              }}
+              onClose={() => {
                 onClose();
                 window.location.reload();
               }}

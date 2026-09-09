@@ -47,7 +47,7 @@ export class WorkflowsService {
         organization_id: input.organization_id,
         document_id: input.document_id,
         title: input.title,
-        status: 'in_progress',
+        status: 'draft',
         flow_graph_json: input.flow_graph_json,
         created_by: user.id
       })
@@ -89,57 +89,9 @@ export class WorkflowsService {
       details: { workflow_id: workflow.id, title: input.title }
     });
 
-    // 4. Enviar notificaciones al Paso 1
-    const firstStepNodes = input.nodes.filter(n => n.step_order === 1);
-    const assignedUserIds = firstStepNodes.map(n => n.assigned_user_id).filter(Boolean) as string[];
-    
-    let emailsToNotify: string[] = [];
 
-    // Si hay usuarios asignados directamente
-    if (assignedUserIds.length > 0) {
-      const { data: users } = await supabase
-        .from('usuarios')
-        .select('correo')
-        .in('id', assignedUserIds);
-      if (users) {
-        emailsToNotify.push(...users.map(u => u.correo));
-      }
-    }
 
-    // Si hay cargos sin usuario asignado, notificar a todos los miembros con ese cargo
-    const cargosWithoutUser = firstStepNodes.filter(n => !n.assigned_user_id).map(n => n.cargo_id);
-    if (cargosWithoutUser.length > 0) {
-      const { data: members } = await supabase
-        .from('organization_members')
-        .select('user_id, usuarios!organization_members_user_id_fkey(correo)')
-        .eq('organization_id', input.organization_id)
-        .in('cargo_id', cargosWithoutUser);
-      
-      if (members) {
-        members.forEach(m => {
-          // @ts-ignore
-          if (m.usuarios && m.usuarios.correo) {
-            // @ts-ignore
-            emailsToNotify.push(m.usuarios.correo);
-          }
-        });
-      }
-    }
-
-    // Deduplicate emails
-    emailsToNotify = [...new Set(emailsToNotify)];
-
-    if (emailsToNotify.length > 0) {
-      await NotificationService.notifyWorkflowAssigned({
-        workflowTitle: input.title,
-        documentTitle: documentTitle,
-        recipientEmails: emailsToNotify,
-        actionRequired: firstStepNodes[0].action_required, // Simplification
-        creatorName: creatorName
-      });
-    }
-
-    return workflow;
+    return { ...workflow, nodes: nodesToInsert };
   }
 
   /**
