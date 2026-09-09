@@ -25,15 +25,22 @@ export function NotificationBell() {
   const router = useRouter();
 
   useEffect(() => {
-    fetchNotifications();
-
+    let isMounted = true;
     let channel: any = null;
 
     const setupSubscription = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user || !isMounted) return;
 
       const channelName = `notifications-${user.id}`;
+      
+      // Cleanup any existing channel with this name to avoid conflicts in React StrictMode
+      supabase.getChannels().forEach((c) => {
+        if (c.topic === `realtime:${channelName}`) {
+          supabase.removeChannel(c);
+        }
+      });
+
       channel = supabase
         .channel(channelName)
         .on(
@@ -68,9 +75,11 @@ export function NotificationBell() {
         .subscribe();
     };
 
+    fetchNotifications();
     setupSubscription();
 
     return () => {
+      isMounted = false;
       if (channel) {
         supabase.removeChannel(channel);
       }

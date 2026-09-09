@@ -19,15 +19,22 @@ export async function GET(
   try {
     const user = await requireAuth();
     const { roomId } = await params;
-    const supabase = await createClient();
+    
+    const adminSupabase = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("salas")
       .select("*")
       .eq("id", roomId)
       .maybeSingle();
 
     if (error || !data) throw new ApiError(404, "Sala no encontrada.");
+
+    // Verificar si el usuario tiene permiso para ver la sala
+    // Asumimos que si tiene 'salas.acceder' o si es miembro, puede verla
+    const hasAccess = await checkRoomPermission(user.id, roomId, "salas.acceder");
+    if (!hasAccess) throw new ApiError(403, "No tienes acceso a esta sala.");
+
     return NextResponse.json({ data: { room: data } }, { status: 200 });
   } catch (error) {
     return handleApiError(error);

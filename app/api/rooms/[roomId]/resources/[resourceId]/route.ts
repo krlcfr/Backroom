@@ -13,8 +13,8 @@ export async function DELETE(
     const user = await requireAuth();
     const { roomId, resourceId } = await params;
 
-    const supabase = await createClient();
-    const { data: sala, error: salaError } = await supabase
+    const adminSupabase = createAdminClient();
+    const { data: sala, error: salaError } = await adminSupabase
       .from("salas")
       .select("backroom_id")
       .eq("id", roomId)
@@ -64,8 +64,8 @@ export async function PUT(
     const user = await requireAuth();
     const { roomId, resourceId } = await params;
 
-    const supabase = await createClient();
-    const { data: sala, error: salaError } = await supabase
+    const adminSupabase = createAdminClient();
+    const { data: sala, error: salaError } = await adminSupabase
       .from("salas")
       .select("backroom_id")
       .eq("id", roomId)

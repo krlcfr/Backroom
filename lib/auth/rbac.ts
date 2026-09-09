@@ -58,9 +58,10 @@ export async function checkRoomPermission(authId: string, roomId: string, permis
   if (!usuario) return false;
 
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
 
-  // Obtener la sala para saber el backroom_id
-  const { data: sala } = await supabase
+  // Obtener la sala para saber el backroom_id usando admin para saltar RLS temporalmente
+  const { data: sala } = await adminSupabase
     .from("salas")
     .select("backroom_id")
     .eq("id", roomId)

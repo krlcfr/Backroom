@@ -17,7 +17,7 @@ export async function GET(
     const supabaseAdmin = createAdminClient();
 
     // Obtener la sala para verificar pertenencia al backroom
-    const { data: sala, error: salaError } = await supabase
+    const { data: sala, error: salaError } = await supabaseAdmin
       .from("salas")
       .select("backroom_id")
       .eq("id", roomId)
@@ -91,8 +91,9 @@ export async function PATCH(
     const body = await request.json();
     const input = updateRoomPermissionsSchema.parse(body);
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
-    const { data: sala } = await supabase
+    const { data: sala } = await adminSupabase
       .from("salas")
       .select("backroom_id, parent_id")
       .eq("id", roomId)

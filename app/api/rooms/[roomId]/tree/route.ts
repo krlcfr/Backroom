@@ -15,11 +15,12 @@ export async function GET(
     const user = await requireAuth();
     const { roomId } = await params;
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
     const usuario = await getUsuarioInterno(user.id);
     if (!usuario) throw new ApiError(404, "Perfil de usuario no encontrado.");
 
     // Obtener el backroom_id de la sala raíz y el propietario del backroom
-    const { data: rootSala } = await supabase
+    const { data: rootSala } = await adminSupabase
       .from("salas")
       .select("backroom_id, backrooms ( propietario_id )")
       .eq("id", roomId)

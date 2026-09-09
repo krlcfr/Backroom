@@ -48,7 +48,8 @@ export class WorkflowsService {
         document_id: input.document_id,
         title: input.title,
         status: 'in_progress',
-        flow_graph_json: input.flow_graph_json
+        flow_graph_json: input.flow_graph_json,
+        created_by: user.id
       })
       .select()
       .single();
@@ -58,7 +59,6 @@ export class WorkflowsService {
     // 2. Insertar los nodos (pasos)
     const nodesToInsert = input.nodes.map(n => ({
       workflow_id: workflow.id,
-      react_flow_id: n.reactFlowId,
       cargo_id: n.cargo_id,
       assigned_user_id: n.assigned_user_id || null,
       step_order: n.step_order,
