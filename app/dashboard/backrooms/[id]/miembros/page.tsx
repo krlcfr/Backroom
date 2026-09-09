@@ -6,6 +6,8 @@ import Link from "next/link"
 import Breadcrumb from "@/components/ui/breadcrumb"
 import { createBrowserClient } from "@supabase/ssr"
 import RoomGraphModal from "@/components/salas/room-graph-modal"
+import InviteBackroomModal from "@/components/modals/invite-backroom-modal"
+import AddBackroomMemberModal from "@/components/modals/add-backroom-member-modal"
 
 interface RoomNode {
   id: string;
@@ -49,40 +51,42 @@ export default function MiembrosPage() {
   const [auditTree, setAuditTree] = useState<RoomNode[]>([])
   const [isAuditing, setIsAuditing] = useState(false)
   const [auditLoading, setAuditLoading] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
   
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const supabase = createBrowserClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        )
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session) {
-          const { data: user } = await supabase.from("usuarios").select("id").eq("auth_id", session.user.id).single()
-          if (user) setCurrentUserId(user.id)
-        }
-
-        const [brRes, memRes] = await Promise.all([
-          fetch(`/api/backrooms/${id}`),
-          fetch(`/api/backrooms/${id}/members`)
-        ])
-        
-        if (brRes.ok) {
-          const brData = await brRes.json()
-          setBackroom(brData)
-        }
-        
-        if (memRes.ok) {
-          const memData = await memRes.json()
-          setMembers(memData.data.members)
-        }
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
+  const loadData = async () => {
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setCurrentUserId(session.user.id)
       }
+
+      const [brRes, memRes] = await Promise.all([
+        fetch(`/api/backrooms/${id}`),
+        fetch(`/api/backrooms/${id}/members`)
+      ])
+      
+      if (brRes.ok) {
+        const brData = await brRes.json()
+        setBackroom(brData)
+      }
+      
+      if (memRes.ok) {
+        const memData = await memRes.json()
+        setMembers(memData.data.members)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     loadData()
   }, [id])
 
@@ -194,10 +198,22 @@ export default function MiembrosPage() {
           <p className="text-[#958da1] text-[14px] mt-1">Gestiona los accesos y roles globales de los usuarios en este proyecto.</p>
         </div>
         {esPropietario && (
-          <button className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[14px] font-medium">
-            <span className="material-symbols-outlined text-[18px]">person_add</span>
-            Invitar Miembro
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 bg-transparent border border-[#7c3aed] text-[#d2bbff] hover:bg-[#7c3aed]/10 px-4 py-2 rounded-lg transition-colors text-[14px] font-medium"
+            >
+              <span className="material-symbols-outlined text-[18px]">group_add</span>
+              Añadir de Organización
+            </button>
+            <button 
+              onClick={() => setShowInviteModal(true)}
+              className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[14px] font-medium"
+            >
+              <span className="material-symbols-outlined text-[18px]">person_add</span>
+              Invitar Miembro
+            </button>
+          </div>
         )}
       </div>
 
@@ -302,6 +318,29 @@ export default function MiembrosPage() {
           auditMode={true}
           userPermissions={auditPermissions}
           onNodeAuditClick={handleNodeAuditClick}
+        />
+      )}
+
+      {showInviteModal && (
+        <InviteBackroomModal
+          backroomId={backroom.id}
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={(invitationData) => {
+            setShowInviteModal(false)
+            alert(`Invitación generada con éxito. El enlace será enviado a ${invitationData.email}`)
+          }}
+        />
+      )}
+
+      {showAddModal && (
+        <AddBackroomMemberModal
+          backroomId={backroom.id}
+          existingMembersIds={members.map(m => m.usuario_id)}
+          onClose={() => setShowAddModal(false)}
+          onSuccess={() => {
+            setShowAddModal(false)
+            loadData() // Recargar la tabla
+          }}
         />
       )}
     </div>

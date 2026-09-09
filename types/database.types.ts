@@ -14,274 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      document_annotations: {
-        Row: {
-          content: string
-          created_at: string
-          document_id: string
-          id: string
-          node_id: string | null
-          type: Database["public"]["Enums"]["annotation_type"]
-          user_id: string
-          workflow_id: string | null
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          document_id: string
-          id?: string
-          node_id?: string | null
-          type: Database["public"]["Enums"]["annotation_type"]
-          user_id: string
-          workflow_id?: string | null
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          document_id?: string
-          id?: string
-          node_id?: string | null
-          type?: Database["public"]["Enums"]["annotation_type"]
-          user_id?: string
-          workflow_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_annotations_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "recursos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_annotations_node_id_fkey"
-            columns: ["node_id"]
-            isOneToOne: false
-            referencedRelation: "workflow_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_annotations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_annotations_workflow_id_fkey"
-            columns: ["workflow_id"]
-            isOneToOne: false
-            referencedRelation: "document_workflows"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      document_workflows: {
-        Row: {
-          created_at: string
-          created_by: string
-          document_id: string
-          flow_graph_json: Json | null
-          id: string
-          organization_id: string
-          status: Database["public"]["Enums"]["workflow_status"]
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          document_id: string
-          flow_graph_json?: Json | null
-          id?: string
-          organization_id: string
-          status?: Database["public"]["Enums"]["workflow_status"]
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          document_id?: string
-          flow_graph_json?: Json | null
-          id?: string
-          organization_id?: string
-          status?: Database["public"]["Enums"]["workflow_status"]
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_workflows_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_workflows_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "recursos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_workflows_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      workflow_actions: {
-        Row: {
-          action: Database["public"]["Enums"]["workflow_action_type"]
-          comments: string | null
-          created_at: string
-          id: string
-          node_id: string
-          rejection_reason: string | null
-          user_id: string
-          workflow_id: string
-        }
-        Insert: {
-          action: Database["public"]["Enums"]["workflow_action_type"]
-          comments?: string | null
-          created_at?: string
-          id?: string
-          node_id: string
-          rejection_reason?: string | null
-          user_id: string
-          workflow_id: string
-        }
-        Update: {
-          action?: Database["public"]["Enums"]["workflow_action_type"]
-          comments?: string | null
-          created_at?: string
-          id?: string
-          node_id?: string
-          rejection_reason?: string | null
-          user_id?: string
-          workflow_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "workflow_actions_node_id_fkey"
-            columns: ["node_id"]
-            isOneToOne: false
-            referencedRelation: "workflow_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "workflow_actions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "workflow_actions_workflow_id_fkey"
-            columns: ["workflow_id"]
-            isOneToOne: false
-            referencedRelation: "document_workflows"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      workflow_nodes: {
-        Row: {
-          action_required: Database["public"]["Enums"]["action_required"]
-          assigned_user_id: string | null
-          cargo_id: string | null
-          created_at: string
-          id: string
-          node_type: Database["public"]["Enums"]["node_type"]
-          status: Database["public"]["Enums"]["node_status"]
-          step_order: number
-          workflow_id: string
-        }
-        Insert: {
-          action_required?: Database["public"]["Enums"]["action_required"]
-          assigned_user_id?: string | null
-          cargo_id?: string | null
-          created_at?: string
-          id?: string
-          node_type?: Database["public"]["Enums"]["node_type"]
-          status?: Database["public"]["Enums"]["node_status"]
-          step_order: number
-          workflow_id: string
-        }
-        Update: {
-          action_required?: Database["public"]["Enums"]["action_required"]
-          assigned_user_id?: string | null
-          cargo_id?: string | null
-          created_at?: string
-          id?: string
-          node_type?: Database["public"]["Enums"]["node_type"]
-          status?: Database["public"]["Enums"]["node_status"]
-          step_order?: number
-          workflow_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "workflow_nodes_assigned_user_id_fkey"
-            columns: ["assigned_user_id"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "workflow_nodes_cargo_id_fkey"
-            columns: ["cargo_id"]
-            isOneToOne: false
-            referencedRelation: "cargos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "workflow_nodes_workflow_id_fkey"
-            columns: ["workflow_id"]
-            isOneToOne: false
-            referencedRelation: "document_workflows"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      cargos: {
-        Row: {
-          id: string
-          organization_id: string
-          nombre: string
-          descripcion: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          organization_id: string
-          nombre: string
-          descripcion?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          organization_id?: string
-          nombre?: string
-          descripcion?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cargos_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       audit_logs: {
         Row: {
           action: string
@@ -423,25 +155,116 @@ export type Database = {
           },
         ]
       }
+      cargos: {
+        Row: {
+          created_at: string
+          descripcion: string | null
+          id: string
+          nombre: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cargos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_annotations: {
+        Row: {
+          content: string
+          created_at: string
+          document_id: string
+          id: string
+          node_id: string | null
+          type: Database["public"]["Enums"]["annotation_type"]
+          user_id: string
+          workflow_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          document_id: string
+          id?: string
+          node_id?: string | null
+          type: Database["public"]["Enums"]["annotation_type"]
+          user_id: string
+          workflow_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          document_id?: string
+          id?: string
+          node_id?: string | null
+          type?: Database["public"]["Enums"]["annotation_type"]
+          user_id?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_annotations_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "recursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_annotations_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_annotations_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "document_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_signatures: {
         Row: {
           created_at: string | null
           height: number
           id: string
+          node_id: string | null
           page_number: number
           pos_x: number
           pos_y: number
           recurso_id: string
           signature_image_url: string
-          workflow_id: string | null
-          node_id: string | null
           usuario_id: string
           width: number
+          workflow_id: string | null
         }
         Insert: {
           created_at?: string | null
           height: number
           id?: string
+          node_id?: string | null
           page_number: number
           pos_x: number
           pos_y: number
@@ -449,11 +272,13 @@ export type Database = {
           signature_image_url: string
           usuario_id: string
           width: number
+          workflow_id?: string | null
         }
         Update: {
           created_at?: string | null
           height?: number
           id?: string
+          node_id?: string | null
           page_number?: number
           pos_x?: number
           pos_y?: number
@@ -461,8 +286,16 @@ export type Database = {
           signature_image_url?: string
           usuario_id?: string
           width?: number
+          workflow_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "document_signatures_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "document_signatures_recurso_id_fkey"
             columns: ["recurso_id"]
@@ -475,6 +308,80 @@ export type Database = {
             columns: ["usuario_id"]
             isOneToOne: false
             referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_signatures_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "document_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_workflows: {
+        Row: {
+          created_at: string
+          created_by: string
+          document_id: string
+          flow_graph_json: Json | null
+          id: string
+          organization_id: string
+          placed_signatures_count: number
+          status: Database["public"]["Enums"]["workflow_status"]
+          title: string
+          total_signers_count: number
+          updated_at: string
+          workflow_batch_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          document_id: string
+          flow_graph_json?: Json | null
+          id?: string
+          organization_id: string
+          placed_signatures_count?: number
+          status?: Database["public"]["Enums"]["workflow_status"]
+          title: string
+          total_signers_count?: number
+          updated_at?: string
+          workflow_batch_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          document_id?: string
+          flow_graph_json?: Json | null
+          id?: string
+          organization_id?: string
+          placed_signatures_count?: number
+          status?: Database["public"]["Enums"]["workflow_status"]
+          title?: string
+          total_signers_count?: number
+          updated_at?: string
+          workflow_batch_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_workflows_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "recursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_workflows_workflow_batch_id_fkey"
+            columns: ["workflow_batch_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_batches"
             referencedColumns: ["id"]
           },
         ]
@@ -526,6 +433,53 @@ export type Database = {
             columns: ["creado_por"]
             isOneToOne: false
             referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          action_data: Json | null
+          action_url: string | null
+          created_at: string
+          id: string
+          message: string
+          organization_id: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_data?: Json | null
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          organization_id?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_data?: Json | null
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          organization_id?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -586,6 +540,7 @@ export type Database = {
       }
       organization_members: {
         Row: {
+          cargo_id: string | null
           created_at: string
           id: string
           joined_at: string | null
@@ -597,6 +552,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cargo_id?: string | null
           created_at?: string
           id?: string
           joined_at?: string | null
@@ -608,6 +564,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cargo_id?: string | null
           created_at?: string
           id?: string
           joined_at?: string | null
@@ -619,6 +576,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "organization_members_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "organization_members_organization_id_fkey"
             columns: ["organization_id"]
@@ -740,6 +704,7 @@ export type Database = {
           tamano_bytes: number | null
           tipo: string
           url: string
+          workflow_batch_id: string | null
         }
         Insert: {
           created_at?: string
@@ -750,6 +715,7 @@ export type Database = {
           tamano_bytes?: number | null
           tipo: string
           url: string
+          workflow_batch_id?: string | null
         }
         Update: {
           created_at?: string
@@ -760,6 +726,7 @@ export type Database = {
           tamano_bytes?: number | null
           tipo?: string
           url?: string
+          workflow_batch_id?: string | null
         }
         Relationships: [
           {
@@ -774,6 +741,13 @@ export type Database = {
             columns: ["subido_por"]
             isOneToOne: false
             referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recursos_workflow_batch_id_fkey"
+            columns: ["workflow_batch_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_batches"
             referencedColumns: ["id"]
           },
         ]
@@ -937,27 +911,285 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_actions: {
+        Row: {
+          action: Database["public"]["Enums"]["workflow_action_type"]
+          comments: string | null
+          created_at: string
+          id: string
+          node_id: string
+          rejection_reason: string | null
+          user_id: string
+          workflow_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["workflow_action_type"]
+          comments?: string | null
+          created_at?: string
+          id?: string
+          node_id: string
+          rejection_reason?: string | null
+          user_id: string
+          workflow_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["workflow_action_type"]
+          comments?: string | null
+          created_at?: string
+          id?: string
+          node_id?: string
+          rejection_reason?: string | null
+          user_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_actions_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_actions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "document_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_batches: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          id: string
+          organization_id: string
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          id?: string
+          organization_id: string
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          organization_id?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_batches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_download_permissions: {
+        Row: {
+          can_download_full: boolean
+          can_download_partial: boolean
+          created_at: string | null
+          id: string
+          user_id: string
+          workflow_id: string
+        }
+        Insert: {
+          can_download_full?: boolean
+          can_download_partial?: boolean
+          created_at?: string | null
+          id?: string
+          user_id: string
+          workflow_id: string
+        }
+        Update: {
+          can_download_full?: boolean
+          can_download_partial?: boolean
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_download_permissions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "document_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_nodes: {
+        Row: {
+          action_required: Database["public"]["Enums"]["action_required"]
+          assigned_user_id: string | null
+          cargo_id: string | null
+          created_at: string
+          id: string
+          node_type: Database["public"]["Enums"]["node_type"]
+          status: Database["public"]["Enums"]["node_status"]
+          step_order: number
+          workflow_id: string
+        }
+        Insert: {
+          action_required?: Database["public"]["Enums"]["action_required"]
+          assigned_user_id?: string | null
+          cargo_id?: string | null
+          created_at?: string
+          id?: string
+          node_type?: Database["public"]["Enums"]["node_type"]
+          status?: Database["public"]["Enums"]["node_status"]
+          step_order: number
+          workflow_id: string
+        }
+        Update: {
+          action_required?: Database["public"]["Enums"]["action_required"]
+          assigned_user_id?: string | null
+          cargo_id?: string | null
+          created_at?: string
+          id?: string
+          node_type?: Database["public"]["Enums"]["node_type"]
+          status?: Database["public"]["Enums"]["node_status"]
+          step_order?: number
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_nodes_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_nodes_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "document_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_signature_positions: {
+        Row: {
+          assigned_user_id: string
+          created_at: string | null
+          height_px: number
+          id: string
+          is_signed: boolean
+          page_number: number
+          pos_x_percent: number
+          pos_y_percent: number
+          resource_id: string
+          signed_at: string | null
+          width_px: number
+          workflow_id: string
+          workflow_node_id: string
+        }
+        Insert: {
+          assigned_user_id: string
+          created_at?: string | null
+          height_px?: number
+          id?: string
+          is_signed?: boolean
+          page_number?: number
+          pos_x_percent: number
+          pos_y_percent: number
+          resource_id: string
+          signed_at?: string | null
+          width_px?: number
+          workflow_id: string
+          workflow_node_id: string
+        }
+        Update: {
+          assigned_user_id?: string
+          created_at?: string | null
+          height_px?: number
+          id?: string
+          is_signed?: boolean
+          page_number?: number
+          pos_x_percent?: number
+          pos_y_percent?: number
+          resource_id?: string
+          signed_at?: string | null
+          width_px?: number
+          workflow_id?: string
+          workflow_node_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_signature_positions_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "recursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_signature_positions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "document_workflows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_signature_positions_workflow_node_id_fkey"
+            columns: ["workflow_node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      create_workflow_with_nodes: {
+        Args: {
+          p_doc_id: string
+          p_flow_graph: Json
+          p_nodes: Json
+          p_org_id: string
+          p_title: string
+        }
+        Returns: string
+      }
       current_usuario_id: { Args: never; Returns: string }
       is_backroom_owner: {
         Args: { check_backroom_id: string }
         Returns: boolean
       }
+      is_org_admin: { Args: { org: string }; Returns: boolean }
       is_org_member: { Args: { org: string }; Returns: boolean }
       is_org_owner: { Args: { org: string }; Returns: boolean }
+      submit_workflow_transaction: {
+        Args: { p_user_id: string; p_workflow_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       action_required: "sign" | "approve" | "review"
-      annotation_type: "rejection_note" | "general_comment" | "revision_feedback"
-      node_status: "pending" | "approved" | "rejected" | "signed"
-      node_type: "linear" | "parallel" | "final"
-      workflow_action_type: "approved" | "rejected" | "signed"
-      workflow_status: "draft" | "in_progress" | "under_review" | "completed" | "rejected"
+      annotation_type:
+        | "rejection_note"
+        | "general_comment"
+        | "revision_feedback"
       billing_cycle: "monthly" | "annual"
+      node_status: "pending" | "approved" | "rejected" | "signed" | "in_turn"
+      node_type: "linear" | "parallel" | "final"
       organization_plan: "free" | "pro" | "enterprise"
       subscription_status:
         | "incomplete"
@@ -968,6 +1200,13 @@ export type Database = {
         | "canceled"
         | "unpaid"
         | "paused"
+      workflow_action_type: "approved" | "rejected" | "signed"
+      workflow_status:
+        | "draft"
+        | "in_progress"
+        | "under_review"
+        | "completed"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -983,12 +1222,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1012,11 +1251,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1037,11 +1276,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1062,11 +1301,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1079,11 +1318,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1095,7 +1334,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      action_required: ["sign", "approve", "review"],
+      annotation_type: [
+        "rejection_note",
+        "general_comment",
+        "revision_feedback",
+      ],
       billing_cycle: ["monthly", "annual"],
+      node_status: ["pending", "approved", "rejected", "signed", "in_turn"],
+      node_type: ["linear", "parallel", "final"],
       organization_plan: ["free", "pro", "enterprise"],
       subscription_status: [
         "incomplete",
@@ -1106,6 +1353,14 @@ export const Constants = {
         "canceled",
         "unpaid",
         "paused",
+      ],
+      workflow_action_type: ["approved", "rejected", "signed"],
+      workflow_status: [
+        "draft",
+        "in_progress",
+        "under_review",
+        "completed",
+        "rejected",
       ],
     },
   },

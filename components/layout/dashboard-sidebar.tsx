@@ -12,25 +12,41 @@ interface DashboardSidebarProps {
   orgUpdatedAt: string | null
   esPropietario: boolean
   isSuperAdmin?: boolean
+  isOrgAdmin?: boolean
 }
 
 const NAV_ITEMS = [
   { label: "Inicio", icon: "home", href: "/dashboard" },
   { label: "Jerarquía", icon: "account_tree", href: "/dashboard/hierarchy" },
   { label: "Almacenamiento", icon: "folder", href: "/dashboard/storage" },
+  { label: "Mis Pendientes", icon: "inbox", href: "/dashboard/pendientes" },
   { label: "Permisos", icon: "key", href: "/dashboard/miembros" },
   { label: "Historial", icon: "history", href: "/dashboard/auditoria" },
   { label: "Configuración", icon: "settings", href: "/dashboard/configuracion" },
   { label: "Planes", icon: "credit_card", href: "/dashboard/configuracion/planes" },
 ]
 
-export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPropietario, isSuperAdmin }: DashboardSidebarProps) {
+export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPropietario, isSuperAdmin, isOrgAdmin }: DashboardSidebarProps) {
   const pathname = usePathname()
   const { canCreateBackroom } = useLimits()
   const { collapsed, setCollapsed } = useSidebar()
 
-  // Filtramos planes si no es propietario
-  let navItems = esPropietario ? [...NAV_ITEMS] : NAV_ITEMS.filter((i) => i.label !== "Planes")
+  // Filtramos planes y configuración avanzada si no es propietario ni admin
+  let navItems = [...NAV_ITEMS]
+  
+  const hasAdminRights = esPropietario || isOrgAdmin;
+
+  if (!hasAdminRights) {
+    // Es un miembro regular
+    navItems = navItems.filter((i) => 
+      !["Planes", "Configuración", "Almacenamiento", "Permisos", "Historial"].includes(i.label)
+    )
+  } else if (!esPropietario) {
+    // Es un admin (pero no propietario), no puede ver Planes ni Configuración principal
+    navItems = navItems.filter((i) => 
+      !["Planes", "Configuración"].includes(i.label)
+    )
+  }
   
   if (isSuperAdmin) {
     if (!navItems.find(i => i.label === "Métricas Globales")) {
@@ -97,28 +113,30 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
         })}
       </nav>
 
-      <div className={`mt-auto mb-4 ${collapsed ? "px-2" : "px-4"}`}>
-        <button
-          onClick={() => {
-            if (canCreateBackroom) {
-              window.dispatchEvent(new CustomEvent("open-create-backroom"))
-            } else {
-              window.dispatchEvent(new CustomEvent("show-upsell", { detail: { message: "Has alcanzado el límite de BackRooms de tu plan actual." } }))
-            }
-          }}
-          title={collapsed ? "Nuevo BackRoom" : undefined}
-          className={`w-full py-2 rounded-lg flex items-center justify-center gap-2 text-[12px] font-medium transition-colors ${
-            canCreateBackroom 
-              ? "bg-[#7c3aed] text-white hover:bg-[#8b5cf6]" 
-              : "bg-[#333535] text-[#ccc3d8] hover:bg-[#4a4455] opacity-80"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">{canCreateBackroom ? "add" : "lock"}</span>
-          {!collapsed && <span>Nuevo BackRoom</span>}
-        </button>
-      </div>
+      {esPropietario && (
+        <div className={`mt-auto mb-4 ${collapsed ? "px-2" : "px-4"}`}>
+          <button
+            onClick={() => {
+              if (canCreateBackroom) {
+                window.dispatchEvent(new CustomEvent("open-create-backroom"))
+              } else {
+                window.dispatchEvent(new CustomEvent("show-upsell", { detail: { message: "Has alcanzado el límite de BackRooms de tu plan actual." } }))
+              }
+            }}
+            title={collapsed ? "Nuevo BackRoom" : undefined}
+            className={`w-full py-2 rounded-lg flex items-center justify-center gap-2 text-[12px] font-medium transition-colors ${
+              canCreateBackroom 
+                ? "bg-[#7c3aed] text-white hover:bg-[#8b5cf6]" 
+                : "bg-[#333535] text-[#ccc3d8] hover:bg-[#4a4455] opacity-80"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[18px]">{canCreateBackroom ? "add" : "lock"}</span>
+            {!collapsed && <span>Nuevo BackRoom</span>}
+          </button>
+        </div>
+      )}
 
-      <div className="border-t border-[#4a4455] pt-2 px-2 flex flex-col gap-1 flex-none">
+      <div className={`border-t border-[#4a4455] pt-2 px-2 flex flex-col gap-1 flex-none ${!esPropietario ? "mt-auto" : ""}`}>
         <Link
           href="/dashboard/support"
           title={collapsed ? "Soporte" : undefined}

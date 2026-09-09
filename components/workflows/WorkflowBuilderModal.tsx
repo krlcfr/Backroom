@@ -12,17 +12,19 @@ import {
   Connection,
   Edge,
   Node,
-  Handle,
   MarkerType,
-  Position,
   NodeMouseHandler
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { parseFlowToSteps } from "@/lib/utils/workflow-graph-parser";
+import { CargoNodeComponent } from "./nodes/CargoNodeComponent";
+import { CustomWorkflowEdge } from "./edges/CustomWorkflowEdge";
+import WorkflowSidebar from "./WorkflowSidebar";
 
 interface Cargo {
   id: string;
-  name: string;
+  nombre: string;
+  departamento?: { nombre: string };
 }
 
 interface Member {
@@ -43,22 +45,8 @@ export interface WorkflowBuilderModalProps {
   onSaveWorkflow?: (workflow: any) => void;
 }
 
-const CircleNode = ({ data, selected }: { data: any, selected?: boolean }) => {
-  return (
-    <div className={`w-16 h-16 bg-[#27272a] rounded-full flex flex-col items-center justify-center border-2 ${selected ? 'border-white' : 'border-[#7c3aed]'} text-center p-1.5 relative shadow-lg`}>
-      <Handle type="target" position={Position.Left} className="w-2.5 h-2.5 !bg-[#d2bbff] !border-none" />
-      {data.avatar ? (
-        <img src={data.avatar} alt="avatar" className="w-5 h-5 rounded-full mb-0.5 object-cover" />
-      ) : (
-        <span className="material-symbols-outlined text-[16px] text-[#7c3aed] mb-0.5">person</span>
-      )}
-      <span className="text-[9px] text-[#e2e2e2] font-semibold leading-tight line-clamp-2">{data.label}</span>
-      <Handle type="source" position={Position.Right} className="w-2.5 h-2.5 !bg-[#d2bbff] !border-none" />
-    </div>
-  );
-};
-
-const nodeTypes = { circle: CircleNode };
+const nodeTypes = { cargo: CargoNodeComponent };
+const edgeTypes = { custom: CustomWorkflowEdge };
 
 export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose, onSaveWorkflow }: WorkflowBuilderModalProps) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -85,7 +73,8 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
           const cData = await cargosRes.json();
           setAvailableCargos((cData.cargos || []).map((c: any) => ({
             id: c.id,
-            name: c.nombre
+            nombre: c.nombre,
+            departamento: c.departamentos
           })));
         }
 
@@ -108,6 +97,9 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge({
       ...params,
+      type: 'custom',
+      animated: true,
+      data: { type: 'approve' },
       markerEnd: {
         type: MarkerType.ArrowClosed,
         width: 20,
@@ -122,26 +114,50 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
     [setEdges]
   );
 
-  const handleCargoClick = (cargo: Cargo) => {
-    const uniqueId = `node_${cargo.id}_${Date.now()}`;
-    const offset = (nodes.length % 5) * 20;
-    const newPosition = { x: 50 + offset, y: 50 + offset };
-
-    const newNode: Node = {
-      id: uniqueId,
-      type: 'circle',
-      position: newPosition,
-      data: { 
-        label: cargo.name, 
-        cargoId: cargo.id, 
-        action_required: 'approve',
-        assigned_user_id: ''
-      },
-    };
-
-    setNodes((nds) => nds.concat(newNode));
-    setSelectedNodeId(uniqueId);
+  const onDragStart = (event: React.DragEvent, cargo: Cargo) => {
+    event.dataTransfer.setData('application/reactflow', JSON.stringify(cargo));
+    event.dataTransfer.effectAllowed = 'move';
   };
+
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+
+      if (!reactFlowInstance) return;
+
+      const cargoStr = event.dataTransfer.getData('application/reactflow');
+      if (!cargoStr) return;
+
+      const cargo = JSON.parse(cargoStr) as Cargo;
+      const position = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      const uniqueId = `node_${cargo.id}_${Date.now()}`;
+      const newNode: Node = {
+        id: uniqueId,
+        type: 'cargo',
+        position,
+        data: { 
+          label: cargo.nombre, 
+          cargoId: cargo.id, 
+          action_required: 'approve',
+          assigned_user_id: '',
+          fullName: 'Cualquiera con este cargo'
+        },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+      setSelectedNodeId(uniqueId);
+    },
+    [reactFlowInstance, setNodes]
+  );
 
   const onNodeClick: NodeMouseHandler = (event, node) => {
     setSelectedNodeId(node.id);
@@ -158,6 +174,17 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
           return { ...n, data: { ...n.data, ...newData } };
         }
         return n;
+      })
+    );
+  };
+
+  const updateEdgeData = (id: string, newData: any) => {
+    setEdges(eds => 
+      eds.map(e => {
+        if (e.id === id) {
+          return { ...e, data: { ...e.data, ...newData } };
+        }
+        return e;
       })
     );
   };
@@ -215,13 +242,13 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[120] backdrop-blur-sm">
-      <div className="bg-[#121414] w-[90vw] h-[90vh] rounded-2xl border border-[#3f3f46] shadow-2xl flex flex-col overflow-hidden">
+      <div className="bg-[#121414] w-[95vw] h-[95vh] rounded-2xl border border-[#3f3f46] shadow-2xl flex flex-col overflow-hidden">
         
         {/* Header */}
         <div className="h-16 px-6 border-b border-[#3f3f46] flex items-center justify-between shrink-0 bg-[#1a1c1c]">
           <h2 className="text-[18px] font-semibold text-[#e2e2e2] flex items-center gap-2">
             <span className="material-symbols-outlined text-[#7c3aed]">account_tree</span>
-            Asignación de Flujo {documentTitle ? `- ${documentTitle}` : ''}
+            Constructor de Mapa Mental {documentTitle ? `- ${documentTitle}` : ''}
           </h2>
           <div className="flex items-center gap-4">
             <button 
@@ -242,18 +269,46 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
 
         {/* Content */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <aside className="w-80 border-r border-[#3f3f46] bg-[#18181b] p-4 flex flex-col gap-4 overflow-y-auto">
-            {loading ? (
-              <div className="text-[#958da1] text-sm text-center py-4">Cargando datos...</div>
-            ) : selectedNode ? (
-              <div className="flex flex-col gap-4 animate-in slide-in-from-left-2 duration-200">
+          {/* Sidebar Cargos */}
+          <WorkflowSidebar cargos={availableCargos} onDragStart={onDragStart} />
+
+          {/* Flow Canvas */}
+          <main className="flex-1 relative" ref={reactFlowWrapper}>
+            <ReactFlowProvider>
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onInit={setReactFlowInstance}
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                onNodeClick={onNodeClick}
+                onEdgeDoubleClick={(_, edge) => setEdges(eds => eds.filter(e => e.id !== edge.id))}
+                onPaneClick={onPaneClick}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                deleteKeyCode={['Backspace', 'Delete']}
+                fitView
+                className="bg-[#0c0f0f]"
+              >
+                <Background color="#3f3f46" gap={16} />
+                <Controls className="bg-[#27272a] border-[#3f3f46] fill-white" />
+              </ReactFlow>
+            </ReactFlowProvider>
+          </main>
+
+          {/* Sidebar Configuración (Right) */}
+          {selectedNode && (
+            <aside className="w-80 border-l border-[#3f3f46] bg-[#18181b] p-4 flex flex-col gap-4 overflow-y-auto">
+              <div className="flex flex-col gap-4 animate-in slide-in-from-right-2 duration-200">
                 <div className="flex items-center gap-2 mb-2">
                   <button 
                     onClick={() => setSelectedNodeId(null)}
                     className="text-[#958da1] hover:text-[#e2e2e2] flex items-center"
                   >
-                    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                    <span className="material-symbols-outlined text-[18px]">close</span>
                   </button>
                   <h3 className="text-sm font-semibold text-[#e2e2e2] uppercase tracking-wider">
                     Configurar Nodo
@@ -269,7 +324,10 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                   <select 
                     className="bg-[#27272a] border border-[#3f3f46] text-white text-sm rounded-lg p-2.5 outline-none focus:border-[#7c3aed]"
                     value={selectedNode.data.action_required || 'approve'}
-                    onChange={(e) => updateNodeData(selectedNode.id, { action_required: e.target.value })}
+                    onChange={(e) => {
+                      updateNodeData(selectedNode.id, { action_required: e.target.value });
+                      // Update incoming edges text as well if needed, but usually edges signify the required action
+                    }}
                   >
                     <option value="approve">Aprobar</option>
                     <option value="sign">Firmar</option>
@@ -282,7 +340,14 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                   <select 
                     className="bg-[#27272a] border border-[#3f3f46] text-white text-sm rounded-lg p-2.5 outline-none focus:border-[#7c3aed]"
                     value={selectedNode.data.assigned_user_id || ''}
-                    onChange={(e) => updateNodeData(selectedNode.id, { assigned_user_id: e.target.value })}
+                    onChange={(e) => {
+                      const user = eligibleMembers.find(m => m.userId === e.target.value);
+                      updateNodeData(selectedNode.id, { 
+                        assigned_user_id: e.target.value,
+                        fullName: user ? user.fullName : 'Cualquiera con este cargo',
+                        avatar: null // if we had avatars
+                      });
+                    }}
                   >
                     <option value="">Cualquiera con este cargo</option>
                     {eligibleMembers.map(m => (
@@ -304,57 +369,8 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col gap-4 animate-in slide-in-from-right-2 duration-200">
-                <div>
-                  <h3 className="text-sm font-semibold text-[#958da1] uppercase tracking-wider">Cargos de la Empresa</h3>
-                  <p className="text-xs text-[#958da1] mt-1 mb-4">Haz clic en un cargo para agregarlo al flujo.</p>
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  {availableCargos.length === 0 && (
-                    <div className="text-[#958da1] text-sm text-center py-4 border border-dashed border-[#3f3f46] rounded-lg">
-                      No hay cargos creados en la organización.
-                    </div>
-                  )}
-                  {availableCargos.map((cargo) => (
-                    <button
-                      key={cargo.id}
-                      onClick={() => handleCargoClick(cargo)}
-                      className="bg-[#27272a] border border-[#3f3f46] hover:border-[#7c3aed] p-3 rounded-lg cursor-pointer text-[#e2e2e2] text-sm transition-colors flex items-center gap-2 text-left"
-                    >
-                      <span className="material-symbols-outlined text-[16px] text-[#7c3aed]">add_circle</span>
-                      {cargo.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </aside>
-
-          {/* Flow Canvas */}
-          <main className="flex-1 relative" ref={reactFlowWrapper}>
-            <ReactFlowProvider>
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onInit={setReactFlowInstance}
-                onNodeClick={onNodeClick}
-                onEdgeDoubleClick={(_, edge) => setEdges(eds => eds.filter(e => e.id !== edge.id))}
-                onPaneClick={onPaneClick}
-                nodeTypes={nodeTypes}
-                deleteKeyCode={['Backspace', 'Delete']}
-                fitView
-                className="bg-[#0c0f0f]"
-              >
-                <Background color="#3f3f46" gap={16} />
-                <Controls className="bg-[#27272a] border-[#3f3f46] fill-white" />
-              </ReactFlow>
-            </ReactFlowProvider>
-          </main>
+            </aside>
+          )}
         </div>
       </div>
     </div>

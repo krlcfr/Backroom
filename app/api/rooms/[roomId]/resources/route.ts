@@ -14,9 +14,9 @@ export async function GET(
     const { roomId } = await params;
 
     // Verificar que el usuario tenga acceso a la sala
-    // Necesitamos saber a qué backroom pertenece la sala
-    const supabase = await createClient();
-    const { data: sala, error: salaError } = await supabase
+    // Necesitamos saber a qué backroom pertenece la sala usando adminSupabase para evitar 404 de RLS
+    const adminSupabase = createAdminClient();
+    const { data: sala, error: salaError } = await adminSupabase
       .from("salas")
       .select("backroom_id")
       .eq("id", roomId)
@@ -119,8 +119,8 @@ export async function POST(
     const usuario = await getUsuarioInterno(user.id);
     if (!usuario) throw new ApiError(401, "Usuario interno no encontrado");
 
-    const supabase = await createClient();
-    const { data: sala, error: salaError } = await supabase
+    const adminSupabase = createAdminClient();
+    const { data: sala, error: salaError } = await adminSupabase
       .from("salas")
       .select("backroom_id")
       .eq("id", roomId)

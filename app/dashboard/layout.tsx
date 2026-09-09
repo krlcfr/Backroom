@@ -20,6 +20,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let usuarioInternoId: string | null = null
   let esPropietario = false
   let isSuperAdmin = false
+  let isOrgAdmin = false
 
   if (authId) {
     try {
@@ -28,6 +29,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
       const perfil = await getUsuarioInterno(authId)
       usuarioInternoId = perfil?.id ?? null
       esPropietario = org !== null && org.ownerId === usuarioInternoId
+      
+      if (org && !esPropietario && usuarioInternoId) {
+        const { data: adminCheck } = await supabase.rpc("is_org_admin", { org: org.id })
+        isOrgAdmin = !!adminCheck
+      }
     } catch {
       org = null
     }
@@ -45,7 +51,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <SidebarProvider>
         <div className="flex min-h-screen flex-col bg-[#121414]">
           <SessionTimeout />
-          <DashboardHeader userName={userName} userAvatar={userAvatar} />
+          <DashboardHeader 
+            userName={userName} 
+            userAvatar={userAvatar} 
+            esPropietario={esPropietario}
+            isOrgAdmin={isOrgAdmin}
+          />
           <div className="flex flex-1 pt-16">
             <DashboardSidebar
               orgName={org?.name ?? null}
@@ -53,6 +64,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               orgUpdatedAt={org?.updatedAt ?? null}
               esPropietario={esPropietario}
               isSuperAdmin={isSuperAdmin}
+              isOrgAdmin={isOrgAdmin}
             />
             <SidebarWrapper>
               {children}

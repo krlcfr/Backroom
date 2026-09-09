@@ -21,8 +21,8 @@ export async function POST(
     const usuario = await getUsuarioInterno(user.id);
     if (!usuario) throw new ApiError(401, "Usuario interno no encontrado");
 
-    const supabase = await createClient();
-    const { data: sala, error: salaError } = await supabase
+    const adminSupabase = createAdminClient();
+    const { data: sala, error: salaError } = await adminSupabase
       .from("salas")
       .select("backroom_id")
       .eq("id", roomId)

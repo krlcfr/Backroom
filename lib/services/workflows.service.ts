@@ -48,7 +48,8 @@ export class WorkflowsService {
         document_id: input.document_id,
         title: input.title,
         status: 'in_progress',
-        flow_graph_json: input.flow_graph_json
+        flow_graph_json: input.flow_graph_json,
+        created_by: user.id
       })
       .select()
       .single();
@@ -58,7 +59,6 @@ export class WorkflowsService {
     // 2. Insertar los nodos (pasos)
     const nodesToInsert = input.nodes.map(n => ({
       workflow_id: workflow.id,
-      react_flow_id: n.reactFlowId,
       cargo_id: n.cargo_id,
       assigned_user_id: n.assigned_user_id || null,
       step_order: n.step_order,
@@ -170,7 +170,7 @@ export class WorkflowsService {
   /**
    * Aprueba o rechaza un nodo del flujo y ejecuta el "efecto dominó"
    */
-  static async approveNode(workflowId: string, nodeId: string, action: 'approved' | 'rejected') {
+  static async approveNode(workflowId: string, nodeId: string, action: 'approved' | 'rejected', rejectionReason?: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new ApiError(401, "No autorizado");
@@ -194,6 +194,15 @@ export class WorkflowsService {
       .single();
 
     if (updateError) throw new ApiError(500, "Error al actualizar nodo: " + updateError.message);
+
+    // Guardar la acción en workflow_actions
+    await supabase.from("workflow_actions").insert({
+      workflow_id: workflowId,
+      node_id: nodeId,
+      user_id: user.id,
+      action: action,
+      rejection_reason: rejectionReason || null
+    });
 
     // Registrar en Auditoría
     await AuditService.logAction({

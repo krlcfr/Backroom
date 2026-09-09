@@ -52,11 +52,21 @@ export default async function DashboardPage() {
     backrooms = []
   }
 
+  let esPropietario = false
+  if (authId && org) {
+    const { getUsuarioInterno } = await import("@/lib/auth/rbac")
+    const perfil = await getUsuarioInterno(authId)
+    if (perfil && org.ownerId === perfil.id) {
+      esPropietario = true
+    }
+  }
+
   return (
     <DashboardContent
       backrooms={backrooms}
       org={org}
       currentUserId={authId}
+      esPropietario={esPropietario}
     />
   )
 }

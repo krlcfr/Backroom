@@ -13,6 +13,7 @@ import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 import { useLimits } from "@/components/providers/limits-provider"
 import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
+import ActiveWorkflowsModal from "@/components/workflows/ActiveWorkflowsModal"
 
 interface Backroom {
   id: string
@@ -73,6 +74,7 @@ export default function BackRoomPage() {
   const [canDeleteRes, setCanDeleteRes] = useState(false)
   const [addResourceType, setAddResourceType] = useState<'doc' | 'pdf' | 'media' | 'link' | null>(null)
   const [showCreateDocument, setShowCreateDocument] = useState(false)
+  const [showActiveWorkflows, setShowActiveWorkflows] = useState(false)
   const [rootRoomId, setRootRoomId] = useState<string | null>(null)
 
   const esPropietario = currentUserId !== null && backroom?.ownerId === currentUserId
@@ -269,6 +271,14 @@ export default function BackRoomPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowActiveWorkflows(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#7c3aed] hover:bg-[#6d28d9] text-white transition-colors text-[13px] font-medium"
+            >
+              <span className="material-symbols-outlined text-[16px]">account_tree</span>
+              Estado de Flujos
+            </button>
+
             {rootRoomId && (esPropietario || canCreateSala(0)) && (
               <Link
                 href={`/dashboard/backrooms/${id}/salas/${rootRoomId}/permisos`}
@@ -309,6 +319,13 @@ export default function BackRoomPage() {
             )}
           </div>
         </div>
+
+        {showActiveWorkflows && id && (
+          <ActiveWorkflowsModal
+            orgId={id}
+            onClose={() => setShowActiveWorkflows(false)}
+          />
+        )}
 
         <SubRoomsGrid
           rooms={rooms.filter((r: any) => r.id !== rootRoomId && (r.parent_id === rootRoomId || !r.parent_id))}

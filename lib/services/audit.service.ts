@@ -25,9 +25,14 @@ export type AuditAction =
   | "WORKFLOW_COMPLETED"
   | "ANNOTATION_CREATED"
   | "ANNOTATION_RESOLVED"
-  | "DOCUMENT_PKI_SIGNED";
+  | "DOCUMENT_PKI_SIGNED"
+  | "lote_documentos_creado"
+  | "mapa_mental_guardado"
+  | "firmas_ubicadas"
+  | "flujo_enviado"
+  | "descarga_parcial_ejecutada";
 
-export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature" | "workflow" | "workflow_node";
+export type TargetType = "member" | "room" | "resource" | "organization" | "billing" | "document_signature" | "workflow" | "workflow_node" | "workflow_batch";
 
 export class AuditService {
   /**

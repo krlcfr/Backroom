@@ -107,6 +107,8 @@ export function WorkflowStatusViewer({ documentId }: WorkflowStatusViewerProps) 
           const rawEdges = graphJson.edges || [];
           setEdges(rawEdges.map((e: any) => ({
             ...e,
+            type: 'straight',
+            animated: true,
             markerEnd: {
               type: 'arrowclosed',
               width: 20,
