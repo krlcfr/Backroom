@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { AuditService } from '@/lib/services/audit.service';
+import { NotificationService } from '@/lib/services/notification.service';
 import { z } from 'zod';
 
 const submitSchema = z.object({
@@ -48,6 +49,8 @@ export async function POST(
       .eq('id', workflowId)
       .single();
 
+
+
     if (wfData) {
       await AuditService.logAction({
         orgId: wfData.organization_id,
@@ -57,9 +60,12 @@ export async function POST(
         targetId: wfData.document_id,
         details: { workflow_id: workflowId, first_node_users: result.first_node_users }
       });
+      
+      // Enviar notificaciones reales a los usuarios del primer nodo
+      if (result.first_node_users && result.first_node_users.length > 0) {
+        await NotificationService.notifyNextStep(workflowId, result.first_node_users);
+      }
     }
-
-    // Notificaciones: aquí se podría integrar NotificationService enviando emails a result.first_node_users
 
     return NextResponse.json({
       success: true,

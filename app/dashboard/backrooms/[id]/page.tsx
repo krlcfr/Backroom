@@ -13,6 +13,7 @@ import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 import { useLimits } from "@/components/providers/limits-provider"
 import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
+import ActiveWorkflowsModal from "@/components/workflows/ActiveWorkflowsModal"
 
 interface Backroom {
   id: string
@@ -72,6 +73,7 @@ export default function BackRoomPage() {
   const [canDeleteRes, setCanDeleteRes] = useState(false)
   const [addResourceType, setAddResourceType] = useState<'doc' | 'pdf' | 'media' | 'link' | null>(null)
   const [showCreateDocument, setShowCreateDocument] = useState(false)
+  const [showActiveWorkflows, setShowActiveWorkflows] = useState(false)
   const [rootRoomId, setRootRoomId] = useState<string | null>(null)
 
   const esPropietario = currentUserId !== null && backroom?.ownerId === currentUserId
@@ -248,11 +250,27 @@ export default function BackRoomPage() {
             { label: "Dashboard", href: "/dashboard" },
             { label: backroom.name },
           ]} />
-          <h1 className="text-[28px] font-bold text-[#e2e2e2] mb-2">{backroom.name}</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-[28px] font-bold text-[#e2e2e2]">{backroom.name}</h1>
+            <button
+              onClick={() => setShowActiveWorkflows(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#7c3aed] hover:bg-[#6d28d9] text-white transition-colors text-sm font-semibold"
+            >
+              <span className="material-symbols-outlined text-[18px]">account_tree</span>
+              Estado de Flujos
+            </button>
+          </div>
           {backroom.description && (
             <p className="text-[#ccc3d8] text-[16px] max-w-2xl">{backroom.description}</p>
           )}
         </div>
+
+        {showActiveWorkflows && id && (
+          <ActiveWorkflowsModal
+            orgId={id}
+            onClose={() => setShowActiveWorkflows(false)}
+          />
+        )}
 
         <SubRoomsGrid
           rooms={rooms.filter((r: any) => r.id !== rootRoomId && (r.parent_id === rootRoomId || !r.parent_id))}
