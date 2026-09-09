@@ -2,12 +2,12 @@
 
 import { useState } from "react"
 
-interface Cargo {
+export interface Cargo {
   id: string
   nombre: string
-  departamento: {
+  departamento?: {
     nombre: string
-  }
+  } | null
 }
 
 interface WorkflowSidebarProps {

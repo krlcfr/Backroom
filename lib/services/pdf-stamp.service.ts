@@ -110,7 +110,7 @@ export class PdfStampService {
       if (!imageUrl) continue;
 
       try {
-        let imageBytes: ArrayBuffer;
+        let imageBytes: Uint8Array | ArrayBuffer;
         let isPng = true;
 
         if (imageUrl.startsWith('data:image')) {
