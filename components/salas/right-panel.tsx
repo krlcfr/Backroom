@@ -25,10 +25,11 @@ interface RightPanelProps {
   esPropietario: boolean
   tree?: RoomNode[]
   activeRoomId?: string
+  rootRoomId?: string
   onUploadClick?: () => void
 }
 
-export default function RightPanel({ backroom, esPropietario, tree, activeRoomId, onUploadClick }: RightPanelProps) {
+export default function RightPanel({ backroom, esPropietario, tree, activeRoomId, rootRoomId, onUploadClick }: RightPanelProps) {
   const [isTreeExpanded, setIsTreeExpanded] = useState(true)
   const [showGraph, setShowGraph] = useState(false)
 
@@ -53,11 +54,11 @@ export default function RightPanel({ backroom, esPropietario, tree, activeRoomId
         )}
         {esPropietario && (
           <Link
-            href={`/dashboard/backrooms/${backroom.id}/miembros`}
+            href={rootRoomId ? `/dashboard/backrooms/${backroom.id}/salas/${rootRoomId}/permisos` : `/dashboard/backrooms/${backroom.id}/miembros`}
             className="w-full bg-transparent border border-[#3f3f46] text-[#e2e2e2] hover:bg-[#27272a] transition-colors text-[12px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-2"
           >
-            <span className="material-symbols-outlined text-[20px]">manage_accounts</span>
-            Gestionar permisos
+            <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+            Matriz de permisos
           </Link>
         )}
       </div>

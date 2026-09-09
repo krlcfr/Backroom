@@ -47,7 +47,7 @@ export default async function DashboardPage() {
 
   let backrooms: Backroom[] = []
   try {
-    backrooms = await BackroomsService.listForUser()
+    backrooms = await BackroomsService.listForUser(authId ?? undefined)
   } catch {
     backrooms = []
   }

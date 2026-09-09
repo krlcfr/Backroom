@@ -19,13 +19,7 @@ import "@xyflow/react/dist/style.css";
 import { parseFlowToSteps } from "@/lib/utils/workflow-graph-parser";
 import { CargoNodeComponent } from "./nodes/CargoNodeComponent";
 import { CustomWorkflowEdge } from "./edges/CustomWorkflowEdge";
-import WorkflowSidebar from "./WorkflowSidebar";
-
-interface Cargo {
-  id: string;
-  nombre: string;
-  departamento?: { nombre: string };
-}
+import WorkflowSidebar, { Cargo } from "./WorkflowSidebar";
 
 interface Member {
   id: string;
