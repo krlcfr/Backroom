@@ -59,8 +59,7 @@ export default function MiembrosPage() {
         )
         const { data: { session } } = await supabase.auth.getSession()
         if (session) {
-          const { data: user } = await supabase.from("usuarios").select("id").eq("auth_id", session.user.id).single()
-          if (user) setCurrentUserId(user.id)
+          setCurrentUserId(session.user.id)
         }
 
         const [brRes, memRes] = await Promise.all([
