@@ -98,7 +98,7 @@ export async function checkRoomPermission(authId: string, roomId: string, permis
 
   if (!miembro) return false;
 
-  if (miembro.permiso === "contribuir") return true;
+  if (miembro.permiso === "admin" || miembro.permiso === "contribuir") return true;
 
   // Si es solo_visualizar y el permiso requerido es de lectura, pasamos.
   if (miembro.permiso === "solo_visualizar" && (permisoRequerido === "salas.ver" || permisoRequerido === "salas.acceder")) {
