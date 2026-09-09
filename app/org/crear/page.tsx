@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 
@@ -14,6 +14,27 @@ export default function CrearOrganizacionPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  const [invitations, setInvitations] = useState<any[]>([])
+  const [loadingInvites, setLoadingInvites] = useState(true)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchInvitations() {
+      try {
+        const res = await fetch("/api/user/invitations")
+        if (res.ok) {
+          const data = await res.json()
+          setInvitations(data.data?.invitations || [])
+        }
+      } catch (err) {
+        console.error("Error fetching invitations", err)
+      } finally {
+        setLoadingInvites(false)
+      }
+    }
+    fetchInvitations()
+  }, [])
+
   function handleLogoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null
     setLogoFile(file)
@@ -26,6 +47,32 @@ export default function CrearOrganizacionPage() {
     if (logoPreview) URL.revokeObjectURL(logoPreview)
     setLogoPreview(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  async function handleInvitationAction(token: string, action: "accept" | "reject") {
+    setActionLoading(token)
+    try {
+      const res = await fetch(`/api/invitations/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || `Error al ${action === 'accept' ? 'aceptar' : 'rechazar'} la invitación`)
+      }
+
+      if (action === "accept") {
+        router.push("/dashboard")
+      } else {
+        setInvitations(invitations.filter(inv => inv.token !== token))
+      }
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -70,13 +117,84 @@ export default function CrearOrganizacionPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-8 bg-[#18181b] text-[#e2e2e2]">
-      <main className="w-full max-w-lg">
-        <div className="mb-8 text-center">
-          <h1 className="text-[28px] md:text-[36px] font-bold tracking-tight text-[#e2e2e2] mb-2">Crear Organización</h1>
-          <p className="text-[14px] text-[#ccc3d8]">Configura el entorno base para tu equipo y proyectos.</p>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-8 bg-[#18181b] text-[#e2e2e2]">
+      <main className="w-full max-w-lg space-y-8">
+        
+        <div className="text-center">
+          <h1 className="text-[28px] md:text-[36px] font-bold tracking-tight text-[#e2e2e2] mb-2">Comienza ahora</h1>
+          <p className="text-[14px] text-[#ccc3d8]">Crea una nueva organización o únete a una existente.</p>
         </div>
 
+        {/* Invitaciones Pendientes */}
+        {!loadingInvites && invitations.length > 0 && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 ease-out">
+            <h2 className="text-[14px] font-semibold tracking-wide text-[#e2e2e2] uppercase">Invitaciones Pendientes</h2>
+            {invitations.map((inv) => (
+              <div key={inv.token} className="bg-[#27272a] border border-[#7c3aed]/30 rounded-xl p-5 flex flex-col gap-4 shadow-[0_4px_20px_-4px_rgba(124,58,237,0.15)] relative overflow-hidden transition-all hover:border-[#7c3aed]/60">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#7c3aed]"></div>
+                
+                <div className="flex items-center gap-4">
+                  {inv.organizations?.logo_url ? (
+                    <Image
+                      src={inv.organizations.logo_url}
+                      alt="Logo"
+                      width={48}
+                      height={48}
+                      className="rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#3f3f46] text-lg font-bold text-[#fafafa]">
+                      {inv.organizations?.name?.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  
+                  <div>
+                    <h3 className="text-[16px] font-semibold text-[#fafafa]">{inv.organizations?.name}</h3>
+                    <p className="text-[12px] text-[#a1a1aa]">Te invitó como {inv.role === "admin" ? "Administrador" : "Miembro"}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => handleInvitationAction(inv.token, "accept")}
+                    disabled={actionLoading === inv.token}
+                    className="flex-1 rounded-lg bg-[#7c3aed] px-4 py-2 text-sm font-medium text-white hover:bg-[#6d28d9] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {actionLoading === inv.token ? (
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                        Aceptar
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInvitationAction(inv.token, "reject")}
+                    disabled={actionLoading === inv.token}
+                    className="flex-1 rounded-lg border border-[#3f3f46] bg-transparent px-4 py-2 text-sm font-medium text-[#e4e4e7] hover:bg-[#27272a] hover:text-[#ffb4ab] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">cancel</span>
+                    Rechazar
+                  </button>
+                </div>
+              </div>
+            ))}
+            
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#3f3f46]"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-[#18181b] px-4 text-[12px] text-[#a1a1aa] uppercase tracking-wider">O crea la tuya</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Crear Organización Form */}
         <form
           onSubmit={handleSubmit}
           className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-6 md:p-8 flex flex-col gap-6 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)]"
@@ -188,3 +306,4 @@ export default function CrearOrganizacionPage() {
     </div>
   )
 }
+
