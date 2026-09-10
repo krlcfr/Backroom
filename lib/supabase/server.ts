@@ -17,9 +17,13 @@ export async function createClient() {
       cookies: {
         getAll() { return cookieStore.getAll() },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, { ...options, path: "/" })
-          )
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, { ...options, path: "/" })
+            )
+          } catch {
+            // Se ignora si se llama desde un Server Component
+          }
         },
       },
     }
