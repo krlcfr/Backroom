@@ -2,39 +2,157 @@
   "openapi": "3.0.0",
   "info": {
     "title": "BackRoom API",
-    "description": "Documentación de la API de BackRoom MVP v8.0",
+    "description": "Documentación interactiva de la API de BackRoom (MVP v8.0). Define los contratos de entrada y salida para cada endpoint.",
     "version": "1.0.0"
   },
   "servers": [
     {
       "url": "http://localhost:3000/api",
-      "description": "Servidor de Desarrollo"
+      "description": "Servidor Local (Desarrollo)"
     }
   ],
+  "components": {
+    "schemas": {
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "username": { "type": "string" },
+          "correo": { "type": "string", "format": "email" },
+          "nombre_completo": { "type": "string" },
+          "es_superadmin": { "type": "boolean" },
+          "activo": { "type": "boolean" }
+        }
+      },
+      "Organizacion": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nombre": { "type": "string", "example": "Mi Empresa SAS" },
+          "descripcion": { "type": "string" },
+          "owner_id": { "type": "string", "format": "uuid" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BackRoom": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nombre": { "type": "string", "example": "Proyecto Alpha" },
+          "organizacion_id": { "type": "string", "format": "uuid" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string", "example": "RATE_LIMIT" },
+              "message": { "type": "string", "example": "Demasiados intentos. Inténtalo más tarde." }
+            }
+          }
+        }
+      }
+    }
+  },
   "paths": {
     "/auth/me": {
       "get": {
-        "summary": "Obtener perfil de usuario actual",
-        "description": "Retorna la información del usuario autenticado basado en la sesión activa (cookies).",
-        "tags": ["Auth"],
+        "summary": "Obtener perfil del usuario",
+        "description": "Verifica las cookies HttpOnly y devuelve los datos del usuario activo.",
+        "tags": ["Autenticación"],
         "responses": {
           "200": {
-            "description": "Perfil del usuario devuelto exitosamente"
+            "description": "Sesión activa. Retorna el perfil.",
+            "content": { "application/json": { "schema": { "": "#/components/schemas/Usuario" } } }
           },
-          "401": {
-            "description": "No autorizado (sesión inválida o ausente)"
-          }
+          "401": { "description": "No autorizado (Sesión inválida)" }
         }
       }
     },
     "/auth/logout": {
       "post": {
         "summary": "Cerrar sesión",
-        "description": "Destruye la sesión actual y elimina las cookies HttpOnly.",
-        "tags": ["Auth"],
+        "tags": ["Autenticación"],
+        "responses": {
+          "200": { "description": "Sesión cerrada. Cookies eliminadas." }
+        }
+      }
+    },
+    "/organizations": {
+      "post": {
+        "summary": "Crear nueva organización",
+        "description": "Crea una organización y asigna al usuario que hace la petición como propietario.",
+        "tags": ["Organizaciones"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": { "type": "string", "example": "Tech Corp" },
+                  "descripcion": { "type": "string", "example": "Empresa de tecnología" }
+                },
+                "required": ["nombre"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Organización creada exitosamente",
+            "content": { "application/json": { "schema": { "": "#/components/schemas/Organizacion" } } }
+          },
+          "409": { "description": "El usuario ya pertenece a otra organización" }
+        }
+      }
+    },
+    "/backrooms": {
+      "get": {
+        "summary": "Listar BackRooms",
+        "description": "Devuelve la lista de BackRooms a los que el usuario tiene acceso en su organización.",
+        "tags": ["BackRooms"],
         "responses": {
           "200": {
-            "description": "Sesión cerrada exitosamente"
+            "description": "Lista de BackRooms obtenida",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "": "#/components/schemas/BackRoom" } } } }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un BackRoom",
+        "tags": ["BackRooms"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombre": { "type": "string", "example": "Contabilidad 2026" },
+                  "descripcion": { "type": "string" }
+                },
+                "required": ["nombre"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "BackRoom creado exitosamente" },
+          "403": { "description": "No tiene permisos suficientes en la organización" }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Verificar estado del sistema",
+        "tags": ["Sistema"],
+        "responses": {
+          "200": {
+            "description": "Sistema operativo",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string", "example": "ok" } } } } }
           }
         }
       }
