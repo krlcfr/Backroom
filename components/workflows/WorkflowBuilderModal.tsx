@@ -131,24 +131,25 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
         y: event.clientY,
       });
 
-      const uniqueId = `node_${cargo.id}_${Date.now()}`;
-      const isRoot = nodes.length === 0;
-      const newNode: Node = {
-        id: uniqueId,
-        type: 'cargo',
-        position,
-        data: { 
-          label: cargo.nombre, 
-          cargoId: cargo.id, 
-          action_required: 'approve',
-          assigned_user_id: '',
-          fullName: 'Cualquiera con este cargo',
-          isRoot
-        },
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-      setSelectedNodeId(uniqueId);
+      setNodes((nds) => {
+        const uniqueId = `node_${cargo.id}_${Date.now()}`;
+        const isRoot = nds.length === 0;
+        const newNode: Node = {
+          id: uniqueId,
+          type: 'cargo',
+          position,
+          data: { 
+            label: cargo.nombre, 
+            cargoId: cargo.id, 
+            action_required: 'approve',
+            assigned_user_id: '',
+            fullName: 'Cualquiera con este cargo',
+            isRoot
+          },
+        };
+        setSelectedNodeId(uniqueId);
+        return nds.concat(newNode);
+      });
     },
     [reactFlowInstance, setNodes]
   );
@@ -157,36 +158,36 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
     (cargo: Cargo) => {
       if (!reactFlowInstance) return;
 
-      const realNodes = nodes;
-      let yPos = 100;
-      let xPos = 250;
-      
-      if (realNodes.length > 0) {
-        const lastNode = realNodes[realNodes.length - 1];
-        yPos = lastNode.position.y + 150;
-        xPos = lastNode.position.x;
-      }
+      setNodes((nds) => {
+        let yPos = 100;
+        let xPos = 250;
+        
+        if (nds.length > 0) {
+          const lastNode = nds[nds.length - 1];
+          yPos = lastNode.position.y + 150;
+          xPos = lastNode.position.x;
+        }
 
-      const uniqueId = `node_${cargo.id}_${Date.now()}`;
-      const isRoot = realNodes.length === 0;
-      const newNode: Node = {
-        id: uniqueId,
-        type: 'cargo',
-        position: { x: xPos, y: yPos },
-        data: { 
-          label: cargo.nombre, 
-          cargoId: cargo.id, 
-          action_required: 'approve',
-          assigned_user_id: '',
-          fullName: 'Cualquiera con este cargo',
-          isRoot
-        },
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-      setSelectedNodeId(uniqueId);
+        const uniqueId = `node_${cargo.id}_${Date.now()}`;
+        const isRoot = nds.length === 0;
+        const newNode: Node = {
+          id: uniqueId,
+          type: 'cargo',
+          position: { x: xPos, y: yPos },
+          data: { 
+            label: cargo.nombre, 
+            cargoId: cargo.id, 
+            action_required: 'approve',
+            assigned_user_id: '',
+            fullName: 'Cualquiera con este cargo',
+            isRoot
+          },
+        };
+        setSelectedNodeId(uniqueId);
+        return nds.concat(newNode);
+      });
     },
-    [nodes, reactFlowInstance, setNodes]
+    [reactFlowInstance, setNodes]
   );
 
   const onNodeClick: NodeMouseHandler = (event, node) => {
