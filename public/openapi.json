@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "BackRoom API",
-    "description": "Documentación interactiva de la API de BackRoom (MVP v8.0). Define los contratos de entrada y salida para cada endpoint.",
+    "description": "Documentación interactiva de la API de BackRoom (MVP v8.0). Define los contratos de entrada y salida para cada endpoint, incluyendo Autenticación, BackRooms, Salas, Recursos y Auditoría.",
     "version": "1.0.0"
   },
   "servers": [
@@ -42,6 +42,34 @@
           "organizacion_id": { "type": "string", "format": "uuid" }
         }
       },
+      "Sala": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nombre": { "type": "string", "example": "Recursos Humanos" },
+          "parent_id": { "type": "string", "format": "uuid", "nullable": true },
+          "backroom_id": { "type": "string", "format": "uuid" }
+        }
+      },
+      "Recurso": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "nombre": { "type": "string", "example": "informe_financiero.pdf" },
+          "tipo": { "type": "string", "example": "archivo" },
+          "url": { "type": "string", "format": "uri" },
+          "size_bytes": { "type": "integer", "example": 1048576 }
+        }
+      },
+      "AuditoriaLog": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "accion": { "type": "string", "example": "SALA_CREADA" },
+          "usuario_id": { "type": "string", "format": "uuid" },
+          "fecha": { "type": "string", "format": "date-time" }
+        }
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -63,11 +91,8 @@
         "description": "Verifica las cookies HttpOnly y devuelve los datos del usuario activo.",
         "tags": ["Autenticación"],
         "responses": {
-          "200": {
-            "description": "Sesión activa. Retorna el perfil.",
-            "content": { "application/json": { "schema": { "": "#/components/schemas/Usuario" } } }
-          },
-          "401": { "description": "No autorizado (Sesión inválida)" }
+          "200": { "description": "Sesión activa.", "content": { "application/json": { "schema": { "": "#/components/schemas/Usuario" } } } },
+          "401": { "description": "No autorizado" }
         }
       }
     },
@@ -76,14 +101,13 @@
         "summary": "Cerrar sesión",
         "tags": ["Autenticación"],
         "responses": {
-          "200": { "description": "Sesión cerrada. Cookies eliminadas." }
+          "200": { "description": "Sesión cerrada." }
         }
       }
     },
     "/organizations": {
       "post": {
         "summary": "Crear nueva organización",
-        "description": "Crea una organización y asigna al usuario que hace la petición como propietario.",
         "tags": ["Organizaciones"],
         "requestBody": {
           "required": true,
@@ -93,7 +117,7 @@
                 "type": "object",
                 "properties": {
                   "nombre": { "type": "string", "example": "Tech Corp" },
-                  "descripcion": { "type": "string", "example": "Empresa de tecnología" }
+                  "descripcion": { "type": "string" }
                 },
                 "required": ["nombre"]
               }
@@ -101,24 +125,17 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "Organización creada exitosamente",
-            "content": { "application/json": { "schema": { "": "#/components/schemas/Organizacion" } } }
-          },
-          "409": { "description": "El usuario ya pertenece a otra organización" }
+          "201": { "description": "Organización creada", "content": { "application/json": { "schema": { "": "#/components/schemas/Organizacion" } } } },
+          "409": { "description": "Conflicto" }
         }
       }
     },
     "/backrooms": {
       "get": {
         "summary": "Listar BackRooms",
-        "description": "Devuelve la lista de BackRooms a los que el usuario tiene acceso en su organización.",
         "tags": ["BackRooms"],
         "responses": {
-          "200": {
-            "description": "Lista de BackRooms obtenida",
-            "content": { "application/json": { "schema": { "type": "array", "items": { "": "#/components/schemas/BackRoom" } } } }
-          }
+          "200": { "description": "Lista de BackRooms", "content": { "application/json": { "schema": { "type": "array", "items": { "": "#/components/schemas/BackRoom" } } } } }
         }
       },
       "post": {
@@ -140,8 +157,88 @@
           }
         },
         "responses": {
-          "201": { "description": "BackRoom creado exitosamente" },
-          "403": { "description": "No tiene permisos suficientes en la organización" }
+          "201": { "description": "BackRoom creado" }
+        }
+      }
+    },
+    "/rooms/{roomId}/tree": {
+      "get": {
+        "summary": "Obtener árbol de subsalas",
+        "description": "Devuelve la estructura recursiva de una sala.",
+        "tags": ["Salas (Rooms)"],
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "ID de la sala padre"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Árbol de salas devuelto" },
+          "403": { "description": "Sin acceso a esta sala" }
+        }
+      }
+    },
+    "/resources": {
+      "post": {
+        "summary": "Subir un recurso (Archivo o Enlace)",
+        "description": "Sube un archivo al almacenamiento (Supabase Storage) o registra un enlace.",
+        "tags": ["Recursos"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" },
+                  "sala_id": { "type": "string", "format": "uuid" }
+                },
+                "required": ["file", "sala_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Recurso subido exitosamente", "content": { "application/json": { "schema": { "": "#/components/schemas/Recurso" } } } },
+          "413": { "description": "Límite de almacenamiento excedido" }
+        }
+      }
+    },
+    "/invitations": {
+      "post": {
+        "summary": "Crear invitación a la Organización",
+        "description": "Genera un enlace o token para invitar a un nuevo miembro.",
+        "tags": ["Invitaciones"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "correo": { "type": "string", "format": "email" },
+                  "rol": { "type": "string", "enum": ["admin", "miembro"] }
+                },
+                "required": ["correo"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Invitación enviada/generada" }
+        }
+      }
+    },
+    "/audit": {
+      "get": {
+        "summary": "Consultar Logs de Auditoría",
+        "description": "Devuelve el registro de actividades de la organización (solo admins).",
+        "tags": ["Auditoría"],
+        "responses": {
+          "200": { "description": "Historial devuelto", "content": { "application/json": { "schema": { "type": "array", "items": { "": "#/components/schemas/AuditoriaLog" } } } } }
         }
       }
     },
@@ -150,10 +247,7 @@
         "summary": "Verificar estado del sistema",
         "tags": ["Sistema"],
         "responses": {
-          "200": {
-            "description": "Sistema operativo",
-            "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string", "example": "ok" } } } } }
-          }
+          "200": { "description": "Sistema funcionando" }
         }
       }
     }
