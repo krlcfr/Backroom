@@ -5,7 +5,9 @@ import { Handle, Position } from "@xyflow/react";
 export const CargoNodeComponent = ({ data, selected }: { data: any, selected?: boolean }) => {
   return (
     <div className={`w-64 bg-[#1e2020] rounded-xl flex flex-col border-2 overflow-hidden shadow-xl transition-colors ${selected ? 'border-white' : 'border-[#3f3f46]'}`}>
-      <Handle type="target" position={Position.Left} className="w-3 h-3 !bg-[#d2bbff] !border-none -ml-1.5" />
+      
+      {/* Handle superior para recibir conexión */}
+      <Handle type="target" position={Position.Top} className="w-4 h-4 !bg-[#d2bbff] !border-2 !border-[#1e2020] -mt-2 z-10" />
       
       {/* Header morado */}
       <div className="bg-[#7c3aed] px-3 py-2 flex items-center gap-2">
@@ -36,7 +38,8 @@ export const CargoNodeComponent = ({ data, selected }: { data: any, selected?: b
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} className="w-3 h-3 !bg-[#d2bbff] !border-none -mr-1.5" />
+      {/* Handle inferior para enviar conexión */}
+      <Handle type="source" position={Position.Bottom} className="w-4 h-4 !bg-[#d2bbff] !border-2 !border-[#1e2020] -mb-2 z-10" />
     </div>
   );
 };

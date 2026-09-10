@@ -15,7 +15,10 @@ export function parseFlowToSteps(
 ): { parsedNodes: ParsedNode[]; errors: string[] } {
   const errors: string[] = [];
 
-  if (nodes.length === 0) {
+  // Filter out the 'final' visual node from the list before processing
+  const realNodes = nodes.filter(n => n.id !== 'final_node');
+
+  if (realNodes.length === 0) {
     return { parsedNodes: [], errors: ["El flujo está vacío. Agrega al menos un nodo."] };
   }
 
@@ -23,12 +26,13 @@ export function parseFlowToSteps(
   const adjacencyList = new Map<string, string[]>();
   const inDegree = new Map<string, number>();
 
-  nodes.forEach(node => {
+  realNodes.forEach(node => {
     adjacencyList.set(node.id, []);
     inDegree.set(node.id, 0);
   });
 
   edges.forEach(edge => {
+    if (edge.source === 'final_node' || edge.target === 'final_node') return;
     if (!adjacencyList.has(edge.source) || !adjacencyList.has(edge.target)) {
       return; // edge references non-existent node
     }
@@ -38,7 +42,7 @@ export function parseFlowToSteps(
 
   // 2. Identify root nodes (inDegree === 0)
   let currentLayer: string[] = [];
-  nodes.forEach(node => {
+  realNodes.forEach(node => {
     if (inDegree.get(node.id) === 0) {
       currentLayer.push(node.id);
     }
@@ -60,7 +64,7 @@ export function parseFlowToSteps(
 
     for (const nodeId of currentLayer) {
       visitedCount++;
-      const node = nodes.find(n => n.id === nodeId)!;
+      const node = realNodes.find(n => n.id === nodeId)!;
       const outgoingCount = adjacencyList.get(nodeId)!.length;
 
       // Extract data (fallback to defaults if not set yet by UI)
@@ -99,9 +103,9 @@ export function parseFlowToSteps(
     currentStepOrder++;
   }
 
-  if (visitedCount !== nodes.length) {
+  if (visitedCount !== realNodes.length) {
     // Some nodes were not visited -> there's a cycle or disconnected component
-    const unvisited = nodes.filter(n => !parsedNodesMap.has(n.id));
+    const unvisited = realNodes.filter(n => !parsedNodesMap.has(n.id));
     // If they have in-degree > 0 but weren't visited, it's a cycle
     const hasCycle = unvisited.some(n => inDegree.get(n.id)! > 0);
     

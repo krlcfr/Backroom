@@ -13,11 +13,13 @@ import {
   Edge,
   Node,
   MarkerType,
-  NodeMouseHandler
+  NodeMouseHandler,
+  ConnectionMode
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { parseFlowToSteps } from "@/lib/utils/workflow-graph-parser";
 import { CargoNodeComponent } from "./nodes/CargoNodeComponent";
+import { FinalNodeComponent } from "./nodes/FinalNodeComponent";
 import { CustomWorkflowEdge } from "./edges/CustomWorkflowEdge";
 import WorkflowSidebar, { Cargo } from "./WorkflowSidebar";
 
@@ -39,12 +41,20 @@ export interface WorkflowBuilderModalProps {
   onSaveWorkflow?: (workflow: any) => void;
 }
 
-const nodeTypes = { cargo: CargoNodeComponent };
+const nodeTypes = { cargo: CargoNodeComponent, final: FinalNodeComponent };
 const edgeTypes = { custom: CustomWorkflowEdge };
 
 export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose, onSaveWorkflow }: WorkflowBuilderModalProps) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([
+    {
+      id: 'final_node',
+      type: 'final',
+      position: { x: 250, y: 500 },
+      data: {},
+      deletable: false,
+    }
+  ]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 

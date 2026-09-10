@@ -37,15 +37,13 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
           status,
           created_at,
           document_id,
-          recursos:document_id (nombre)
+          recursos(nombre)
         `)
         .eq('organization_id', orgId)
-        .in('status', ['in_progress', 'under_review'])
+        .in('status', ['draft', 'in_progress', 'under_review'])
         .order('created_at', { ascending: false })
 
       if (data && !error) {
-        // En supabase 'recursos' vendrá como un objeto o array dependiendo de la relación,
-        // asumimos que document_id es un foreign key válido a recursos
         setWorkflows(data as any)
       }
       setLoading(false)
@@ -87,10 +85,11 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    wf.status === 'draft' ? 'bg-[#3f3f46] text-[#e2e2e2]' :
                     wf.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' : 
                     wf.status === 'under_review' ? 'bg-orange-500/20 text-orange-400' : 'bg-green-500/20 text-green-400'
                   }`}>
-                    {wf.status === 'in_progress' ? 'En Progreso' : 'En Revisión'}
+                    {wf.status === 'draft' ? 'Borrador (Incompleto)' : wf.status === 'in_progress' ? 'En Progreso' : 'En Revisión'}
                   </span>
                   <button 
                     onClick={() => {
