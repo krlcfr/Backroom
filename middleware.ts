@@ -13,7 +13,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return await updateSession(request);
+  // WORKAROUND: Edge runtime fetch is hanging due to broken IPv6 routing from the ISP.
+  // We bypass `updateSession` entirely so the app doesn't hang for 120s.
+  // Auth checks will rely on client/server components until the network stabilizes.
+  return NextResponse.next({ request });
 }
 
 export const config = {
