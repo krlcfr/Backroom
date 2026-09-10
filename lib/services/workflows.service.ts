@@ -40,6 +40,13 @@ export class WorkflowsService {
     
     const documentTitle = document?.name || input.title;
 
+    // 0. Limpiar cualquier flujo anterior en borrador para este documento
+    await supabase
+      .from("document_workflows")
+      .delete()
+      .eq("document_id", input.document_id)
+      .eq("status", "draft");
+
     // 1. Insertar Workflow principal
     const { data: workflow, error: wfError } = await supabase
       .from("document_workflows")
@@ -110,6 +117,8 @@ export class WorkflowsService {
         )
       `)
       .eq("document_id", documentId)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .single();
 
     if (error) {
