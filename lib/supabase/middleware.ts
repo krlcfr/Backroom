@@ -27,13 +27,9 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // WORKAROUND: Edge fetch is hanging on Windows for Supabase. 
-  // We use getSession() locally to prevent the middleware from hanging.
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  
-  const user = session?.user ?? null;
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const url = request.nextUrl.clone()
   const isAuthRoute = url.pathname.startsWith('/login') || url.pathname.startsWith('/registro') || url.pathname.startsWith('/recuperar') || url.pathname.startsWith('/confirmar-correo')
