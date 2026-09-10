@@ -132,6 +132,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
       });
 
       const uniqueId = `node_${cargo.id}_${Date.now()}`;
+      const isRoot = nodes.length === 0;
       const newNode: Node = {
         id: uniqueId,
         type: 'cargo',
@@ -141,7 +142,8 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
           cargoId: cargo.id, 
           action_required: 'approve',
           assigned_user_id: '',
-          fullName: 'Cualquiera con este cargo'
+          fullName: 'Cualquiera con este cargo',
+          isRoot
         },
       };
 
@@ -166,6 +168,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
       }
 
       const uniqueId = `node_${cargo.id}_${Date.now()}`;
+      const isRoot = realNodes.length === 0;
       const newNode: Node = {
         id: uniqueId,
         type: 'cargo',
@@ -175,32 +178,15 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
           cargoId: cargo.id, 
           action_required: 'approve',
           assigned_user_id: '',
-          fullName: 'Cualquiera con este cargo'
+          fullName: 'Cualquiera con este cargo',
+          isRoot
         },
       };
 
-      setNodes((nds) => {
-        const updated = nds.concat(newNode);
-        
-        if (realNodes.length > 0) {
-          const lastNode = realNodes[realNodes.length - 1];
-          const newEdge: Edge = {
-            id: `edge_${lastNode.id}-${newNode.id}`,
-            source: lastNode.id,
-            target: newNode.id,
-            type: 'custom',
-            animated: true,
-            data: { type: 'approve' },
-            style: { strokeWidth: 2, stroke: '#7c3aed' },
-          };
-          setEdges((eds) => eds.concat(newEdge));
-        }
-
-        return updated;
-      });
+      setNodes((nds) => nds.concat(newNode));
       setSelectedNodeId(uniqueId);
     },
-    [nodes, reactFlowInstance, setNodes, setEdges]
+    [nodes, reactFlowInstance, setNodes]
   );
 
   const onNodeClick: NodeMouseHandler = (event, node) => {

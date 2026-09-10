@@ -7,7 +7,9 @@ export const CargoNodeComponent = ({ data, selected }: { data: any, selected?: b
     <div className={`w-64 bg-[#1e2020] rounded-xl flex flex-col border-2 overflow-hidden shadow-xl transition-colors ${selected ? 'border-white' : 'border-[#3f3f46]'}`}>
       
       {/* Handle superior para recibir conexión */}
-      <Handle type="target" position={Position.Top} className="w-4 h-4 !bg-[#d2bbff] !border-2 !border-[#1e2020] -mt-2 z-10" />
+      {!data.isRoot && (
+        <Handle type="target" position={Position.Top} className="w-4 h-4 !bg-[#d2bbff] !border-2 !border-[#1e2020] -mt-2 z-10" />
+      )}
       
       {/* Header morado */}
       <div className="bg-[#7c3aed] px-3 py-2 flex items-center gap-2">
