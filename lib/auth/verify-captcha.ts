@@ -6,6 +6,9 @@ interface SiteVerifyResponse {
   "error-codes"?: string[];
 }
 
+import fetchNode from "node-fetch";
+import https from "https";
+
 export async function verifyCaptchaToken(token: string, remoteIp?: string): Promise<boolean> {
   const secret = process.env.RECAPTCHA_SECRET_KEY;
 
@@ -23,10 +26,12 @@ export async function verifyCaptchaToken(token: string, remoteIp?: string): Prom
   }
 
   try {
-    const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+    const agent = new https.Agent({ family: 4 });
+    const res = await fetchNode("https://www.google.com/recaptcha/api/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
+      body: body.toString(),
+      agent,
     });
 
     if (!res.ok) {
