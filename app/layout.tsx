@@ -21,6 +21,8 @@ export const metadata: Metadata = {
     "Plataforma web colaborativa para organizar, compartir y gestionar material en espacios llamados BackRooms.",
 };
 
+import { AuthProvider } from "@/components/providers/auth-provider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -37,7 +39,11 @@ export default function RootLayout({
         <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
