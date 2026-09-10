@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { checkRateLimit, rateLimitResponse } from "@/lib/auth/rate-limit";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") ?? "anon";
   const { pathname } = request.nextUrl;
 
