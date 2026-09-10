@@ -58,16 +58,13 @@ export async function POST(
     let extension = ".pdf";
     let dbTipo = "pdf";
 
-    if (isHTML) {
-      const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${content}</body></html>`;
-      fileBuffer = Buffer.from(fullHtml, 'utf-8');
-      mimeType = "text/html";
-      extension = ".html";
-      dbTipo = "doc";
-    } else {
-      // Convertir texto a HTML básico para el PDF
+    // Siempre generaremos un PDF para que funcione con el Lienzo de Firmas
+    let fullHtml = content;
+    
+    // Si isHTML es false, envolvemos el texto plano en HTML básico
+    if (!isHTML) {
       const formattedContent = content.replace(/\n/g, '<br/>');
-      const fullHtml = `
+      fullHtml = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -82,22 +79,22 @@ export async function POST(
         </body>
         </html>
       `;
-
-      // Convertir a PDF
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"]
-      });
-      const page = await browser.newPage();
-      await page.setContent(fullHtml, { waitUntil: "domcontentloaded" });
-      
-      fileBuffer = await page.pdf({
-        format: "A4",
-        printBackground: true,
-        margin: { top: "20mm", right: "20mm", bottom: "20mm", left: "20mm" },
-      });
-      await browser.close();
     }
+
+    // Convertir a PDF usando Puppeteer
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    });
+    const page = await browser.newPage();
+    await page.setContent(fullHtml, { waitUntil: "domcontentloaded" });
+    
+    fileBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "20mm", right: "20mm", bottom: "20mm", left: "20mm" },
+    });
+    await browser.close();
 
     const fileSizeBytes = fileBuffer.length;
 

@@ -582,18 +582,16 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
                   id="document-editor-container" 
                   className="bg-white rounded-lg p-12 text-black shadow-inner min-h-[700px] w-full max-w-3xl"
                 >
-                  <h1 className="text-2xl font-bold mb-4 outline-none" contentEditable suppressContentEditableWarning>Título del Documento</h1>
                   <div 
                     contentEditable
                     className="outline-none min-h-full leading-relaxed"
                     onBlur={(e) => {
                       if (e.relatedTarget && (e.relatedTarget as HTMLElement).closest('.annotation-ui')) {
-                        // ignore blur if clicking on floating button
                         return;
                       }
                       setDocumentContent(e.currentTarget.innerHTML);
                     }}
-                    dangerouslySetInnerHTML={{ __html: documentContent }}
+                    dangerouslySetInnerHTML={{ __html: documentContent || '<h1>Título del Documento</h1><p>Escribe aquí...</p>' }}
                   />
                 </div>
               </div>
@@ -693,37 +691,6 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
               documentTitle={documentTitle}
               onClose={() => setStep(editResource ? 'editor' : 'menu')}
               onSaveWorkflow={(workflowData) => {
-                const firmantesNodes = workflowData?.nodes?.filter((n: any) => n.action_required === 'sign') || [];
-                if (firmantesNodes.length > 0) {
-                  setWorkflowData(workflowData);
-                  setStep('sign_summary');
-                } else {
-                  onClose();
-                  window.location.reload();
-                }
-              }}
-            />
-          )}
-
-          {step === 'sign_summary' && workflowData && (
-            <SignersSummaryModal
-              signersCount={workflowData.nodes.filter((n: any) => n.action_required === 'sign').length}
-              onContinue={() => setStep('sign_canvas')}
-              onClose={() => {
-                onClose();
-                window.location.reload();
-              }}
-            />
-          )}
-
-          {step === 'sign_canvas' && workflowData && (
-            <DocumentSignatureCanvas
-              workflowData={workflowData}
-              onFinish={() => {
-                onClose();
-                window.location.reload();
-              }}
-              onClose={() => {
                 onClose();
                 window.location.reload();
               }}

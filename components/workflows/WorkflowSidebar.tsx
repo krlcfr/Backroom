@@ -13,9 +13,10 @@ export interface Cargo {
 interface WorkflowSidebarProps {
   cargos: Cargo[]
   onDragStart: (event: React.DragEvent, cargo: Cargo) => void
+  onCargoClick?: (cargo: Cargo) => void
 }
 
-export default function WorkflowSidebar({ cargos, onDragStart }: WorkflowSidebarProps) {
+export default function WorkflowSidebar({ cargos, onDragStart, onCargoClick }: WorkflowSidebarProps) {
   const [searchTerm, setSearchTerm] = useState("")
 
   // Agrupar por departamento
@@ -69,9 +70,10 @@ export default function WorkflowSidebar({ cargos, onDragStart }: WorkflowSidebar
                 {filtrados.map((cargo: Cargo) => (
                   <div
                     key={cargo.id}
-                    className="bg-[#27272a] border border-[#3f3f46] hover:border-[#7c3aed] hover:bg-[#303036] rounded-lg p-3 cursor-grab active:cursor-grabbing flex items-center gap-3 transition-colors"
+                    className="bg-[#27272a] border border-[#3f3f46] hover:border-[#7c3aed] hover:bg-[#303036] rounded-lg p-3 cursor-pointer flex items-center gap-3 transition-colors"
                     draggable
                     onDragStart={(e) => onDragStart(e, cargo)}
+                    onClick={() => onCargoClick?.(cargo)}
                   >
                     <div className="w-8 h-8 rounded-full bg-[#1e2020] flex items-center justify-center shrink-0">
                       <span className="material-symbols-outlined text-[#d2bbff] text-[16px]">work</span>
