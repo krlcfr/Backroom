@@ -1,0 +1,43 @@
+﻿{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BackRoom API",
+    "description": "Documentación de la API de BackRoom MVP v8.0",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Servidor de Desarrollo"
+    }
+  ],
+  "paths": {
+    "/auth/me": {
+      "get": {
+        "summary": "Obtener perfil de usuario actual",
+        "description": "Retorna la información del usuario autenticado basado en la sesión activa (cookies).",
+        "tags": ["Auth"],
+        "responses": {
+          "200": {
+            "description": "Perfil del usuario devuelto exitosamente"
+          },
+          "401": {
+            "description": "No autorizado (sesión inválida o ausente)"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Cerrar sesión",
+        "description": "Destruye la sesión actual y elimina las cookies HttpOnly.",
+        "tags": ["Auth"],
+        "responses": {
+          "200": {
+            "description": "Sesión cerrada exitosamente"
+          }
+        }
+      }
+    }
+  }
+}
