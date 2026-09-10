@@ -91,7 +91,7 @@ export class WorkflowsService {
 
 
 
-    return { ...workflow, nodes: nodesToInsert };
+    return this.getWorkflowByDocument(input.document_id);
   }
 
   /**
