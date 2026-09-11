@@ -4,6 +4,9 @@
 -- Añadir columna visual_signature_url a usuarios
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS visual_signature_url TEXT;
 
+-- Permitir que los usuarios actualicen su propio perfil (visual_signature_url)
+CREATE POLICY "usuarios_update_own" ON usuarios FOR UPDATE USING (auth_id = auth.uid());
+
 -- Crear el bucket 'signatures' si no existe
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('signatures', 'signatures', false)

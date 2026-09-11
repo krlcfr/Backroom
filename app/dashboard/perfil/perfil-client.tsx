@@ -146,17 +146,33 @@ export default function PerfilConfigClient({ userId, initialSignatureUrl, authId
     }
   };
 
+  const [displayUrl, setDisplayUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (signatureUrl) {
+      supabase.storage.from('signatures').createSignedUrl(signatureUrl, 3600).then(({ data }) => {
+        if (data?.signedUrl) setDisplayUrl(data.signedUrl);
+      });
+    } else {
+      setDisplayUrl(null);
+    }
+  }, [signatureUrl, supabase]);
+
   return (
     <div className="space-y-6">
       {signatureUrl ? (
         <div className="p-4 bg-[#27272a] rounded-lg border border-[#3f3f46]">
           <h3 className="text-sm font-semibold text-[#e2e2e2] mb-4">Tu firma actual</h3>
           <div className="w-full max-w-sm h-40 bg-white rounded-lg flex items-center justify-center p-2">
-            <img 
-              src={supabase.storage.from('signatures').getPublicUrl(signatureUrl).data.publicUrl} 
-              alt="Firma actual" 
-              className="max-w-full max-h-full object-contain"
-            />
+            {displayUrl ? (
+              <img 
+                src={displayUrl} 
+                alt="Firma actual" 
+                className="max-w-full max-h-full object-contain"
+              />
+            ) : (
+              <span className="material-symbols-outlined animate-spin text-[#d2bbff]">progress_activity</span>
+            )}
           </div>
           <button 
             onClick={() => setSignatureUrl(null)}
