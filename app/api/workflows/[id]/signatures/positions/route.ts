@@ -28,7 +28,7 @@ export async function POST(
     // Obtener los nodos del flujo para mapearlos
     const { data: nodes, error: nodesError } = await supabaseAdmin
       .from('workflow_nodes')
-      .select('id, assigned_user_id')
+      .select('id, assigned_user_id, usuarios!workflow_nodes_assigned_user_id_fkey(auth_id)')
       .eq('workflow_id', workflowId);
 
     if (nodesError || !nodes) {
@@ -49,11 +49,14 @@ export async function POST(
     // Preparar registros a insertar
     const positionsToInsert = positions.map(pos => {
       const node = nodes.find(n => n.id === pos.nodeId);
+      // Extraemos el auth_id del usuario asignado, o usamos el del usuario actual como fallback
+      const targetAuthId = node?.usuarios?.auth_id || user.id;
+
       return {
         workflow_id: workflowId,
         resource_id: wfData.document_id,
         workflow_node_id: pos.nodeId,
-        assigned_user_id: node?.assigned_user_id || user.id, // Fallback por seguridad de null constraint
+        assigned_user_id: targetAuthId,
         page_number: pos.pageNumber,
         pos_x_percent: pos.xPercent,
         pos_y_percent: pos.yPercent,
