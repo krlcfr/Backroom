@@ -47,7 +47,8 @@ export async function POST(
     
     if (!workflow) throw new ApiError(404, "Workflow no encontrado");
 
-    const { data: document } = await supabase
+    const supabaseAdmin = createAdminClient();
+    const { data: document } = await supabaseAdmin
       .from("recursos")
       .select("url")
       .eq("id", workflow.document_id)
@@ -56,7 +57,7 @@ export async function POST(
     if (!document) throw new ApiError(404, "Documento no encontrado");
 
     // Descargar el PDF del Storage
-    const { data: fileData, error: fileError } = await supabase.storage
+    const { data: fileData, error: fileError } = await supabaseAdmin.storage
       .from("resources") // The storage bucket is actually "resources"
       .download(document.url);
 
@@ -67,7 +68,6 @@ export async function POST(
     const buffer = Buffer.from(await fileData.arrayBuffer());
 
     // 3. Fetch Organization's PKI Certificate details
-    const supabaseAdmin = createAdminClient();
     const { data: org } = await supabaseAdmin
       .from("organizations")
       .select("certificate_path, certificate_password")

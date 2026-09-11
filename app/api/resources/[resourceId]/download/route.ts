@@ -9,11 +9,11 @@ export async function GET(
 ) {
   try {
     const user = await requireAuth();
-    const supabase = await createClient();
+    const supabaseAdmin = createAdminClient();
     const { resourceId } = await params;
 
     // Obtener info del recurso
-    const { data: resource, error } = await supabase
+    const { data: resource, error } = await supabaseAdmin
       .from("recursos")
       .select("*")
       .eq("id", resourceId)
@@ -24,9 +24,10 @@ export async function GET(
       throw new ApiError(404, "Recurso no encontrado");
     }
 
-    const { data: fileData, error: fileError } = await supabase.storage
-      .from("resources")
-      .download(resource.ruta_archivo);
+    // Descargar el PDF del Storage
+    const { data: fileData, error: fileError } = await supabaseAdmin.storage
+      .from("resources") // The storage bucket is actually "resources"
+      .download(resource.url);
 
     if (fileError || !fileData) {
       throw new ApiError(500, "Error leyendo PDF del storage");
