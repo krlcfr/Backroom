@@ -38,7 +38,7 @@ export async function DELETE(
     await AuditService.logAction({
       orgId: workflow.organization_id,
       actorId: user.id,
-      action: 'flujo_eliminado',
+      action: 'WORKFLOW_DELETED',
       targetType: 'workflow',
       targetId: workflow.document_id,
       details: { workflow_id: id }
