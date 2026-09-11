@@ -75,7 +75,7 @@ export default function SalaPage() {
   const [showCreateDocument, setShowCreateDocument] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('recursos')
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('subsalas')
 
   const menuRef = useRef<HTMLDivElement>(null)
 

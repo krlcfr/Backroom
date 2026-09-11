@@ -58,7 +58,7 @@ export default function BackRoomPage() {
 
 
 
-  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('recursos')
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('subsalas')
   const [error, setError] = useState<string | null>(null)
 
   const [menuOpen, setMenuOpen] = useState(false)

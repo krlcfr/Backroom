@@ -51,17 +51,7 @@ export default function RightPanel({ backroom, esPropietario, tree, activeRoomId
             <span className="material-symbols-outlined text-[20px]">upload</span>
             Subir recurso
           </button>
-        )}
-        {esPropietario && (
-          <Link
-            href={rootRoomId ? `/dashboard/backrooms/${backroom.id}/salas/${rootRoomId}/permisos` : `/dashboard/backrooms/${backroom.id}/miembros`}
-            className="w-full bg-transparent border border-[#3f3f46] text-[#e2e2e2] hover:bg-[#27272a] transition-colors text-[12px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-2"
-          >
-            <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
-            Matriz de permisos
-          </Link>
-        )}
-      </div>
+        </div>
 
       <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4">
         <h3 className="text-[12px] text-[#ccc3d8] uppercase tracking-wider mb-4 border-b border-[#3f3f46] pb-2 font-medium">
