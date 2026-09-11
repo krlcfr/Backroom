@@ -34,11 +34,11 @@ export class WorkflowsService {
     // Para la notificación por correo necesitamos el título del documento
     const { data: document } = await supabase
       .from('recursos')
-      .select('name')
+      .select('nombre')
       .eq('id', input.document_id)
       .single();
     
-    const documentTitle = document?.name || input.title;
+    const documentTitle = document?.nombre || input.title;
 
     // 0. Limpiar cualquier flujo anterior en borrador para este documento
     await supabase

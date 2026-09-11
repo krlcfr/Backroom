@@ -43,7 +43,7 @@ export default async function PendientesPage() {
         status,
         recursos!inner (
           id,
-          name,
+          nombre,
           sala_id,
           salas!inner (
             backroom_id
@@ -105,7 +105,7 @@ export default async function PendientesPage() {
                           </span>
                           <div>
                             <p className="font-medium text-[#e2e2e2]">{wf.title}</p>
-                            <p className="text-xs text-[#958da1] truncate max-w-xs">{doc.name}</p>
+                            <p className="text-xs text-[#958da1] truncate max-w-xs">{doc.nombre}</p>
                           </div>
                         </div>
                       </td>
