@@ -14,7 +14,7 @@ import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 import { useLimits } from "@/components/providers/limits-provider"
 import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
 import ActiveWorkflowsModal from "@/components/workflows/ActiveWorkflowsModal"
-import SalaPermissions from "@/components/salas/permissions/sala-permissions"
+import { SalaPermissions } from "@/components/salas/permissions/sala-permissions"
 
 interface Backroom {
   id: string
