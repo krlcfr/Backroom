@@ -40,13 +40,17 @@ export class PKIService {
   }
 
   /**
-   * Toma el contenido (HTML o cualquier texto/binario), genera su Hash SHA-256
+   * Toma el contenido (Buffer de PDF o string), genera su Hash SHA-256
    * y lo firma digitalmente usando la Private Key extraída.
    */
-  static signContent(content: string, privateKey: any) {
+  static signContent(content: string | Buffer, privateKey: any) {
     // 1. Crear el Hash SHA-256
     const md = forge.md.sha256.create();
-    md.update(content, 'utf8');
+    if (Buffer.isBuffer(content)) {
+      md.update(content.toString('binary'));
+    } else {
+      md.update(content, 'utf8');
+    }
     const hashHex = md.digest().toHex();
 
     // 2. Firmar el Hash

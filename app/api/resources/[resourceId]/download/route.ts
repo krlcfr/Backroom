@@ -14,12 +14,13 @@ export async function GET(
 
     // Obtener info del recurso
     const { data: resource, error } = await supabase
-      .from("resources")
+      .from("recursos")
       .select("*")
       .eq("id", resourceId)
       .single();
 
     if (error || !resource) {
+      console.error(error);
       throw new ApiError(404, "Recurso no encontrado");
     }
 

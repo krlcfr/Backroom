@@ -49,16 +49,22 @@ export async function POST(
 
     const { data: document } = await supabase
       .from("recursos")
-      .select("content, isHTML")
+      .select("url")
       .eq("id", workflow.document_id)
       .single();
     
     if (!document) throw new ApiError(404, "Documento no encontrado");
 
-    // PKI solo para documentos HTML (texto nativo) por ahora
-    if (!document.isHTML || !document.content) {
-      throw new ApiError(400, "La firma electrónica PKI solo está soportada para documentos nativos (HTML).");
+    // Descargar el PDF del Storage
+    const { data: fileData, error: fileError } = await supabase.storage
+      .from("resources") // The storage bucket is actually "resources"
+      .download(document.url);
+
+    if (fileError || !fileData) {
+      throw new ApiError(500, "Error descargando el PDF para la firma.");
     }
+
+    const buffer = Buffer.from(await fileData.arrayBuffer());
 
     // 3. Fetch Organization's PKI Certificate details
     const supabaseAdmin = createAdminClient();
@@ -72,16 +78,16 @@ export async function POST(
       throw new ApiError(400, "La organización no tiene un certificado PKI (.p12) configurado. Comunícate con el administrador.");
     }
 
-    // 4. Download .p12 from Storage
-    const { data: fileData, error: fileError } = await supabaseAdmin.storage
+    // 4. Download Certificate from Storage
+    const { data: p12Data, error: p12Error } = await supabaseAdmin.storage
       .from("certificates")
       .download(org.certificate_path);
     
-    if (fileError || !fileData) {
-      throw new ApiError(500, "Error al acceder al certificado criptográfico de la organización.");
+    if (p12Error || !p12Data) {
+      throw new ApiError(500, "Error al acceder al certificado PKI de la organización.");
     }
-
-    const p12Buffer = await fileData.arrayBuffer();
+    
+    const p12Buffer = Buffer.from(await p12Data.arrayBuffer());
 
     // 5. PKI Signing Ceremony
     let privateKey, certificate, serial;
@@ -95,7 +101,7 @@ export async function POST(
     }
 
     // Generate Hash and Sign
-    const { contentHash, signatureBase64 } = PKIService.signContent(document.content, privateKey);
+    const { contentHash, signatureBase64 } = PKIService.signContent(buffer, privateKey);
 
     // 6. Save Signature to Database
     const { data: perfil } = await supabase.from("usuarios").select("id").eq("auth_id", user.id).single();

@@ -33,7 +33,7 @@ export class WorkflowsService {
 
     // Para la notificación por correo necesitamos el título del documento
     const { data: document } = await supabase
-      .from('resources')
+      .from('recursos')
       .select('name')
       .eq('id', input.document_id)
       .single();
@@ -98,7 +98,17 @@ export class WorkflowsService {
 
 
 
-    return this.getWorkflowByDocument(input.document_id);
+    const fullWorkflow = await this.getWorkflowByDocument(input.document_id);
+
+    // 4. Notificar a los del primer paso
+    if (fullWorkflow && fullWorkflow.nodes) {
+      const firstStepNodes = fullWorkflow.nodes.filter((n: any) => n.step_order === 1);
+      if (firstStepNodes.length > 0) {
+        await NotificationService.notifyNextStep(workflow.id, firstStepNodes);
+      }
+    }
+
+    return fullWorkflow;
   }
 
   /**
