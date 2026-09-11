@@ -89,9 +89,12 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
 
     const rect = containerRef.current.getBoundingClientRect()
     // Calculate percentage relative to the page container
-    // Assuming the page container fills the ref minus some padding, but for simplicity:
-    let xPercent = ((e.clientX - rect.left) / rect.width) * 100
-    let yPercent = ((e.clientY - rect.top) / rect.height) * 100
+    // Center the 150x60 box on the cursor
+    const boxWidthPercent = (150 / rect.width) * 100;
+    const boxHeightPercent = (60 / rect.height) * 100;
+
+    let xPercent = ((e.clientX - rect.left) / rect.width) * 100 - (boxWidthPercent / 2);
+    let yPercent = ((e.clientY - rect.top) / rect.height) * 100 - (boxHeightPercent / 2);
 
     // Constrain
     xPercent = Math.max(0, Math.min(xPercent, 90))

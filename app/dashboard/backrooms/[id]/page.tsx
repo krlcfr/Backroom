@@ -76,6 +76,7 @@ export default function BackRoomPage() {
   const [showCreateDocument, setShowCreateDocument] = useState(false)
   const [showActiveWorkflows, setShowActiveWorkflows] = useState(false)
   const [rootRoomId, setRootRoomId] = useState<string | null>(null)
+  const [currentOrgId, setCurrentOrgId] = useState<string>("")
 
   const esPropietario = currentUserId !== null && backroom?.ownerId === currentUserId
 
@@ -104,14 +105,20 @@ export default function BackRoomPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [backroomRes, roomsRes] = await Promise.all([
+        const [backroomRes, roomsRes, orgRes] = await Promise.all([
           fetch(`/api/backrooms/${id}`),
           fetch(`/api/backrooms/${id}/rooms`),
+          fetch(`/api/backrooms/${id}/organization`)
         ])
 
         if (!backroomRes.ok) throw new Error("No se pudo cargar la BackRoom")
         const backroomData = await backroomRes.json()
         setBackroom(backroomData)
+
+        if (orgRes.ok) {
+          const orgData = await orgRes.json()
+          setCurrentOrgId(orgData.orgId)
+        }
 
         if (roomsRes.ok) {
           const roomsData = await roomsRes.json()
@@ -320,9 +327,9 @@ export default function BackRoomPage() {
           </div>
         </div>
 
-        {showActiveWorkflows && id && (
+        {showActiveWorkflows && currentOrgId && (
           <ActiveWorkflowsModal
-            orgId={id}
+            orgId={currentOrgId}
             onClose={() => setShowActiveWorkflows(false)}
           />
         )}
@@ -503,9 +510,9 @@ export default function BackRoomPage() {
         />
       )}
 
-      {showCreateDocument && (
+      {showCreateDocument && currentOrgId && (
         <DocumentCreationWizardModal
-          orgId={""}
+          orgId={currentOrgId}
           onClose={() => setShowCreateDocument(false)}
           onAddResource={(type) => {
             setShowCreateDocument(false)
