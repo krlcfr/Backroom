@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { label: "Jerarquía", icon: "account_tree", href: "/dashboard/hierarchy" },
   { label: "Almacenamiento", icon: "folder", href: "/dashboard/storage" },
   { label: "Mis Pendientes", icon: "inbox", href: "/dashboard/pendientes" },
-  { label: "Permisos", icon: "key", href: "/dashboard/miembros" },
+  { label: "Miembros y Permisos", icon: "key", href: "/dashboard/miembros" },
   { label: "Historial", icon: "history", href: "/dashboard/auditoria" },
   { label: "Configuración", icon: "settings", href: "/dashboard/configuracion" },
   { label: "Planes", icon: "credit_card", href: "/dashboard/configuracion/planes" },
@@ -37,10 +37,10 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
   const hasAdminRights = esPropietario || isOrgAdmin;
 
   if (!hasAdminRights) {
-    // Es un miembro regular
-    navItems = navItems.filter((i) => 
-      !["Planes", "Configuración", "Almacenamiento", "Permisos", "Historial"].includes(i.label)
-    )
+      // Es un miembro regular
+      navItems = navItems.filter((i) => 
+        !["Planes", "Configuración", "Almacenamiento", "Miembros y Permisos", "Historial"].includes(i.label)
+      )
   } else if (!esPropietario) {
     // Es un admin (pero no propietario), no puede ver Planes ni Configuración principal
     navItems = navItems.filter((i) => 

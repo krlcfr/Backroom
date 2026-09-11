@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 
 import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
+import { SalaPermissions } from "@/components/salas/permissions/sala-permissions"
 import { useParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import RoomTree from "@/components/salas/room-tree"
@@ -74,6 +75,7 @@ export default function SalaPage() {
   const [showCreateDocument, setShowCreateDocument] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('recursos')
 
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -299,14 +301,6 @@ export default function SalaPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              href={`/dashboard/backrooms/${id}/salas/${salaId}/permisos`}
-              className="flex items-center gap-2 bg-[#27272a] hover:bg-[#333535] border border-[#4a4455] text-[#ccc3d8] hover:text-[#e2e2e2] px-3 py-1.5 rounded-lg transition-colors text-[13px] font-medium"
-            >
-              <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-              Permisos
-            </Link>
-
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
@@ -336,51 +330,89 @@ export default function SalaPage() {
           </div>
         </div>
 
-        {!atMaxDepth && (
-          <SubRoomsGrid
-            rooms={children}
-            backroomId={id}
-            onCreateClick={() => setShowCreateRoom(true)}
-            canCreate={canCreateSala(sala.depth)}
-          />
-        )}
-
-        {atMaxDepth && children.length === 0 && (
-          <div className="text-center py-12">
-            <span className="material-symbols-outlined text-[48px] text-[#958da1] mb-3 block">folder_off</span>
-            <p className="text-[14px] text-[#958da1]">Esta sala no tiene subsalas.</p>
-            <p className="text-[12px] text-[#958da1]/70 mt-1">Profundidad máxima alcanzada (nivel 2).</p>
-          </div>
-        )}
-
-        <hr className="border-[#3f3f46] my-8" />
-
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Recursos</h2>
-              <p className="text-[#958da1] text-[13px] mt-1">Archivos y enlaces compartidos en esta sala.</p>
-            </div>
-            {canUpload && (
-              <button
-                onClick={() => setShowCreateDocument(true)}
-                className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[13px] font-medium"
-              >
-                <span className="material-symbols-outlined text-[18px]">add</span>
-                Recursos
-              </button>
-            )}
-          </div>
-
-          <ResourcesGrid 
-            resources={resources}
-            roomId={salaId}
-            canDelete={canDeleteRes}
-            onResourceDeleted={reloadResources}
-            onEditDoc={(res: any) => setEditDocResource(res)}
-            onAssignWorkflow={(res: any) => setWorkflowResource(res)}
-          />
+        <div className="flex border-b border-[#3f3f46]">
+          <button
+            onClick={() => setActiveTab('recursos')}
+            className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+              activeTab === 'recursos' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+            }`}
+          >
+            Recursos
+          </button>
+          <button
+            onClick={() => setActiveTab('subsalas')}
+            className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+              activeTab === 'subsalas' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+            }`}
+          >
+            Sub-Salas
+          </button>
+          <button
+            onClick={() => setActiveTab('permisos')}
+            className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors flex items-center gap-2 ${
+              activeTab === 'permisos' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+            Permisos de Sala
+          </button>
         </div>
+
+        {activeTab === 'subsalas' && (
+          <>
+            {!atMaxDepth && (
+              <SubRoomsGrid
+                rooms={children}
+                backroomId={id}
+                onCreateClick={() => setShowCreateRoom(true)}
+                canCreate={canCreateSala(sala.depth)}
+              />
+            )}
+
+            {atMaxDepth && children.length === 0 && (
+              <div className="text-center py-12">
+                <span className="material-symbols-outlined text-[48px] text-[#958da1] mb-3 block">folder_off</span>
+                <p className="text-[14px] text-[#958da1]">Esta sala no tiene subsalas.</p>
+                <p className="text-[12px] text-[#958da1]/70 mt-1">Profundidad máxima alcanzada (nivel 2).</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'recursos' && (
+          <div>
+            <div className="flex items-center justify-between mb-6 mt-4">
+              <div>
+                <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Recursos</h2>
+                <p className="text-[#958da1] text-[13px] mt-1">Archivos y enlaces compartidos en esta sala.</p>
+              </div>
+              {canUpload && (
+                <button
+                  onClick={() => setShowCreateDocument(true)}
+                  className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[13px] font-medium"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add</span>
+                  Nuevo
+                </button>
+              )}
+            </div>
+
+            <ResourcesGrid 
+              resources={resources}
+              roomId={salaId}
+              canDelete={canDeleteRes}
+              onResourceDeleted={reloadResources}
+              onEditDoc={(res: any) => setEditDocResource(res)}
+              onAssignWorkflow={(res: any) => setWorkflowResource(res)}
+            />
+          </div>
+        )}
+
+        {activeTab === 'permisos' && (
+          <div className="mt-4">
+            <SalaPermissions salaId={salaId} salaParentId={sala.parent_id} />
+          </div>
+        )}
       </main>
 
       {workflowResource && backroom && currentOrgId && (

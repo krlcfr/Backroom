@@ -143,13 +143,23 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
               </div>
 
               <div className="flex items-center gap-1">
+                <button
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    handleResourceClick(res);
+                  }}
+                  className="w-8 h-8 flex items-center justify-center shrink-0 rounded-md bg-[#3f3f46]/50 text-[#e2e2e2] hover:bg-[#3f3f46] transition-colors"
+                  title="Ver"
+                >
+                  <span className="material-symbols-outlined text-[16px]">visibility</span>
+                </button>
                 {(res.tipo === "doc" || res.tipo === "pdf" || res.tipo === "archivo") && onAssignWorkflow && (
                   <button
                     onClick={(e) => { 
                       e.stopPropagation(); 
                       onAssignWorkflow(res);
                     }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#10b981]/10 text-[#10b981]"
+                    className="w-8 h-8 flex items-center justify-center shrink-0 rounded-md bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981]/20 transition-colors"
                     title="Asignar Flujo de Trabajo"
                   >
                     <span className="material-symbols-outlined text-[16px]">account_tree</span>
@@ -161,7 +171,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
                       e.stopPropagation(); 
                       onEditDoc(res);
                     }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#a78bfa]/10 text-[#a78bfa]"
+                    className="w-8 h-8 flex items-center justify-center shrink-0 rounded-md bg-[#a78bfa]/10 text-[#a78bfa] hover:bg-[#a78bfa]/20 transition-colors"
                     title="Editar Documento"
                   >
                     <span className="material-symbols-outlined text-[16px]">draw</span>
@@ -171,7 +181,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(res.id) }}
                     disabled={deleting === res.id}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8 flex items-center justify-center shrink-0 rounded-md hover:bg-[#ef4444]/10 text-[#ef4444] disabled:opacity-50"
+                    className="w-8 h-8 flex items-center justify-center shrink-0 rounded-md bg-[#ef4444]/10 text-[#ef4444] hover:bg-[#ef4444]/20 transition-colors disabled:opacity-50"
                     title="Eliminar"
                   >
                     {deleting === res.id ? (
