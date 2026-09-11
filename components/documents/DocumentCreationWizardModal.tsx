@@ -4,7 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { PDFService } from "@/lib/services/pdf.service";
 import { WorkflowBuilderModal } from "@/components/workflows/WorkflowBuilderModal";
 import { SignersSummaryModal } from "@/components/workflows/SignersSummaryModal";
-import { DocumentSignatureCanvas } from "@/components/documents/DocumentSignatureCanvas";
+import dynamic from 'next/dynamic';
+
+const DocumentSignatureCanvas = dynamic(
+  () => import('@/components/documents/DocumentSignatureCanvas').then(mod => mod.DocumentSignatureCanvas),
+  { ssr: false }
+);
 
 interface DocumentCreationWizardModalProps {
   onClose: () => void;

@@ -20,7 +20,12 @@ import { CargoNodeComponent } from "./nodes/CargoNodeComponent";
 import { CustomWorkflowEdge } from "./edges/CustomWorkflowEdge";
 import WorkflowSidebar, { Cargo } from "./WorkflowSidebar";
 import { SignersSummaryModal } from "./SignersSummaryModal";
-import { DocumentSignatureCanvas } from "../documents/DocumentSignatureCanvas";
+import dynamic from 'next/dynamic';
+
+const DocumentSignatureCanvas = dynamic(
+  () => import('../documents/DocumentSignatureCanvas').then(mod => mod.DocumentSignatureCanvas),
+  { ssr: false }
+);
 
 interface Member {
   id: string;
