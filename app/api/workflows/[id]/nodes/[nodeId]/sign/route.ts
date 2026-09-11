@@ -58,7 +58,7 @@ export async function POST(
 
     // Descargar el PDF del Storage
     const { data: fileData, error: fileError } = await supabaseAdmin.storage
-      .from("resources") // The storage bucket is actually "resources"
+      .from("recursos")
       .download(document.url);
 
     if (fileError || !fileData) {

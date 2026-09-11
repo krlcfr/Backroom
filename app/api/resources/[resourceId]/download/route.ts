@@ -27,7 +27,7 @@ export async function GET(
 
     // Descargar el PDF del Storage
     const { data: fileData, error: fileError } = await supabaseAdmin.storage
-      .from("resources") // The storage bucket is actually "resources"
+      .from("recursos")
       .download(resource.url);
 
     if (fileError || !fileData) {
