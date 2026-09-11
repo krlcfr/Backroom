@@ -49,8 +49,7 @@ export async function POST(
     // Preparar registros a insertar
     const positionsToInsert = positions.map(pos => {
       const node = nodes.find(n => n.id === pos.nodeId);
-      // Extraemos el auth_id del usuario asignado, o usamos el del usuario actual como fallback
-      const targetAuthId = node?.usuarios?.auth_id || user.id;
+      const targetAuthId = (node?.usuarios as any)?.auth_id || (Array.isArray(node?.usuarios) ? (node?.usuarios as any)[0]?.auth_id : null) || user.id;
 
       return {
         workflow_id: workflowId,
