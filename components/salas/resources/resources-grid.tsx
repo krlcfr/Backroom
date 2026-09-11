@@ -32,6 +32,14 @@ interface ResourcesGridProps {
 export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted, onEditDoc, onAssignWorkflow }: ResourcesGridProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [activeResource, setActiveResource] = useState<Resource | null>(null)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = () => setOpenMenuId(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Seguro que deseas eliminar este recurso?")) return;
@@ -60,7 +68,6 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
       window.open(resource.url, "_blank")
     }
     if (resource.tipo === "doc") {
-      // Si es doc HTML, intentamos editarlo o verlo
       if (onEditDoc) {
         onEditDoc(resource)
       } else {
@@ -104,92 +111,93 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
         {resources.map((res) => {
           const { icon, color, bg } = getIconAndColor(res.tipo)
           const size = formatSize(res.tamano_bytes)
+          const isMenuOpen = openMenuId === res.id
 
           return (
-            <div key={res.id} className="bg-[#1e2020] border border-[#3f3f46] rounded-xl p-4 flex items-start gap-4 hover:border-[#a78bfa]/50 transition-colors group">
+            <div key={res.id} className="bg-[#1e2020] border border-[#3f3f46] rounded-xl p-4 flex items-center gap-3 hover:border-[#a78bfa]/50 transition-colors group relative">
               <div 
-                className={`mt-0.5 w-10 h-10 rounded-full flex items-center justify-center shrink-0 cursor-pointer ${bg} ${color}`}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${bg} ${color}`}
                 onClick={() => handleResourceClick(res)}
               >
                 <span className="material-symbols-outlined text-[20px]">{icon}</span>
               </div>
               
-              <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <div className="flex items-center gap-2">
-                  <h4 
-                    className="text-[#e2e2e2] font-medium text-[14px] truncate cursor-pointer hover:text-[#a78bfa] transition-colors"
-                    onClick={() => handleResourceClick(res)}
-                    title={res.nombre}
-                  >
+              <div className="flex-1 min-w-0" onClick={() => handleResourceClick(res)}>
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="text-[#e2e2e2] font-medium text-[14px] truncate cursor-pointer hover:text-[#a78bfa] transition-colors" title={res.nombre}>
                     {res.nombre}
                   </h4>
                   {(res as any).pending_signature && (
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 whitespace-nowrap" title="Requiere tu firma">
+                    <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-500/20 text-green-400 border border-green-500/30" title="Requiere tu firma">
                       FIRMAR
                     </span>
                   )}
                 </div>
-                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mt-1 text-[11px] text-[#958da1]">
-                  <span className="truncate">{res.usuarios?.nombre_completo}</span>
-                  <span>•</span>
+                <div className="flex items-center text-[12px] text-[#958da1] truncate">
+                  <span className="truncate max-w-[100px]">{res.usuarios?.nombre_completo}</span>
+                  <span className="mx-1.5">•</span>
                   <span>{formatDistanceToNow(new Date(res.created_at.endsWith('Z') ? res.created_at : `${res.created_at}Z`), { addSuffix: true, locale: es })}</span>
                   {size && (
                     <>
-                      <span>•</span>
+                      <span className="mx-1.5">•</span>
                       <span>{size}</span>
                     </>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-1">
+              <div className="relative">
                 <button
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    handleResourceClick(res);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setOpenMenuId(isMenuOpen ? null : res.id);
                   }}
-                  className="w-8 h-8 flex items-center justify-center shrink-0 rounded-md bg-[#3f3f46]/50 text-[#e2e2e2] hover:bg-[#3f3f46] transition-colors"
-                  title="Ver"
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${isMenuOpen ? 'bg-[#3f3f46] text-[#e2e2e2]' : 'text-[#958da1] hover:bg-[#3f3f46] hover:text-[#e2e2e2]'}`}
                 >
-                  <span className="material-symbols-outlined text-[16px]">visibility</span>
+                  <span className="material-symbols-outlined text-[20px]">more_vert</span>
                 </button>
-                {(res.tipo === "doc" || res.tipo === "pdf" || res.tipo === "archivo") && onAssignWorkflow && (
-                  <button
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onAssignWorkflow(res);
-                    }}
-                    className="w-8 h-8 flex items-center justify-center shrink-0 rounded-md bg-[#10b981]/10 text-[#10b981] hover:bg-[#10b981]/20 transition-colors"
-                    title="Asignar Flujo de Trabajo"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">account_tree</span>
-                  </button>
-                )}
-                {res.tipo === "doc" && onEditDoc && (
-                  <button
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onEditDoc(res);
-                    }}
-                    className="w-8 h-8 flex items-center justify-center shrink-0 rounded-md bg-[#a78bfa]/10 text-[#a78bfa] hover:bg-[#a78bfa]/20 transition-colors"
-                    title="Editar Documento"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">draw</span>
-                  </button>
-                )}
-                {canDelete && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleDelete(res.id) }}
-                    disabled={deleting === res.id}
-                    className="w-8 h-8 flex items-center justify-center shrink-0 rounded-md bg-[#ef4444]/10 text-[#ef4444] hover:bg-[#ef4444]/20 transition-colors disabled:opacity-50"
-                    title="Eliminar"
-                  >
-                    {deleting === res.id ? (
-                      <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-                    ) : (
-                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                
+                {isMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-[#27272a] border border-[#4a4455] rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.4)] z-50 py-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => { setOpenMenuId(null); handleResourceClick(res); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ccc3d8] hover:bg-[#333535] hover:text-[#e2e2e2] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">visibility</span>
+                      Ver documento
+                    </button>
+                    
+                    {(res.tipo === "doc" || res.tipo === "pdf" || res.tipo === "archivo") && onAssignWorkflow && (
+                      <button
+                        onClick={() => { setOpenMenuId(null); onAssignWorkflow(res); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#10b981] hover:bg-[#10b981]/10 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">account_tree</span>
+                        Asignar a Flujo
+                      </button>
                     )}
-                  </button>
+                    
+                    {res.tipo === "doc" && onEditDoc && (
+                      <button
+                        onClick={() => { setOpenMenuId(null); onEditDoc(res); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#a78bfa] hover:bg-[#a78bfa]/10 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">draw</span>
+                        Editar
+                      </button>
+                    )}
+                    
+                    {canDelete && (
+                      <button
+                        onClick={() => { setOpenMenuId(null); handleDelete(res.id); }}
+                        disabled={deleting === res.id}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ffb4ab] hover:bg-[#ffb4ab]/10 transition-colors disabled:opacity-50"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">{deleting === res.id ? 'progress_activity' : 'delete'}</span>
+                        {deleting === res.id ? 'Eliminando...' : 'Eliminar'}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

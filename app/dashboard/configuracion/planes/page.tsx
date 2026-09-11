@@ -42,13 +42,6 @@ export default async function PlanesPage() {
 
   return (
     <div className="flex flex-col flex-1 pb-12">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-headline-lg font-semibold text-[#e2e2e2] mb-2">Planes de Pago</h1>
-          <p className="text-[#ccc3d8]">Administra tu suscripción y aumenta los límites de tu organización.</p>
-        </div>
-      </div>
-
       {!esPropietario ? (
         <div className="rounded-xl border border-[#4a4455] bg-[#1e2020] p-8 text-center">
           <span className="material-symbols-outlined text-[#ffb4ab] text-[48px] mb-4 block">lock</span>

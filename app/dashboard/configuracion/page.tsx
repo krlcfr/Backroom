@@ -46,13 +46,6 @@ export default async function ConfiguracionPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-headline-lg font-semibold text-[#e2e2e2] mb-2">Configuración de Organización</h1>
-        <p className="text-[#ccc3d8]">
-          Gestiona los detalles, seguridad y ciclo de vida de &apos;{org.name}&apos;.
-        </p>
-      </div>
-
       {!esPropietario ? (
         <div className="rounded-xl border border-[#4a4455] bg-[#1e2020] p-8 text-center">
           <span className="material-symbols-outlined text-[#ffb4ab] text-[48px] mb-4 block">lock</span>

@@ -3,6 +3,16 @@
 import { useState, useEffect } from "react"
 import { createBrowserClient } from "@supabase/ssr"
 
+interface WorkflowNode {
+  id: string
+  type: string
+  status: string
+  step_order: number
+  usuarios: {
+    nombre_completo: string
+  }
+}
+
 interface Workflow {
   id: string
   title: string
@@ -12,6 +22,7 @@ interface Workflow {
   recursos: {
     nombre: string
   }
+  workflow_nodes?: WorkflowNode[]
 }
 
 interface ActiveWorkflowsModalProps {
@@ -24,6 +35,7 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
   const [loading, setLoading] = useState(true)
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [pinging, setPinging] = useState<string | null>(null)
 
   const loadWorkflows = async () => {
     setLoading(true)
@@ -39,7 +51,14 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
         status,
         created_at,
         document_id,
-        recursos(nombre)
+        recursos(nombre),
+        workflow_nodes(
+          id,
+          type,
+          status,
+          step_order,
+          usuarios!workflow_nodes_assigned_user_id_fkey(nombre_completo)
+        )
       `)
       .eq('organization_id', orgId)
       .in('status', ['draft', 'in_progress', 'under_review'])
@@ -67,13 +86,29 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
         const err = await res.json();
         throw new Error(err.error || "No se pudo eliminar el flujo");
       }
-      alert("Flujo eliminado exitosamente");
       setSelectedWorkflow(null);
       loadWorkflows();
     } catch (e: any) {
       alert("Error: " + e.message);
     } finally {
       setDeleting(false);
+    }
+  }
+
+  const handlePing = async (node: WorkflowNode) => {
+    setPinging(node.id)
+    try {
+      const res = await fetch(`/api/workflows/${selectedWorkflow!.id}/nodes/${node.id}/ping`, {
+        method: "POST"
+      });
+      if (!res.ok) {
+        throw new Error("No se pudo enviar el aviso");
+      }
+      alert(`Se ha enviado un recordatorio a ${node.usuarios?.nombre_completo || 'el usuario'}.`);
+    } catch (e: any) {
+      alert("Error: " + e.message);
+    } finally {
+      setPinging(null)
     }
   }
 
@@ -122,14 +157,50 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
                     {selectedWorkflow.status === 'draft' ? 'Borrador (Incompleto)' : 
                      selectedWorkflow.status === 'in_progress' ? 'En Progreso' : 'En Revisión'}
                   </span>
-                  <span className="text-sm text-[#a1a1aa]">ID: <span className="font-mono text-xs">{selectedWorkflow.id}</span></span>
                 </div>
 
-                <div className="p-4 bg-[#1e2020] rounded-lg border border-[#3f3f46]">
-                  <p className="text-[#e2e2e2] text-sm flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#7c3aed] text-[18px]">verified</span>
-                    El flujo está activo y esperando firmas.
-                  </p>
+                <div className="space-y-3 mt-4">
+                  <h4 className="text-[13px] font-semibold text-[#a1a1aa] uppercase tracking-wider mb-2">Participantes del Flujo</h4>
+                  {selectedWorkflow.workflow_nodes?.sort((a, b) => a.step_order - b.step_order).map((node) => (
+                    <div key={node.id} className="flex items-center justify-between bg-[#1e2020] p-3 rounded-lg border border-[#3f3f46]">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[14px] font-bold ${
+                          node.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                          node.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                          'bg-[#3f3f46] text-[#e2e2e2]'
+                        }`}>
+                          {node.status === 'approved' ? <span className="material-symbols-outlined text-[16px]">check</span> :
+                           node.status === 'rejected' ? <span className="material-symbols-outlined text-[16px]">close</span> :
+                           node.usuarios?.nombre_completo?.[0]?.toUpperCase() || '?'}
+                        </div>
+                        <div>
+                          <p className="text-[14px] text-[#e2e2e2] font-medium">{node.usuarios?.nombre_completo || 'Usuario'}</p>
+                          <p className="text-[12px] text-[#958da1]">
+                            {node.type === 'SIGNATURE' ? 'Firma requerida' : 'Revisión requerida'} 
+                            {' • Nivel ' + node.step_order}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {node.status === 'pending' && (
+                        <button
+                          onClick={() => handlePing(node)}
+                          disabled={pinging === node.id}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#3f3f46] hover:bg-[#7c3aed] text-[#e2e2e2] rounded-md transition-colors text-[12px] font-medium disabled:opacity-50"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">notifications_active</span>
+                          {pinging === node.id ? 'Avisando...' : 'Avisar'}
+                        </button>
+                      )}
+                      
+                      {node.status === 'approved' && (
+                        <span className="text-[12px] font-medium text-green-400 bg-green-500/10 px-2 py-1 rounded">Completado</span>
+                      )}
+                    </div>
+                  ))}
+                  {(!selectedWorkflow.workflow_nodes || selectedWorkflow.workflow_nodes.length === 0) && (
+                    <p className="text-[13px] text-[#958da1] italic">No hay participantes asignados todavía.</p>
+                  )}
                 </div>
               </div>
 

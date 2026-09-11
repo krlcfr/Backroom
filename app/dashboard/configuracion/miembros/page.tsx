@@ -70,20 +70,14 @@ export default async function MiembrosPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
-      <div className="mb-8 flex items-center justify-between">
+    <div>
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#e2e2e2]">Miembros de {org.name}</h1>
+          <h2 className="text-xl font-bold text-[#e2e2e2]">Miembros de {org.name}</h2>
           <p className="text-sm text-[#ccc3d8]">
             {miembros.length} miembro{miembros.length !== 1 ? "s" : ""} activo{miembros.length !== 1 ? "s" : ""} y {pendingInvitations.length} invitación{pendingInvitations.length !== 1 ? "es" : ""} pendiente{pendingInvitations.length !== 1 ? "s" : ""}.
           </p>
         </div>
-        <Link
-          href="/dashboard"
-          className="rounded-lg border border-[#3f3f46] px-4 py-2 text-sm text-[#ccc3d8] hover:text-[#e2e2e2]"
-        >
-          Volver al dashboard
-        </Link>
       </div>
 
       <div className="mb-6">

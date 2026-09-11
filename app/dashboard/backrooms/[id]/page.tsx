@@ -286,16 +286,6 @@ export default function BackRoomPage() {
               Estado de Flujos
             </button>
 
-            {rootRoomId && (esPropietario || canCreateSala(0)) && (
-              <Link
-                href={`/dashboard/backrooms/${id}/salas/${rootRoomId}/permisos`}
-                className="flex items-center gap-2 bg-[#27272a] hover:bg-[#333535] border border-[#4a4455] text-[#ccc3d8] hover:text-[#e2e2e2] px-3 py-1.5 rounded-lg transition-colors text-[13px] font-medium"
-              >
-                <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-                Matriz de Permisos
-              </Link>
-            )}
-
             {esPropietario && (
               <div className="relative" ref={menuRef}>
                 <button

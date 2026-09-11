@@ -20,10 +20,8 @@ const NAV_ITEMS = [
   { label: "Jerarquía", icon: "account_tree", href: "/dashboard/hierarchy" },
   { label: "Almacenamiento", icon: "folder", href: "/dashboard/storage" },
   { label: "Mis Pendientes", icon: "inbox", href: "/dashboard/pendientes" },
-  { label: "Miembros y Permisos", icon: "key", href: "/dashboard/miembros" },
+  { label: "Miembros y Permisos", icon: "key", href: "/dashboard/configuracion/miembros" },
   { label: "Historial", icon: "history", href: "/dashboard/auditoria" },
-  { label: "Configuración", icon: "settings", href: "/dashboard/configuracion" },
-  { label: "Planes", icon: "credit_card", href: "/dashboard/configuracion/planes" },
 ]
 
 export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPropietario, isSuperAdmin, isOrgAdmin }: DashboardSidebarProps) {
@@ -92,7 +90,9 @@ export default function DashboardSidebar({ orgName, orgLogo, orgUpdatedAt, esPro
 
       <nav className="flex-none flex flex-col gap-1 px-2">
         {navItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = item.href.includes('/configuracion') 
+            ? pathname.startsWith('/dashboard/configuracion')
+            : pathname === item.href
           return (
             <Link
               key={item.href}
