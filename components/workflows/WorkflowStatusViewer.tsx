@@ -228,12 +228,25 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { 
   // Buscar si el usuario actual está asignado a un nodo en el paso activo
   // OJO: En la vida real, si assigned_user_id es null, habría que checar si el usuario tiene el cargo requerido
   // Aquí simplificamos asumiendo assigned_user_id.
-  const myActiveNode = pendingNodes.find(n => 
-    n.step_order === currentStepOrder && 
-    (n.assigned_user_id === currentUser.id || n.assigned_user_id === null) // Si es null, cualquiera del cargo podría (idealmente checaríamos el cargo)
+  const activeNodesInCurrentStep = pendingNodes.filter(n => n.step_order === currentStepOrder);
+  
+  const myActiveNode = activeNodesInCurrentStep.find(n => 
+    n.assigned_user_id === currentUser.id || n.assigned_user_id === null
   );
 
-  if (!myActiveNode) return null;
+  if (!myActiveNode) {
+    // Si no es mi turno, mostramos a quién estamos esperando
+    const waitingFor = activeNodesInCurrentStep.map(n => n.assigned_user_name || "Un miembro").join(", ");
+    return (
+      <div className="bg-[#1e2020] border border-[#f59e0b]/30 rounded-xl p-4 shadow-2xl flex flex-col items-center gap-2">
+        <span className="material-symbols-outlined text-[24px] text-[#f59e0b]">hourglass_empty</span>
+        <p className="text-sm font-semibold text-[#e2e2e2]">Esperando revisión</p>
+        <p className="text-xs text-[#958da1] text-center max-w-sm">
+          Actualmente es el turno de <strong>{waitingFor}</strong>. Recibirás una notificación cuando sea tu turno de actuar en el flujo.
+        </p>
+      </div>
+    );
+  }
 
   const handleAction = async (action: 'approved' | 'rejected', nodeId: string, pwd?: string) => {
     setLoading(true);

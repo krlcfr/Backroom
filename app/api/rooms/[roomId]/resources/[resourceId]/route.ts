@@ -4,6 +4,7 @@ import { checkPermission, checkRoomPermission } from "@/lib/auth/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
+import puppeteer from "puppeteer";
 
 export async function DELETE(
   request: NextRequest,
@@ -96,15 +97,30 @@ export async function PUT(
       throw new ApiError(400, "Solo se pueden editar documentos HTML directamente");
     }
 
-    const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${content}</body></html>`;
-    const fileBuffer = Buffer.from(fullHtml, 'utf-8');
+    const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 40px; max-width: 800px; margin: 0 auto; }</style></head><body>${content}</body></html>`;
+    
+    // Regenerar el PDF usando Puppeteer
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    });
+    const page = await browser.newPage();
+    await page.setContent(fullHtml, { waitUntil: "domcontentloaded" });
+    
+    const fileBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "20mm", right: "20mm", bottom: "20mm", left: "20mm" },
+    });
+    await browser.close();
+
     const newSizeBytes = fileBuffer.length;
 
-    // We skip limits check for edit to keep it simple, since it's just replacing text
+    // We skip limits check for edit to keep it simple
     const { error: storageError } = await supabaseAdmin.storage
       .from("recursos")
       .upload(recurso.url, fileBuffer, {
-        contentType: "text/html",
+        contentType: "application/pdf",
         upsert: true
       });
 
