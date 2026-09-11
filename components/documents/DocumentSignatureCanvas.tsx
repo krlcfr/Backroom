@@ -257,7 +257,7 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               className="relative shadow-2xl transition-transform"
-              style={{ width: 'fit-content', minHeight: '800px', backgroundColor: 'white' }}
+              style={{ width: '800px', minHeight: '1131px', backgroundColor: 'white' }}
             >
               <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
                 <Page 

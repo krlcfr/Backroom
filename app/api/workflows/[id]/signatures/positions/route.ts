@@ -81,10 +81,13 @@ export async function POST(
         throw new Error(insertError.message);
       }
       
-      // Actualizar total_signers_count
+      // Actualizar contadores
       await supabaseAdmin
         .from('document_workflows')
-        .update({ total_signers_count: positionsToInsert.length })
+        .update({ 
+          total_signers_count: positionsToInsert.length,
+          placed_signatures_count: positionsToInsert.length
+        })
         .eq('id', workflowId);
     }
 
