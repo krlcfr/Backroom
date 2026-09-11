@@ -108,7 +108,7 @@ export default function BackRoomPage() {
         const [backroomRes, roomsRes, orgRes] = await Promise.all([
           fetch(`/api/backrooms/${id}`),
           fetch(`/api/backrooms/${id}/rooms`),
-          fetch(`/api/backrooms/${id}/organization`)
+          fetch('/api/organizations/current')
         ])
 
         if (!backroomRes.ok) throw new Error("No se pudo cargar la BackRoom")
