@@ -11,6 +11,7 @@ export default async function RecursoViewerPage({ params }: { params: Promise<{ 
     .from("recursos")
     .select("*")
     .eq("id", recursoId)
+    .eq("sala_id", salaId)
     .single();
 
   if (!recurso) {
@@ -83,13 +84,23 @@ export default async function RecursoViewerPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          {content}
-        </div>
-        <div className="lg:col-span-1">
-          {/* Aquí inyectamos el panel de firmas */}
+      <div className="flex flex-col gap-6">
+        <div className="w-full">
           <WorkflowStatusViewer documentId={recursoId} />
+        </div>
+        <div className="w-full bg-[#1a1c1c] border border-[#3f3f46] rounded-xl overflow-hidden shadow-2xl flex flex-col">
+          {/* Header del visor */}
+          <div className="bg-[#27272a] border-b border-[#3f3f46] px-4 py-3 flex items-center gap-3 shrink-0">
+            <span className="material-symbols-outlined text-[#7c3aed]">
+              {recurso.tipo === 'enlace' ? 'link' : 'description'}
+            </span>
+            <span className="text-[#e2e2e2] font-medium text-sm truncate">{recurso.nombre}</span>
+          </div>
+
+          {/* Contenedor del documento */}
+          <div className="relative w-full" style={{ height: "calc(100vh - 400px)", minHeight: "600px" }}>
+            {content}
+          </div>
         </div>
       </div>
     </div>

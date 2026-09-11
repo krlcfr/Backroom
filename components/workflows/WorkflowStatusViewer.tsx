@@ -15,6 +15,7 @@ import "@xyflow/react/dist/style.css";
 
 interface WorkflowStatusViewerProps {
   documentId: string;
+  hideActions?: boolean;
 }
 
 // Custom Node para visualizar el estado
@@ -54,7 +55,7 @@ const StatusCircleNode = ({ data }: { data: any }) => {
 
 const nodeTypes = { circle: StatusCircleNode, statusCircle: StatusCircleNode };
 
-export function WorkflowStatusViewer({ documentId }: WorkflowStatusViewerProps) {
+export function WorkflowStatusViewer({ documentId, hideActions = false }: WorkflowStatusViewerProps) {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,48 +140,50 @@ export function WorkflowStatusViewer({ documentId }: WorkflowStatusViewerProps) 
   if (error) return <div className="p-4 text-[#958da1] text-sm">{error}</div>;
 
   return (
-    <div className="w-full h-[400px] border border-[#3f3f46] rounded-xl overflow-hidden relative bg-[#0c0f0f]">
-      <div className="absolute top-0 left-0 right-0 bg-[#1a1c1c]/80 backdrop-blur-sm border-b border-[#3f3f46] p-3 z-10 flex justify-between items-center">
-        <h3 className="text-sm font-semibold text-[#e2e2e2] flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px] text-[#7c3aed]">account_tree</span>
-          Estado de Aprobación
-        </h3>
-        <div className="flex gap-4 text-xs font-medium">
-          <span className="flex items-center gap-1 text-[#10b981]"><span className="w-2 h-2 rounded-full bg-[#10b981]"></span> Aprobado</span>
-          <span className="flex items-center gap-1 text-[#f59e0b]"><span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Pendiente</span>
-          <span className="flex items-center gap-1 text-[#ef4444]"><span className="w-2 h-2 rounded-full bg-[#ef4444]"></span> Rechazado</span>
-        </div>
-      </div>
-
-      <ReactFlowProvider>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          fitView
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable={false}
-          className="bg-[#0c0f0f]"
-        >
-          <Background color="#3f3f46" gap={16} />
-          <Controls showInteractive={false} className="bg-[#27272a] border-[#3f3f46] fill-white" />
-        </ReactFlow>
-      </ReactFlowProvider>
-
+    <div className="flex flex-col gap-4 w-full">
       {/* Panel de Acciones */}
-      {dbNodes && dbNodes.length > 0 && (
+      {!hideActions && dbNodes && dbNodes.length > 0 && (
         <WorkflowActionsPanel 
           workflowId={workflowId}
           nodes={dbNodes} 
           onActionComplete={() => window.location.reload()}
         />
       )}
+
+      <div className="w-full h-[400px] border border-[#3f3f46] rounded-xl overflow-hidden relative bg-[#0c0f0f]">
+        <div className="absolute top-0 left-0 right-0 bg-[#1a1c1c]/80 backdrop-blur-sm border-b border-[#3f3f46] p-3 z-10 flex justify-between items-center">
+          <h3 className="text-sm font-semibold text-[#e2e2e2] flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-[#7c3aed]">account_tree</span>
+            Estado de Aprobación
+          </h3>
+          <div className="flex gap-4 text-xs font-medium">
+            <span className="flex items-center gap-1 text-[#10b981]"><span className="w-2 h-2 rounded-full bg-[#10b981]"></span> Aprobado</span>
+            <span className="flex items-center gap-1 text-[#f59e0b]"><span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Pendiente</span>
+            <span className="flex items-center gap-1 text-[#ef4444]"><span className="w-2 h-2 rounded-full bg-[#ef4444]"></span> Rechazado</span>
+          </div>
+        </div>
+
+        <ReactFlowProvider>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            fitView
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable={false}
+            className="bg-[#0c0f0f]"
+          >
+            <Background color="#3f3f46" gap={16} />
+            <Controls showInteractive={false} className="bg-[#27272a] border-[#3f3f46] fill-white" />
+          </ReactFlow>
+        </ReactFlowProvider>
+      </div>
     </div>
   );
 }
 
-function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { workflowId: string, nodes: any[], onActionComplete: () => void }) {
+export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { workflowId: string, nodes: any[], onActionComplete: () => void }) {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [passwordModal, setPasswordModal] = useState<{ isOpen: boolean, nodeId: string } | null>(null);
   const [password, setPassword] = useState("");
@@ -246,7 +249,7 @@ function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { workflo
   };
 
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-[#1e2020] border border-[#7c3aed]/50 rounded-xl p-4 shadow-2xl z-20 flex flex-col items-center gap-3 animate-in slide-in-from-bottom-4">
+    <div className="bg-[#1e2020] border border-[#7c3aed]/50 rounded-xl p-4 shadow-2xl flex flex-col items-center gap-3">
       <div className="text-center">
         <p className="text-sm font-semibold text-[#e2e2e2]">Es tu turno de actuar</p>
         <p className="text-xs text-[#958da1]">

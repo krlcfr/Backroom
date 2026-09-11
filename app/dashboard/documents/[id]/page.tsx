@@ -1,11 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 
 export default async function DocumentRedirectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
 
-  const { data: recurso } = await supabase
+  const { data: recurso } = await supabaseAdmin
     .from("recursos")
     .select(`
       id,
