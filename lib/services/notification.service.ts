@@ -98,7 +98,7 @@ export class NotificationService {
     
     const { data: workflow } = await adminSupabase
       .from("document_workflows")
-      .select("title, organization_id")
+      .select("title, organization_id, document_id")
       .eq("id", workflowId)
       .single();
 
@@ -107,14 +107,23 @@ export class NotificationService {
 
     for (const node of nextNodes) {
       if (node.assigned_user_id) {
-        await this.send({
-          userId: node.assigned_user_id,
-          organizationId: orgId,
-          type: 'WORKFLOW_ACTION_REQUIRED',
-          title: "Acción Requerida en Flujo de Aprobación",
-          message: "Se requiere su revisión y acción para el documento " + docTitle,
-          actionData: { workflow_id: workflowId, node_id: node.id }
-        });
+        // node.assigned_user_id is `usuarios.id`, but notifications need `auth.users.id`
+        const { data: usuarioData } = await adminSupabase
+          .from("usuarios")
+          .select("auth_id")
+          .eq("id", node.assigned_user_id)
+          .single();
+
+        if (usuarioData?.auth_id) {
+          await this.send({
+            userId: usuarioData.auth_id,
+            organizationId: orgId,
+            type: 'WORKFLOW_ACTION_REQUIRED',
+            title: "Acción Requerida en Flujo de Aprobación",
+            message: "Se requiere su revisión y acción para el documento " + docTitle,
+            actionData: { workflow_id: workflowId, node_id: node.id, document_id: workflow?.document_id }
+          });
+        }
       } else {
         // Si no hay usuario asignado, buscar a todos los usuarios con ese cargo_id y notificarles
         console.warn("[NotificationService] No hay usuario asignado explícitamente para el cargo");

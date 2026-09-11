@@ -17,8 +17,19 @@ export default async function PendientesPage() {
   // Identificar la organización activa del usuario (asumimos la primera o la que devuelve el service)
   const org = await OrganizationsService.getOrgForUser(user.id);
 
+  // Obtener el ID del usuario interno (usuarios.id) porque assigned_user_id usa ese UUID
+  const { data: perfil } = await supabase
+    .from("usuarios")
+    .select("id")
+    .eq("auth_id", user.id)
+    .single();
+
+  if (!perfil) {
+    return <div>Perfil no encontrado</div>;
+  }
+
   // Obtener los workflows pendientes del usuario
-  // Buscamos en workflow_nodes donde status = 'in_turn'
+  // Buscamos en workflow_nodes donde status = 'pending'
   // y que esté asignado al usuario o a su cargo
   const { data: nodes, error } = await supabase
     .from('workflow_nodes')
@@ -43,7 +54,7 @@ export default async function PendientesPage() {
     .eq('status', 'pending')
     // Nota: Por brevedad, este query directo asume asignación directa.
     // Si queremos por cargo, en el backend se debería hacer una subquery con rpc o filtrarlo
-    .eq('assigned_user_id', user.id);
+    .eq('assigned_user_id', perfil.id);
 
   const tasks = nodes || [];
 
