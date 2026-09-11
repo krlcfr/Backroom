@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { requireAuth } from '@/lib/auth/session';
 import { z } from 'zod';
 
 const positionsSchema = z.object({
@@ -20,15 +22,11 @@ export async function POST(
     const body = await req.json();
     const { positions } = positionsSchema.parse(body);
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
+    const user = await requireAuth();
+    const supabaseAdmin = createAdminClient();
 
     // Obtener los nodos del flujo para mapearlos
-    const { data: nodes, error: nodesError } = await supabase
+    const { data: nodes, error: nodesError } = await supabaseAdmin
       .from('workflow_nodes')
       .select('id, assigned_user_id')
       .eq('workflow_id', workflowId);
@@ -38,7 +36,7 @@ export async function POST(
     }
 
     // Obtener el document_id
-    const { data: wfData } = await supabase
+    const { data: wfData } = await supabaseAdmin
       .from('document_workflows')
       .select('document_id')
       .eq('id', workflowId)
@@ -67,12 +65,12 @@ export async function POST(
 
     if (positionsToInsert.length > 0) {
       // Eliminar posiciones anteriores si existieran
-      await supabase
+      await supabaseAdmin
         .from('workflow_signature_positions')
         .delete()
         .eq('workflow_id', workflowId);
 
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseAdmin
         .from('workflow_signature_positions')
         .insert(positionsToInsert);
 
@@ -81,7 +79,7 @@ export async function POST(
       }
       
       // Actualizar total_signers_count
-      await supabase
+      await supabaseAdmin
         .from('document_workflows')
         .update({ total_signers_count: positionsToInsert.length })
         .eq('id', workflowId);

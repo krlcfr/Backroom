@@ -272,17 +272,22 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
               {/* Render placed signature boxes for this page */}
               {boxes.filter(b => b.pageNumber === currentPage).map(box => {
                 const node = signNodes.find(n => n.id === box.nodeId)
-                return (
-                  <div 
-                    key={box.nodeId}
-                    className="absolute border-2 border-dashed border-[#7c3aed] bg-[#7c3aed]/10 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center group"
-                    style={{
-                      left: `${box.xPercent}%`,
-                      top: `${box.yPercent}%`,
-                      width: '150px',
-                      height: '60px'
-                    }}
-                  >
+                  return (
+                    <div 
+                      key={box.nodeId}
+                      draggable={true}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('application/signature-node', JSON.stringify(node))
+                        e.dataTransfer.effectAllowed = 'copy'
+                      }}
+                      className="absolute border-2 border-dashed border-[#7c3aed] bg-[#7c3aed]/10 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center group cursor-grab active:cursor-grabbing"
+                      style={{
+                        left: `${box.xPercent}%`,
+                        top: `${box.yPercent}%`,
+                        width: '150px',
+                        height: '60px'
+                      }}
+                    >
                     <button 
                       onClick={() => removeBox(box.nodeId)}
                       className="absolute -top-3 -right-3 w-6 h-6 bg-red-500 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
