@@ -49,6 +49,14 @@ export default function DashboardHeader({ userName, userAvatar, esPropietario, i
         <NotificationBell />
 
         <Link 
+          href="/dashboard/perfil" 
+          className="relative p-2 rounded-full text-[#ccc3d8] hover:text-[#e2e2e2] hover:bg-[#27272a] transition-colors flex items-center justify-center"
+          title="Mi Perfil"
+        >
+          <span className="material-symbols-outlined text-[20px]">person</span>
+        </Link>
+
+        <Link 
           href="/dashboard/support" 
           className="relative p-2 rounded-full text-[#ccc3d8] hover:text-[#e2e2e2] hover:bg-[#27272a] transition-colors flex items-center justify-center"
         >
