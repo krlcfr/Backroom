@@ -56,10 +56,7 @@ export default function BackRoomPage() {
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
 
-  const [resources, setResources] = useState<Resource[]>([])
-  const [canUpload, setCanUpload] = useState(false)
-  const [canDeleteRes, setCanDeleteRes] = useState(false)
-  const [loadingRes, setLoadingRes] = useState(true)
+
 
   const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('recursos')
   const [error, setError] = useState<string | null>(null)
