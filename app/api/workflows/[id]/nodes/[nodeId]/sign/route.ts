@@ -87,12 +87,12 @@ export async function POST(
       throw new ApiError(500, "Error al acceder al certificado PKI de la organización.");
     }
     
-    const p12Buffer = Buffer.from(await p12Data.arrayBuffer());
+    const p12ArrayBuffer = await p12Data.arrayBuffer();
 
     // 5. PKI Signing Ceremony
     let privateKey, certificate, serial;
     try {
-      const extracted = PKIService.extractPrivateKeyFromP12(p12Buffer, org.certificate_password);
+      const extracted = PKIService.extractPrivateKeyFromP12(p12ArrayBuffer, org.certificate_password);
       privateKey = extracted.privateKey;
       certificate = extracted.certificate;
       serial = extracted.serial;
