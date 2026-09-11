@@ -51,7 +51,8 @@ export default function RightPanel({ backroom, esPropietario, tree, activeRoomId
             <span className="material-symbols-outlined text-[20px]">upload</span>
             Subir recurso
           </button>
-        </div>
+        )}
+      </div>
 
       <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4">
         <h3 className="text-[12px] text-[#ccc3d8] uppercase tracking-wider mb-4 border-b border-[#3f3f46] pb-2 font-medium">
