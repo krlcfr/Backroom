@@ -19,41 +19,57 @@ interface WorkflowStatusViewerProps {
 }
 
 // Custom Node para visualizar el estado
-const StatusCircleNode = ({ data }: { data: any }) => {
-  let borderColor = "border-[#3f3f46]"; // Default
+const StatusNode = ({ data }: any) => {
+  const isApproved = data.status === 'approved';
+  const isRejected = data.status === 'rejected';
+  
+  let borderColor = "border-[#3f3f46]";
+  let bgColor = "bg-[#1e2020]";
   let textColor = "text-[#958da1]";
-  let icon = "person";
-  let statusText = "Esperando";
+  let badgeClass = "border-[#3f3f46] text-[#958da1] bg-[#27272a]";
+  let statusText = "Pendiente";
 
-  if (data.status === 'approved') {
-    borderColor = "border-[#10b981]"; // Verde
+  if (isApproved) {
+    borderColor = "border-[#10b981]";
+    bgColor = "bg-[#10b981]/10";
     textColor = "text-[#10b981]";
-    icon = "check_circle";
+    badgeClass = "border-[#10b981]/30 text-[#10b981] bg-[#10b981]/10";
     statusText = "Aprobado";
-  } else if (data.status === 'rejected') {
-    borderColor = "border-[#ef4444]"; // Rojo
+  } else if (isRejected) {
+    borderColor = "border-[#ef4444]";
+    bgColor = "bg-[#ef4444]/10";
     textColor = "text-[#ef4444]";
-    icon = "cancel";
+    badgeClass = "border-[#ef4444]/30 text-[#ef4444] bg-[#ef4444]/10";
     statusText = "Rechazado";
-  } else if (data.status === 'pending') {
-    borderColor = "border-[#f59e0b]"; // Amarillo
-    textColor = "text-[#f59e0b]";
-    icon = "pending";
-    statusText = "Pendiente";
   }
 
   return (
-    <div className="w-20 h-20 bg-[#27272a] rounded-full flex flex-col items-center justify-center border-2 text-center p-1.5 relative shadow-lg">
-      <Handle type="target" position={Position.Left} className="w-2.5 h-2.5 !bg-[#d2bbff] !border-none" />
-      <span className="material-symbols-outlined text-[20px] mb-0.5">{icon}</span>
-      <span className="text-[9px] text-[#e2e2e2] font-semibold leading-tight line-clamp-1">{data.label}</span>
-      <span className="text-[8px] font-medium">{statusText}</span>
-      <Handle type="source" position={Position.Right} className="w-2.5 h-2.5 !bg-[#d2bbff] !border-none" />
+    <div className={`px-4 py-2 shadow-xl rounded-xl border-2 transition-colors ${borderColor} ${bgColor}`}>
+      <Handle type="target" position={Position.Left} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
+      <div className="flex items-center gap-3">
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-[#e2e2e2]">{data.label}</span>
+          {data.assigned_user_name && (
+            <span className="text-[10px] text-[#958da1] truncate max-w-[120px]">{data.assigned_user_name}</span>
+          )}
+          <div className="flex gap-1 mt-1">
+            {data.action_required && (
+              <span className="text-[9px] uppercase tracking-wider text-[#7c3aed] border border-[#7c3aed]/30 bg-[#7c3aed]/10 px-1 rounded w-fit">
+                {data.action_required === 'sign' ? 'Firmar' : data.action_required === 'approve' ? 'Aprobar' : 'Revisar'}
+              </span>
+            )}
+            <span className={`text-[9px] uppercase tracking-wider px-1 rounded w-fit border ${badgeClass}`}>
+              {statusText}
+            </span>
+          </div>
+        </div>
+      </div>
+      <Handle type="source" position={Position.Right} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
     </div>
   );
 };
 
-const nodeTypes = { circle: StatusCircleNode, statusCircle: StatusCircleNode };
+const nodeTypes = { circle: StatusNode, statusCircle: StatusNode };
 
 export function WorkflowStatusViewer({ documentId, hideActions = false }: WorkflowStatusViewerProps) {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -98,8 +114,10 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
               draggable: false, // Solo lectura
               data: {
                 ...vNode.data,
+                status,
                 label,
-                status
+                assigned_user_name: dbNode?.assigned_user?.nombre_completo || "",
+                action_required: dbNode?.action_required || vNode.data?.action_required
               }
             };
           });

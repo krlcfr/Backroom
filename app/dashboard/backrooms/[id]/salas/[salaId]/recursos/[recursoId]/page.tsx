@@ -1,13 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { WorkflowStatusViewer } from "@/components/workflows/WorkflowStatusViewer";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { checkRoomPermission } from "@/lib/auth/rbac";
 
 export default async function RecursoViewerPage({ params }: { params: Promise<{ id: string, salaId: string, recursoId: string }> }) {
   const { id, salaId, recursoId } = await params;
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: recurso } = await supabase
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Verificamos permisos de la sala manualmente
+  const canView = await checkRoomPermission(user.id, salaId, "salas.ver");
+  if (!canView) {
+    return <div className="p-8 text-red-500">Error: No tienes permiso 'salas.ver' para la sala {salaId}. Usuario: {user.id}</div>;
+  }
+
+  const supabaseAdmin = createAdminClient();
+
+  const { data: recurso, error: fetchError } = await supabaseAdmin
     .from("recursos")
     .select("*")
     .eq("id", recursoId)
@@ -15,13 +30,14 @@ export default async function RecursoViewerPage({ params }: { params: Promise<{ 
     .single();
 
   if (!recurso) {
-    notFound();
+    return <div className="p-8 text-red-500">Error: Recurso no encontrado en DB. recursoId={recursoId}, salaId={salaId}, Error: {fetchError?.message}</div>;
   }
 
   // Get signed URL if it's a file
   let finalUrl = recurso.url;
-  if (recurso.tipo !== "link" && recurso.tipo !== "youtube") {
-    const { data: urlData } = await supabase.storage.from("recursos").createSignedUrl(recurso.url, 3600);
+  if (recurso.tipo !== "enlace" && recurso.tipo !== "youtube") {
+    // Es posible que el storage también tenga RLS, usamos admin por si acaso
+    const { data: urlData } = await supabaseAdmin.storage.from("recursos").createSignedUrl(recurso.url, 3600);
     if (urlData) {
       finalUrl = urlData.signedUrl;
     }

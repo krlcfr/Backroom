@@ -165,17 +165,17 @@ export async function checkRoomPermission(authId: string, roomId: string, permis
     .single();
 
   if (backroom) {
-    const { data: org } = await supabase
-      .from("organizations")
-      .select("id")
-      .eq("owner_id", backroom.propietario_id)
+    const { data: orgRel } = await supabase
+      .from("organization_backrooms")
+      .select("organization_id")
+      .eq("backroom_id", sala.backroom_id)
       .maybeSingle();
 
-    if (org) {
+    if (orgRel) {
       const { data: orgMember } = await supabase
         .from("organization_members")
         .select("role")
-        .eq("organization_id", org.id)
+        .eq("organization_id", orgRel.organization_id)
         .eq("user_id", usuario.id)
         .eq("status", "active")
         .maybeSingle();
