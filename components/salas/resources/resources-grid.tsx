@@ -36,10 +36,15 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
 
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
-    const handleClickOutside = () => setOpenMenuId(null);
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+    const handleClickOutside = (e: MouseEvent) => {
+      if ((e.target as Element).closest('.resource-menu-btn')) return;
+      setOpenMenuId(null);
+    };
+    if (openMenuId) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [openMenuId]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("¿Seguro que deseas eliminar este recurso?")) return;
@@ -152,7 +157,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
                     e.stopPropagation();
                     setOpenMenuId(isMenuOpen ? null : res.id);
                   }}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${isMenuOpen ? 'bg-[#3f3f46] text-[#e2e2e2]' : 'text-[#958da1] hover:bg-[#3f3f46] hover:text-[#e2e2e2]'}`}
+                  className={`resource-menu-btn w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${isMenuOpen ? 'bg-[#3f3f46] text-[#e2e2e2]' : 'text-[#958da1] hover:bg-[#3f3f46] hover:text-[#e2e2e2]'}`}
                 >
                   <span className="material-symbols-outlined text-[20px]">more_vert</span>
                 </button>
