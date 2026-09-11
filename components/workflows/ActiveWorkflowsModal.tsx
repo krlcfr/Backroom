@@ -5,7 +5,7 @@ import { createBrowserClient } from "@supabase/ssr"
 
 interface WorkflowNode {
   id: string
-  type: string
+  node_type: string
   status: string
   step_order: number
   usuarios: {
@@ -54,7 +54,7 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
         recursos(nombre),
         workflow_nodes(
           id,
-          type,
+          node_type,
           status,
           step_order,
           usuarios!workflow_nodes_assigned_user_id_fkey(nombre_completo)
@@ -173,10 +173,10 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
                            node.status === 'rejected' ? <span className="material-symbols-outlined text-[16px]">close</span> :
                            node.usuarios?.nombre_completo?.[0]?.toUpperCase() || '?'}
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <p className="text-[14px] text-[#e2e2e2] font-medium">{node.usuarios?.nombre_completo || 'Usuario'}</p>
                           <p className="text-[12px] text-[#958da1]">
-                            {node.type === 'SIGNATURE' ? 'Firma requerida' : 'Revisión requerida'} 
+                            {node.node_type === 'SIGNATURE' ? 'Firma requerida' : 'Revisión requerida'} 
                             {' • Nivel ' + node.step_order}
                           </p>
                         </div>
