@@ -189,7 +189,10 @@ function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { workflo
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.json()).then(data => {
+      // In Next.js App Router, some routes return { data: { user } }, while /api/auth/me returns the profile fields directly or nested. 
+      // If it has id, it's the user directly.
       if (data.user) setCurrentUser(data.user);
+      else if (data.id) setCurrentUser(data);
     }).catch(console.error);
   }, []);
 

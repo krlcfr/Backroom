@@ -40,7 +40,7 @@ export default async function PendientesPage() {
         )
       )
     `)
-    .eq('status', 'in_turn')
+    .eq('status', 'pending')
     // Nota: Por brevedad, este query directo asume asignación directa.
     // Si queremos por cargo, en el backend se debería hacer una subquery con rpc o filtrarlo
     .eq('assigned_user_id', user.id);
