@@ -14,6 +14,7 @@ import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 import { useLimits } from "@/components/providers/limits-provider"
 import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
 import ActiveWorkflowsModal from "@/components/workflows/ActiveWorkflowsModal"
+import SalaPermissions from "@/components/salas/permissions/sala-permissions"
 
 interface Backroom {
   id: string
@@ -53,12 +54,19 @@ export default function BackRoomPage() {
   const [rooms, setRooms] = useState<Sala[]>([])
   const [tree, setTree] = useState<SalaNode[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState(false)
+
+  const [resources, setResources] = useState<Resource[]>([])
+  const [canUpload, setCanUpload] = useState(false)
+  const [canDeleteRes, setCanDeleteRes] = useState(false)
+  const [loadingRes, setLoadingRes] = useState(true)
+
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('recursos')
   const [error, setError] = useState<string | null>(null)
 
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deleting, setDeleting] = useState(false)
 
   const [editNombre, setEditNombre] = useState("")
   const [editDescripcion, setEditDescripcion] = useState("")
@@ -324,17 +332,49 @@ export default function BackRoomPage() {
           />
         )}
 
-        <SubRoomsGrid
-          rooms={rooms.filter((r: any) => r.id !== rootRoomId && (r.parent_id === rootRoomId || !r.parent_id))}
-          backroomId={backroom.id}
-          onCreateClick={() => setShowCreateRoom(true)}
-          canCreate={canCreateSala(0)}
-        />
-
-        <hr className="border-[#3f3f46] my-4" />
-
         {rootRoomId && (
-          <div>
+          <div className="flex border-b border-[#3f3f46] mb-4">
+            <button
+              onClick={() => setActiveTab('recursos')}
+              className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+                activeTab === 'recursos' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+              }`}
+            >
+              Recursos Generales
+            </button>
+            <button
+              onClick={() => setActiveTab('subsalas')}
+              className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+                activeTab === 'subsalas' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+              }`}
+            >
+              Salas Principales
+            </button>
+            {(esPropietario || canCreateSala(0)) && (
+              <button
+                onClick={() => setActiveTab('permisos')}
+                className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors flex items-center gap-2 ${
+                  activeTab === 'permisos' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+                Permisos de Sala
+              </button>
+            )}
+          </div>
+        )}
+
+        {(!rootRoomId || activeTab === 'subsalas') && (
+          <SubRoomsGrid
+            rooms={rooms.filter((r: any) => r.id !== rootRoomId && (r.parent_id === rootRoomId || !r.parent_id))}
+            backroomId={backroom.id}
+            onCreateClick={() => setShowCreateRoom(true)}
+            canCreate={canCreateSala(0)}
+          />
+        )}
+
+        {rootRoomId && activeTab === 'recursos' && (
+          <div className="mt-4">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Recursos Generales</h2>
@@ -357,6 +397,12 @@ export default function BackRoomPage() {
               canDelete={canDeleteRes}
               onResourceDeleted={reloadResources}
             />
+          </div>
+        )}
+
+        {rootRoomId && activeTab === 'permisos' && (
+          <div className="mt-4">
+            <SalaPermissions salaId={rootRoomId} salaParentId={null} />
           </div>
         )}
       </main>
