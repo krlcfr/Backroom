@@ -10,7 +10,12 @@ export default async function PerfilPage() {
     return <div>No autorizado</div>;
   }
 
-  const perfil = await getUsuarioInterno(user.id);
+  const supabaseAdmin = await createClient(); // Server client is fine
+  const { data: perfil } = await supabaseAdmin
+    .from("usuarios")
+    .select("id, nombre_completo, correo, visual_signature_url")
+    .eq("auth_id", user.id)
+    .single();
   
   if (!perfil) {
     return <div>Perfil no encontrado</div>;
@@ -21,10 +26,10 @@ export default async function PerfilPage() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-[#7c3aed] flex items-center justify-center text-2xl font-bold text-white shadow-lg">
-            {perfil.nombre_completo.charAt(0).toUpperCase()}
+            {(perfil.nombre_completo || perfil.correo || "U").charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[#e2e2e2]">{perfil.nombre_completo}</h1>
+            <h1 className="text-2xl font-bold text-[#e2e2e2]">{perfil.nombre_completo || "Usuario"}</h1>
             <p className="text-[#958da1]">{perfil.correo}</p>
           </div>
         </div>
