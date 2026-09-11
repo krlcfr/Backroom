@@ -365,7 +365,7 @@ export default function SalaPage() {
                 rooms={children}
                 backroomId={id}
                 onCreateClick={() => setShowCreateRoom(true)}
-                canCreate={canCreateSala(sala.depth)}
+                canCreate={canCreateSala(sala.depth) && (sala as any)?.can_create_subrooms !== false}
               />
             )}
 

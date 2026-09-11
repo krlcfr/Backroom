@@ -366,7 +366,7 @@ export default function BackRoomPage() {
             rooms={rooms.filter((r: any) => r.id !== rootRoomId && (r.parent_id === rootRoomId || !r.parent_id))}
             backroomId={backroom.id}
             onCreateClick={() => setShowCreateRoom(true)}
-            canCreate={canCreateSala(0)}
+            canCreate={canCreateSala(0) && (esPropietario || (rooms.find(r => r.id === rootRoomId) as any)?.can_create_subrooms !== false)}
           />
         )}
 

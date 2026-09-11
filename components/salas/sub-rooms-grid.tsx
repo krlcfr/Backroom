@@ -9,6 +9,8 @@ interface Sala {
   depth: number
   created_at: string
   icono?: string
+  can_access?: boolean
+  can_create_subrooms?: boolean
 }
 
 interface SubRoomsGridProps {
@@ -16,27 +18,45 @@ interface SubRoomsGridProps {
   backroomId: string
   onCreateClick: () => void
   canCreate?: boolean
+  upsellMessage?: string
 }
 
-export default function SubRoomsGrid({ rooms, backroomId, onCreateClick, canCreate = true }: SubRoomsGridProps) {
+export default function SubRoomsGrid({ rooms, backroomId, onCreateClick, canCreate = true, upsellMessage = "Límite alcanzado o sin permisos." }: SubRoomsGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {rooms.map((room) => (
-        <Link
-          key={room.id}
-          href={`/dashboard/backrooms/${backroomId}/salas/${room.id}`}
-          className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4 hover:border-[#7c3aed] transition-colors group"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-10 h-10 rounded-lg bg-[#1e2020] flex items-center justify-center text-[#d2bbff] group-hover:bg-[#7c3aed]/20 transition-colors">
-              <span className="material-symbols-outlined">{room.icono || "grid_view"}</span>
+        room.can_access === false ? (
+          <div key={room.id} className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4 opacity-50 cursor-not-allowed">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-10 h-10 rounded-lg bg-[#1e2020] flex items-center justify-center text-[#958da1]">
+                <span className="material-symbols-outlined">{room.icono || "lock"}</span>
+              </div>
             </div>
+            <h3 className="font-semibold text-[#e2e2e2] text-[16px] mb-1 flex items-center gap-2">
+              {room.nombre}
+              <span className="material-symbols-outlined text-[16px] text-[#ffb4ab]">lock</span>
+            </h3>
+            {room.descripcion && (
+              <p className="text-[#ccc3d8] text-[13px] line-clamp-2">{room.descripcion}</p>
+            )}
           </div>
-          <h3 className="font-semibold text-[#e2e2e2] text-[16px] mb-1">{room.nombre}</h3>
-          {room.descripcion && (
-            <p className="text-[#ccc3d8] text-[13px] line-clamp-2">{room.descripcion}</p>
-          )}
-        </Link>
+        ) : (
+          <Link
+            key={room.id}
+            href={`/dashboard/backrooms/${backroomId}/salas/${room.id}`}
+            className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4 hover:border-[#7c3aed] transition-colors group"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-10 h-10 rounded-lg bg-[#1e2020] flex items-center justify-center text-[#d2bbff] group-hover:bg-[#7c3aed]/20 transition-colors">
+                <span className="material-symbols-outlined">{room.icono || "grid_view"}</span>
+              </div>
+            </div>
+            <h3 className="font-semibold text-[#e2e2e2] text-[16px] mb-1">{room.nombre}</h3>
+            {room.descripcion && (
+              <p className="text-[#ccc3d8] text-[13px] line-clamp-2">{room.descripcion}</p>
+            )}
+          </Link>
+        )
       ))}
 
       <button
@@ -44,7 +64,7 @@ export default function SubRoomsGrid({ rooms, backroomId, onCreateClick, canCrea
           if (canCreate) {
             onCreateClick()
           } else {
-            window.dispatchEvent(new CustomEvent("show-upsell", { detail: { message: "Has alcanzado el límite de jerarquía (niveles de salas) de tu plan actual." } }))
+            window.dispatchEvent(new CustomEvent("show-upsell", { detail: { message: upsellMessage } }))
           }
         }}
         className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center min-h-[160px] transition-colors ${
@@ -62,7 +82,7 @@ export default function SubRoomsGrid({ rooms, backroomId, onCreateClick, canCrea
         </div>
         <h3 className="font-semibold text-[#e2e2e2] text-[16px] mb-1">Crear nueva sala</h3>
         <p className="text-[#ccc3d8] text-[13px]">
-          {canCreate ? "Configura un nuevo espacio de trabajo jerárquico." : "Límite alcanzado"}
+          {canCreate ? "Configura un nuevo espacio de trabajo jerárquico." : "Sin permiso"}
         </p>
       </button>
     </div>
