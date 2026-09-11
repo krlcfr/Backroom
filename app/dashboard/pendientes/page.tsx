@@ -83,8 +83,7 @@ export default async function PendientesPage() {
                   const doc = wf.recursos;
                   
                   // Para abrir el recurso, generamos la URL
-                  // Depende de la estructura de salas y backrooms. 
-                  const viewerUrl = `/dashboard/backrooms/${doc.salas.backroom_id}/salas/${doc.sala_id}/recursos`;
+                  const viewerUrl = `/dashboard/documents/${doc.id}`;
 
                   return (
                     <tr key={task.id} className="hover:bg-[#27272a]/30 transition-colors">
@@ -113,7 +112,7 @@ export default async function PendientesPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link 
-                          href={`${viewerUrl}?docId=${doc.id}`}
+                          href={viewerUrl}
                           className="inline-flex items-center gap-2 px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-lg transition-colors"
                         >
                           Ver Documento
