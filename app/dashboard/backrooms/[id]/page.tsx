@@ -11,6 +11,7 @@ import CreateRoomModal from "@/components/modals/create-room-modal"
 import Breadcrumb from "@/components/ui/breadcrumb"
 import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
+import FinalResourcesTab from "@/components/salas/resources/final-resources-tab"
 import { useLimits } from "@/components/providers/limits-provider"
 import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
 import ActiveWorkflowsModal from "@/components/workflows/ActiveWorkflowsModal"
@@ -58,7 +59,7 @@ export default function BackRoomPage() {
 
 
 
-  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('subsalas')
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos' | 'finalizados'>('subsalas')
   const [error, setError] = useState<string | null>(null)
 
   const [menuOpen, setMenuOpen] = useState(false)
@@ -340,6 +341,14 @@ export default function BackRoomPage() {
               Recursos Generales
             </button>
             <button
+              onClick={() => setActiveTab('finalizados')}
+              className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+                activeTab === 'finalizados' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+              }`}
+            >
+              Documentos Finales
+            </button>
+            <button
               onClick={() => setActiveTab('subsalas')}
               className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
                 activeTab === 'subsalas' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
@@ -368,6 +377,10 @@ export default function BackRoomPage() {
             onCreateClick={() => setShowCreateRoom(true)}
             canCreate={canCreateSala(0) && (esPropietario || (rooms.find(r => r.id === rootRoomId) as any)?.can_create_subrooms !== false)}
           />
+        )}
+
+        {rootRoomId && activeTab === 'finalizados' && (
+          <FinalResourcesTab roomId={rootRoomId} />
         )}
 
         {rootRoomId && activeTab === 'recursos' && (

@@ -20,7 +20,8 @@ const NAV_ITEMS = [
   { label: "Jerarquía", icon: "account_tree", href: "/dashboard/hierarchy" },
   { label: "Almacenamiento", icon: "folder", href: "/dashboard/storage" },
   { label: "Mis Pendientes", icon: "inbox", href: "/dashboard/pendientes" },
-  { label: "Miembros y Permisos", icon: "key", href: "/dashboard/configuracion/miembros" },
+  { label: "Docs Finalizados", icon: "task_alt", href: "/dashboard/documentos-finales" },
+  { label: "Configuración", icon: "settings", href: "/dashboard/configuracion" },
   { label: "Historial", icon: "history", href: "/dashboard/auditoria" },
 ]
 

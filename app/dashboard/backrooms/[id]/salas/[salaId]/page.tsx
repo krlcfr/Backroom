@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 
 import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
+import FinalResourcesTab from "@/components/salas/resources/final-resources-tab"
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
 import { SalaPermissions } from "@/components/salas/permissions/sala-permissions"
 import { useParams, useRouter, usePathname } from "next/navigation"
@@ -75,7 +76,7 @@ export default function SalaPage() {
   const [showCreateDocument, setShowCreateDocument] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos'>('subsalas')
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos' | 'finalizados'>('subsalas')
 
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -340,6 +341,14 @@ export default function SalaPage() {
             Recursos
           </button>
           <button
+            onClick={() => setActiveTab('finalizados')}
+            className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+              activeTab === 'finalizados' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+            }`}
+          >
+            Documentos Finales
+          </button>
+          <button
             onClick={() => setActiveTab('subsalas')}
             className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
               activeTab === 'subsalas' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
@@ -377,6 +386,10 @@ export default function SalaPage() {
               </div>
             )}
           </>
+        )}
+
+        {activeTab === 'finalizados' && (
+          <FinalResourcesTab roomId={salaId} />
         )}
 
         {activeTab === 'recursos' && (
