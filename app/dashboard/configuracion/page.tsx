@@ -95,6 +95,7 @@ export default async function ConfiguracionPage() {
               description: org.description ?? "",
               logoUrl: org.logoUrl,
               updatedAt: org.updatedAt,
+              hasCertificate: !!org.certificatePath,
             }}
           />
         )}

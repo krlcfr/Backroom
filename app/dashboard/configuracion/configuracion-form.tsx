@@ -9,6 +9,7 @@ interface OrgProps {
   description: string
   logoUrl: string | null
   updatedAt: string
+  hasCertificate?: boolean
 }
 
 type Tab = "perfil" | "seguridad"
@@ -317,7 +318,44 @@ export default function ConfiguracionForm({ org }: { org: OrgProps }) {
               />
             </div>
 
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between items-center pt-4">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!confirm("¿Generar un nuevo certificado reemplazará el actual. ¿Estás seguro?")) return;
+                    const btn = document.getElementById("btn-generate-cert") as HTMLButtonElement;
+                    const originalText = btn.textContent;
+                    btn.disabled = true;
+                    btn.textContent = "Generando...";
+                    try {
+                      const res = await fetch(`/api/organizations/${org.id}/certificate/generate`, { method: 'POST' });
+                      if (!res.ok) throw new Error((await res.json()).error);
+                      alert("Certificado generado y guardado con éxito.");
+                      window.location.reload();
+                    } catch (e: any) {
+                      alert(e.message || "Error al generar");
+                    } finally {
+                      btn.disabled = false;
+                      btn.textContent = originalText;
+                    }
+                  }}
+                  id="btn-generate-cert"
+                  className="px-4 py-2 border border-[#7c3aed] text-[#7c3aed] hover:bg-[#7c3aed]/10 transition-colors rounded-lg text-[12px] font-medium"
+                >
+                  Generar Automáticamente
+                </button>
+                {org.hasCertificate && (
+                  <a
+                    href={`/api/organizations/${org.id}/certificate/download`}
+                    download="certificado.p12"
+                    className="px-4 py-2 border border-[#ccc3d8] text-[#ccc3d8] hover:bg-[#333535] transition-colors rounded-lg text-[12px] font-medium flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">download</span>
+                    Descargar Actual
+                  </a>
+                )}
+              </div>
               <button
                 type="submit"
                 name="p12_submit"

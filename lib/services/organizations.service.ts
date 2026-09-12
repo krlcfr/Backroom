@@ -24,6 +24,7 @@ function toOrgResponse(row: {
   logo_url: string | null;
   created_at: string;
   updated_at: string;
+  certificate_path?: string | null;
 }) {
   return {
     id: row.id,
@@ -33,6 +34,7 @@ function toOrgResponse(row: {
     logoUrl: row.logo_url,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    certificatePath: row.certificate_path ?? null,
   };
 }
 
