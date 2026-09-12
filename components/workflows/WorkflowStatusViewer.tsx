@@ -263,12 +263,26 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { 
         if (!res.ok) throw new Error(data.error || "Error al firmar");
         alert(data.message);
       } else {
-        // Fallback for simple approve/reject (Motor de Ejecución de Antigravity)
-        // This is a placeholder since the coworker implemented `WorkflowsService.approveNode` 
-        // but maybe not the API endpoint. We will assume the API endpoint exists or create it.
-        // Actually, if it doesn't exist, we can just call our /sign endpoint but without PKI logic,
-        // or we'll create /approve. But for now, we focus on PKI.
-        alert("Aprobación simple no implementada en este demo. Usa la firma.");
+        // Aprobación simple o rechazo
+        let rejectionReason = "";
+        if (action === 'rejected') {
+          rejectionReason = window.prompt("Razón del rechazo (opcional):") || "";
+          if (rejectionReason === null) {
+            setLoading(false);
+            return; // El usuario canceló el prompt
+          }
+        }
+
+        const res = await fetch(`/api/workflows/${workflowId}/nodes/${nodeId}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, rejection_reason: rejectionReason })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Error al procesar la acción");
+        
+        alert(action === 'approved' ? "Aprobado con éxito." : "Rechazado con éxito.");
       }
       onActionComplete();
     } catch (e: any) {
@@ -290,8 +304,9 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { 
       
       <div className="flex gap-3">
         <button 
-          onClick={() => alert("Función de rechazo simplificada.")}
-          className="px-4 py-2 bg-[#27272a] hover:bg-[#3f3f46] text-[#ef4444] text-xs font-semibold rounded-lg transition-colors border border-[#ef4444]/20"
+          onClick={() => handleAction('rejected', myActiveNode.id)}
+          disabled={loading}
+          className="px-4 py-2 bg-[#27272a] hover:bg-[#3f3f46] text-[#ef4444] text-xs font-semibold rounded-lg transition-colors border border-[#ef4444]/20 disabled:opacity-50"
         >
           Rechazar
         </button>
@@ -299,7 +314,8 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { 
         {myActiveNode.action_required === 'sign' ? (
           <button 
             onClick={() => setPasswordModal({ isOpen: true, nodeId: myActiveNode.id })}
-            className="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-xs font-semibold rounded-lg transition-colors shadow-lg flex items-center gap-2"
+            disabled={loading}
+            className="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-xs font-semibold rounded-lg transition-colors shadow-lg flex items-center gap-2 disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[16px]">fingerprint</span>
             Firmar Digitalmente (PKI)
@@ -307,7 +323,8 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { 
         ) : (
           <button 
             onClick={() => handleAction('approved', myActiveNode.id)}
-            className="px-4 py-2 bg-[#10b981] hover:bg-[#059669] text-white text-xs font-semibold rounded-lg transition-colors shadow-lg flex items-center gap-2"
+            disabled={loading}
+            className="px-4 py-2 bg-[#10b981] hover:bg-[#059669] text-white text-xs font-semibold rounded-lg transition-colors shadow-lg flex items-center gap-2 disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[16px]">check_circle</span>
             Aprobar

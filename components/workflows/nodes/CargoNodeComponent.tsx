@@ -8,7 +8,7 @@ export const CargoNodeComponent = ({ data, selected }: { data: any, selected?: b
       
       {/* Handle superior para recibir conexión */}
       {!data.isRoot && (
-        <Handle type="target" position={Position.Top} className="w-4 h-4 !bg-[#d2bbff] !border-2 !border-[#1e2020] -mt-2 z-10" />
+        <Handle type="target" position={Position.Top} className="w-6 h-6 !bg-[#d2bbff] !border-4 !border-[#1e2020] -mt-3 z-10 hover:scale-125 transition-transform cursor-crosshair" />
       )}
       
       {/* Header morado */}
@@ -41,7 +41,7 @@ export const CargoNodeComponent = ({ data, selected }: { data: any, selected?: b
       </div>
 
       {/* Handle inferior para enviar conexión */}
-      <Handle type="source" position={Position.Bottom} className="w-4 h-4 !bg-[#d2bbff] !border-2 !border-[#1e2020] -mb-2 z-10" />
+      <Handle type="source" position={Position.Bottom} className="w-6 h-6 !bg-[#d2bbff] !border-4 !border-[#1e2020] -mb-3 z-10 hover:scale-125 transition-transform cursor-crosshair" />
     </div>
   );
 };
