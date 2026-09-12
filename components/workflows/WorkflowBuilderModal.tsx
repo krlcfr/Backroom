@@ -325,8 +325,8 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                     className="bg-[#27272a] text-[#e2e2e2] text-[13px] border border-[#3f3f46] rounded-md px-2 py-1 outline-none"
                   >
                     <option value="">Nadie</option>
-                    {members.map(m => (
-                      <option key={m.id} value={m.userId || m.id}>{m.nombre} {m.apellidos}</option>
+                    {members.map((m, idx) => (
+                      <option key={m.userId || m.id || idx} value={m.userId || m.id}>{m.nombre} {m.apellidos}</option>
                     ))}
                   </select>
                 </div>
@@ -437,8 +437,8 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                         }}
                       >
                         <option value="">Cualquiera con este cargo</option>
-                        {eligibleMembers.map(m => (
-                          <option key={m.userId} value={m.userId}>{m.fullName}</option>
+                        {eligibleMembers.map((m, idx) => (
+                          <option key={m.userId || m.id || idx} value={m.userId}>{m.fullName}</option>
                         ))}
                       </select>
                       {eligibleMembers.length === 0 && (
