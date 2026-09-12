@@ -253,6 +253,27 @@ export default function ConfiguracionForm({ org }: { org: OrgProps }) {
               Sube el certificado digital oficial de la empresa para sellar y validar criptográficamente los documentos firmados. (Solo planes Pro/Enterprise)
             </p>
           </div>
+
+          <div className="px-6 pt-6 pb-0">
+            {org.hasCertificate ? (
+              <div className="flex items-center gap-3 p-4 bg-[#052e16]/50 border border-[#166534] rounded-lg">
+                <span className="material-symbols-outlined text-[#4ade80]">check_circle</span>
+                <div>
+                  <h4 className="text-[14px] font-medium text-[#4ade80]">Certificado Vigente Instalado</h4>
+                  <p className="text-[12px] text-[#4ade80]/70">El sistema de firmas criptográficas está habilitado.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 p-4 bg-[#450a0a]/50 border border-[#7f1d1d] rounded-lg">
+                <span className="material-symbols-outlined text-[#f87171]">error</span>
+                <div>
+                  <h4 className="text-[14px] font-medium text-[#f87171]">No se han implementado certificados</h4>
+                  <p className="text-[12px] text-[#f87171]/70">Los documentos no tendrán firma PKI hasta que configures uno.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
           <form 
             className="p-6 flex flex-col gap-6"
             onSubmit={async (e) => {
