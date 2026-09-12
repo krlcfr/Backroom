@@ -85,18 +85,31 @@ export async function GET(
       return rest;
     });
 
-    // Generar Signed URLs para los recursos de tipo 'archivo'
-    const resourcesWithUrls = await Promise.all(filteredRecursos.map(async (res) => {
-      if (res.tipo !== "link" && res.tipo !== "youtube") {
-        // Es un archivo físico guardado en Storage (res.url guarda el path)
-        const { data } = await supabaseAdmin.storage
-          .from("recursos")
-          .createSignedUrl(res.url, 60 * 60); // 1 hora de validez
+    // Generar Signed URLs para los recursos de tipo 'archivo' en un solo request batch
+    const pathsToSign = filteredRecursos
+      .filter(res => res.tipo !== "link" && res.tipo !== "youtube" && res.url)
+      .map(res => res.url);
+
+    let signedUrlsMap: Record<string, string> = {};
+    
+    if (pathsToSign.length > 0) {
+      const { data } = await supabaseAdmin.storage
+        .from("recursos")
+        .createSignedUrls(pathsToSign, 60 * 60); // 1 hora de validez
         
-        return { ...res, signedUrl: data?.signedUrl || null };
+      if (data) {
+        data.forEach(item => {
+          if (item.signedUrl) signedUrlsMap[item.path] = item.signedUrl;
+        });
       }
-      return res; // Links y YouTube devuelven su URL original
-    }));
+    }
+
+    const resourcesWithUrls = filteredRecursos.map(res => {
+      if (res.tipo !== "link" && res.tipo !== "youtube" && res.url) {
+        return { ...res, signedUrl: signedUrlsMap[res.url] || null };
+      }
+      return res;
+    });
 
     return NextResponse.json({ data: resourcesWithUrls, canUpload, canDelete }, { status: 200 });
   } catch (error) {
