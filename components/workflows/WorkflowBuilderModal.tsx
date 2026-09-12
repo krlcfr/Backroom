@@ -56,6 +56,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
   const [availableCargos, setAvailableCargos] = useState<Cargo[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [step, setStep] = useState<'builder' | 'sign_summary' | 'sign_canvas'>('builder');
   const [workflowData, setWorkflowData] = useState<any>(null);
@@ -103,6 +104,12 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
       type: 'custom',
       animated: true,
       data: { type: 'approve' },
+      markerEnd: {
+        type: 'arrowclosed',
+        width: 20,
+        height: 20,
+        color: '#7c3aed',
+      },
       style: {
         strokeWidth: 2,
         stroke: '#7c3aed',
@@ -239,6 +246,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
       return;
     }
 
+    setIsSaving(true);
     try {
       const payload = {
         organization_id: orgId,
@@ -257,6 +265,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
       if (!res.ok) {
         const err = await res.json();
         alert("Error al guardar: " + (err.error || "Desconocido"));
+        setIsSaving(false);
         return;
       }
 
@@ -267,8 +276,10 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
         setWorkflowData(respData);
         setSignNodes(firmantes);
         setStep('sign_summary');
+        setIsSaving(false);
       } else {
         alert("¡Flujo guardado y asignado con éxito!");
+        setIsSaving(false);
         if (onSaveWorkflow) {
           onSaveWorkflow(respData);
         }
@@ -276,6 +287,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
     } catch (e) {
       console.error(e);
       alert("Error inesperado al guardar el flujo");
+      setIsSaving(false);
     }
   };
 
@@ -285,8 +297,16 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[120] backdrop-blur-sm">
-      <div className="bg-[#121414] w-[95vw] h-[95vh] rounded-2xl border border-[#3f3f46] shadow-2xl flex flex-col overflow-hidden">
+      <div className="bg-[#121414] w-[95vw] h-[95vh] rounded-2xl border border-[#3f3f46] shadow-2xl flex flex-col overflow-hidden relative">
         
+        {isSaving && (
+          <div className="absolute inset-0 bg-[#121414]/80 backdrop-blur-sm z-[200] flex flex-col items-center justify-center">
+            <span className="material-symbols-outlined animate-spin text-[#7c3aed] text-4xl mb-4">refresh</span>
+            <p className="text-[#e2e2e2] font-medium text-lg">Guardando y asignando flujo...</p>
+            <p className="text-[#958da1] text-sm mt-2">Por favor espera, no cierres esta ventana.</p>
+          </div>
+        )}
+
         {step === 'builder' && (
           <>
             {/* Header */}
@@ -298,14 +318,22 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
               <div className="flex items-center gap-4">
                 <button 
                   onClick={handleSave}
-                  disabled={nodes.length === 0}
-                  className="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors"
+                  disabled={nodes.length === 0 || isSaving}
+                  className="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors flex items-center gap-2"
                 >
-                  Guardar y Asignar Flujo
+                  {isSaving ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-[16px]">refresh</span>
+                      Guardando...
+                    </>
+                  ) : (
+                    "Guardar y Asignar Flujo"
+                  )}
                 </button>
                 <button 
                   onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#333535] text-[#958da1] hover:text-[#e2e2e2] transition-colors"
+                  disabled={isSaving}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#333535] text-[#958da1] hover:text-[#e2e2e2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="material-symbols-outlined text-[20px]">close</span>
                 </button>

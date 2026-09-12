@@ -4,6 +4,7 @@ import { OrganizationsService } from "@/lib/services/organizations.service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
 import { v4 as uuidv4 } from "uuid";
+import { PKIService } from "@/lib/services/pki.service";
 
 export async function POST(
   request: NextRequest,
@@ -31,11 +32,20 @@ export async function POST(
       throw new ApiError(400, "El certificado debe ser formato .p12");
     }
 
+    const buffer = await file.arrayBuffer();
+
+    // Validar el certificado y la contraseña antes de guardarlo
+    try {
+      PKIService.extractPrivateKeyFromP12(buffer, password);
+    } catch (e: any) {
+      console.error("Error validando p12:", e);
+      throw new ApiError(400, "Contraseña incorrecta para el certificado o formato no soportado (usa cifrado Legacy si usaste OpenSSL).");
+    }
+
     const supabaseAdmin = createAdminClient();
     const fileName = `${orgId}/${uuidv4()}.p12`;
 
     // 1. Subir al bucket privado
-    const buffer = await file.arrayBuffer();
     const { error: storageError } = await supabaseAdmin.storage
       .from("certificates")
       .upload(fileName, buffer, {

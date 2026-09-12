@@ -38,12 +38,6 @@ export function SignersSummaryModal({ signersCount, onContinue, onClose }: Signe
               <span className="material-symbols-outlined text-[20px]">view_quilt</span>
               Ir a ubicar firmas
             </button>
-            <button 
-              onClick={onClose}
-              className="w-full py-3 rounded-xl bg-transparent hover:bg-[#27272a] text-[#a1a1aa] hover:text-white font-medium transition-colors border border-transparent hover:border-[#3f3f46]"
-            >
-              Hacerlo más tarde
-            </button>
           </div>
         </div>
 

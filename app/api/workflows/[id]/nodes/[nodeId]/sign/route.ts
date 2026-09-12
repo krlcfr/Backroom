@@ -164,10 +164,9 @@ export async function POST(
           certificate = extracted.certificate;
           serial = extracted.serial;
           
-          const hashObj = PKIService.calculateDocumentHash(buffer);
-          contentHash = hashObj.hashHex;
-          
-          signatureBase64 = PKIService.signHash(hashObj.hashBuffer, privateKey);
+          const signResult = PKIService.signContent(buffer, privateKey);
+          contentHash = signResult.contentHash;
+          signatureBase64 = signResult.signatureBase64;
           isPki = true;
         } catch (e: any) {
           console.error("Error en PKI:", e);
