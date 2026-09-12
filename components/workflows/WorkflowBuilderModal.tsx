@@ -52,6 +52,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
+  const [finalRecipientId, setFinalRecipientId] = useState<string>('');
 
   const [availableCargos, setAvailableCargos] = useState<Cargo[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -253,7 +254,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
         document_id: documentId,
         title: documentTitle || "Flujo de aprobación",
         nodes: parsedNodes,
-        flow_graph_json: { nodes, edges }
+        flow_graph_json: { nodes, edges, final_recipient_id: finalRecipientId || null }
       };
 
       const res = await fetch("/api/workflows", {
@@ -316,6 +317,19 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                 Constructor de Mapa Mental {documentTitle ? `- ${documentTitle}` : ''}
               </h2>
               <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 mr-2 border-r border-[#3f3f46] pr-4">
+                  <label className="text-[12px] text-[#958da1]">Destinatario Final:</label>
+                  <select
+                    value={finalRecipientId}
+                    onChange={(e) => setFinalRecipientId(e.target.value)}
+                    className="bg-[#27272a] text-[#e2e2e2] text-[13px] border border-[#3f3f46] rounded-md px-2 py-1 outline-none"
+                  >
+                    <option value="">Nadie</option>
+                    {members.map(m => (
+                      <option key={m.id} value={m.userId || m.id}>{m.nombre} {m.apellidos}</option>
+                    ))}
+                  </select>
+                </div>
                 <button 
                   onClick={handleSave}
                   disabled={nodes.length === 0 || isSaving}

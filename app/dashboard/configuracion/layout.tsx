@@ -26,8 +26,6 @@ export default async function ConfigLayout({ children }: { children: React.React
         <p className="text-sm text-[#ccc3d8] mt-1">Ajustes generales, miembros y facturación de la organización.</p>
       </div>
       
-      <ConfigTabs esPropietario={esPropietario} />
-      
       <div className="mt-8">
         {children}
       </div>

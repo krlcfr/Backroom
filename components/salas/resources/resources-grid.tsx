@@ -119,17 +119,17 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
           const isMenuOpen = openMenuId === res.id
 
           return (
-            <div key={res.id} className="bg-[#1e2020] border border-[#3f3f46] rounded-xl p-4 flex items-center gap-3 hover:border-[#a78bfa]/50 transition-colors group relative">
+            <div key={res.id} className="bg-[#1e2020] border border-[#3f3f46] rounded-xl p-3 flex items-start gap-3 hover:border-[#a78bfa]/50 transition-colors group relative">
               <div 
-                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${bg} ${color}`}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 cursor-pointer mt-0.5 ${bg} ${color}`}
                 onClick={() => handleResourceClick(res)}
               >
-                <span className="material-symbols-outlined text-[20px]">{icon}</span>
+                <span className="material-symbols-outlined text-[18px]">{icon}</span>
               </div>
               
               <div className="flex-1 min-w-0" onClick={() => handleResourceClick(res)}>
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-[#e2e2e2] font-medium text-[14px] truncate cursor-pointer hover:text-[#a78bfa] transition-colors" title={res.nombre}>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h4 className="text-[#e2e2e2] font-medium text-[13px] break-words cursor-pointer hover:text-[#a78bfa] transition-colors" title={res.nombre}>
                     {res.nombre}
                   </h4>
                   {(res as any).pending_signature && (
@@ -138,20 +138,20 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
                     </span>
                   )}
                 </div>
-                <div className="flex items-center text-[12px] text-[#958da1] truncate">
-                  <span className="truncate max-w-[100px]">{res.usuarios?.nombre_completo}</span>
-                  <span className="mx-1.5">•</span>
+                <div className="flex items-center text-[11px] text-[#958da1] flex-wrap gap-x-1.5 gap-y-1">
+                  <span className="truncate max-w-[120px]">{res.usuarios?.nombre_completo}</span>
+                  <span>•</span>
                   <span>{formatDistanceToNow(new Date(res.created_at.endsWith('Z') ? res.created_at : `${res.created_at}Z`), { addSuffix: true, locale: es })}</span>
                   {size && (
                     <>
-                      <span className="mx-1.5">•</span>
+                      <span>•</span>
                       <span>{size}</span>
                     </>
                   )}
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

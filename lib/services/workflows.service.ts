@@ -149,7 +149,7 @@ export class WorkflowsService {
     // 0. Obtener el workflow para saber el documento y la organización (para auditoría)
     const { data: workflow, error: wfError } = await supabase
       .from("document_workflows")
-      .select("organization_id, document_id")
+      .select("organization_id, document_id, title, flow_graph_json")
       .eq("id", workflowId)
       .single();
     
@@ -220,6 +220,20 @@ export class WorkflowsService {
       } else {
         // No hay más pasos. Flujo completado.
         await supabase.from("document_workflows").update({ status: 'completed' }).eq("id", workflowId);
+
+        // Notificar al destinatario final si existe
+        const finalRecipientId = (workflow.flow_graph_json as any)?.final_recipient_id;
+        if (finalRecipientId) {
+          await NotificationService.send({
+            organizationId: workflow.organization_id,
+            userId: finalRecipientId,
+            title: "Documento Finalizado",
+            message: `El flujo del documento "${workflow.title}" ha finalizado y estás asignado como destinatario final.`,
+            type: 'WORKFLOW_STATUS_UPDATE',
+            actionUrl: `/dashboard/documentos-finales`,
+          });
+        }
+
         return { success: true, nextStep: null, workflowStatus: 'completed' };
       }
     }

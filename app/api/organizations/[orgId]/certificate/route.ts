@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth/session";
 import { OrganizationsService } from "@/lib/services/organizations.service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
+import { getUsuarioInterno } from "@/lib/auth/rbac";
 import { v4 as uuidv4 } from "uuid";
 import { PKIService } from "@/lib/services/pki.service";
 
@@ -13,10 +14,15 @@ export async function POST(
   try {
     const user = await requireAuth();
     const { orgId } = await params;
+    
+    const usuario = await getUsuarioInterno(user.id);
+    if (!usuario) {
+      throw new ApiError(401, "Usuario interno no encontrado");
+    }
 
     // Verificar si es propietario
     const org = await OrganizationsService.getOrgForUser(user.id);
-    if (!org || org.id !== orgId || org.ownerId !== user.id) {
+    if (!org || org.id !== orgId || org.ownerId !== usuario.id) {
       throw new ApiError(403, "No tienes permisos para configurar esta organización");
     }
 
