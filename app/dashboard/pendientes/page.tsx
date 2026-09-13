@@ -43,11 +43,7 @@ export default async function PendientesPage() {
         status,
         recursos!inner (
           id,
-          nombre,
-          sala_id,
-          salas!inner (
-            backroom_id
-          )
+          nombre
         )
       )
     `)

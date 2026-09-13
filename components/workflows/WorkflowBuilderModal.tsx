@@ -279,6 +279,16 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
         setStep('sign_summary');
         setIsSaving(false);
       } else {
+        // Enviar la transaccion para pasarlo a in_progress
+        const resSub = await fetch(`/api/workflows/${respData.id}/submit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+        
+        if (!resSub.ok) {
+           throw new Error("Error iniciando flujo (submit)");
+        }
+
         alert("¡Flujo guardado y asignado con éxito!");
         setIsSaving(false);
         if (onSaveWorkflow) {
