@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireAuth } from "@/lib/auth/session"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { handleApiError, ApiError } from "@/lib/api-error"
-import { checkRoomPermission } from "@/lib/auth/rbac"
+import { getUsuarioInterno } from "@/lib/auth/rbac"
 
 export async function GET(
   _request: NextRequest,
@@ -13,6 +14,17 @@ export async function GET(
     const { backroomId } = await params
 
     const supabase = await createClient()
+    const adminSupabase = createAdminClient()
+    const usuario = await getUsuarioInterno(user.id)
+    if (!usuario) throw new ApiError(404, "Perfil no encontrado")
+
+    const { data: backroom } = await adminSupabase
+      .from("backrooms")
+      .select("propietario_id")
+      .eq("id", backroomId)
+      .single()
+
+    const isOwner = backroom?.propietario_id === usuario.id
 
     const { data, error } = await supabase
       .from("salas")
@@ -22,19 +34,57 @@ export async function GET(
 
     if (error) throw new ApiError(500, "No se pudieron cargar las salas.")
 
-    const roomsWithPermissions = [];
-    for (const room of data ?? []) {
-      const canView = await checkRoomPermission(user.id, room.id, "salas.ver");
-      if (!canView) continue;
+    let userPermissions = new Map<string, any>()
+    let memberPermiso: string | null = null
 
-      const canAccess = await checkRoomPermission(user.id, room.id, "salas.acceder");
-      const canCreateSubrooms = await checkRoomPermission(user.id, room.id, "salas.crear");
+    if (!isOwner) {
+      const { data: permisos } = await supabase
+        .from("sala_permisos")
+        .select("sala_id, salas_ver, salas_acceder, salas_crear")
+        .eq("usuario_id", usuario.id)
+
+      ;(permisos ?? []).forEach(p => userPermissions.set(p.sala_id, p))
+
+      const { data: miembro } = await supabase
+        .from("backroom_miembros")
+        .select("permiso")
+        .eq("backroom_id", backroomId)
+        .eq("usuario_id", usuario.id)
+        .maybeSingle()
+      
+      memberPermiso = miembro?.permiso ?? null
+    }
+
+    const roomsWithPermissions = []
+    for (const room of data ?? []) {
+      let canView = isOwner;
+      let canAccess = isOwner;
+      let canCreateSubrooms = isOwner;
+
+      if (!isOwner) {
+        const p = userPermissions.get(room.id);
+        if (p !== undefined) {
+          canView = p.salas_ver === true;
+          canAccess = p.salas_acceder === true;
+          canCreateSubrooms = p.salas_crear === true;
+        } else if (memberPermiso) {
+          canView = true;
+          canAccess = true;
+          canCreateSubrooms = memberPermiso === "contribuir" || memberPermiso === "admin";
+        } else {
+          canView = false;
+          canAccess = false;
+          canCreateSubrooms = false;
+        }
+      }
+
+      if (!canView) continue;
 
       roomsWithPermissions.push({
         ...room,
         can_access: canAccess,
         can_create_subrooms: canCreateSubrooms
-      });
+      })
     }
 
     return NextResponse.json(roomsWithPermissions)

@@ -41,6 +41,12 @@ const StatusNode = ({ data }: any) => {
     textColor = "text-[#ef4444]";
     badgeClass = "border-[#ef4444]/30 text-[#ef4444] bg-[#ef4444]/10";
     statusText = "Rechazado";
+  } else if (data.status === 'in_turn') {
+    borderColor = "border-[#7c3aed]";
+    bgColor = "bg-[#7c3aed]/10";
+    textColor = "text-[#d2bbff]";
+    badgeClass = "border-[#7c3aed]/30 text-[#d2bbff] bg-[#7c3aed]/10";
+    statusText = "En Turno";
   }
 
   return (
@@ -69,6 +75,8 @@ const StatusNode = ({ data }: any) => {
   );
 };
 
+import { WorkflowHistoryTimeline } from "./WorkflowHistoryTimeline";
+
 const nodeTypes = { circle: StatusNode, statusCircle: StatusNode };
 
 export function WorkflowStatusViewer({ documentId, hideActions = false }: WorkflowStatusViewerProps) {
@@ -78,6 +86,8 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
   const [error, setError] = useState("");
   const [dbNodes, setDbNodes] = useState<any[]>([]);
   const [workflowId, setWorkflowId] = useState<string>("");
+  const [orgId, setOrgId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     async function loadWorkflow() {
@@ -94,16 +104,23 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
 
         const workflow = json.data;
         setWorkflowId(workflow.id);
+        setOrgId(workflow.organization_id);
         const rawDbNodes = workflow.nodes || []; // Array de workflow_nodes de la BD
         setDbNodes(rawDbNodes);
         const graphJson = workflow.flow_graph_json;
 
         if (graphJson && graphJson.nodes) {
           // Mapeamos los nodos del grafo visual con los datos reales de la BD
+          const usedDbNodes = new Set();
           const visualNodes: Node[] = graphJson.nodes.map((vNode: any) => {
-            // Buscamos si existe un nodo en la BD con este cargo_id
-            const dbNode = rawDbNodes.find((dbN: any) => dbN.cargo_id === vNode.data?.cargo_id);
+            // Buscamos si existe un nodo en la BD con este cargo_id que no hayamos usado
+            const dbNode = rawDbNodes.find((dbN: any) => {
+               const matchesCargo = dbN.cargo_id === (vNode.data?.cargoId || vNode.data?.cargo_id);
+               return matchesCargo && !usedDbNodes.has(dbN.id);
+            });
             
+            if (dbNode) usedDbNodes.add(dbNode.id);
+
             // Asignamos el label correcto desde la BD si existe, o dejamos el que tenia
             const label = dbNode?.cargo?.nombre || vNode.data?.label || "Desconocido";
             const status = dbNode?.status || 'pending'; // 'pending', 'approved', 'rejected'
@@ -164,6 +181,7 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
         <WorkflowActionsPanel 
           workflowId={workflowId}
           nodes={dbNodes} 
+          orgId={orgId}
           onActionComplete={() => window.location.reload()}
         />
       )}
@@ -174,10 +192,20 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
             <span className="material-symbols-outlined text-[18px] text-[#7c3aed]">account_tree</span>
             Estado de Aprobación
           </h3>
-          <div className="flex gap-4 text-xs font-medium">
-            <span className="flex items-center gap-1 text-[#10b981]"><span className="w-2 h-2 rounded-full bg-[#10b981]"></span> Aprobado</span>
-            <span className="flex items-center gap-1 text-[#f59e0b]"><span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Pendiente</span>
-            <span className="flex items-center gap-1 text-[#ef4444]"><span className="w-2 h-2 rounded-full bg-[#ef4444]"></span> Rechazado</span>
+          <div className="flex items-center gap-4 text-xs font-medium">
+            <div className="hidden md:flex gap-3">
+              <span className="flex items-center gap-1 text-[#10b981]"><span className="w-2 h-2 rounded-full bg-[#10b981]"></span> Aprobado</span>
+              <span className="flex items-center gap-1 text-[#d2bbff]"><span className="w-2 h-2 rounded-full bg-[#7c3aed]"></span> En Turno</span>
+              <span className="flex items-center gap-1 text-[#f59e0b]"><span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Pendiente</span>
+              <span className="flex items-center gap-1 text-[#ef4444]"><span className="w-2 h-2 rounded-full bg-[#ef4444]"></span> Rechazado</span>
+            </div>
+            <button 
+              onClick={() => setShowHistory(!showHistory)}
+              className="px-3 py-1.5 bg-[#27272a] hover:bg-[#3f3f46] text-[#e2e2e2] rounded-lg transition-colors border border-[#3f3f46] flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[16px]">{showHistory ? 'visibility_off' : 'history'}</span>
+              {showHistory ? 'Ocultar Bitácora' : 'Ver Histórico'}
+            </button>
           </div>
         </div>
 
@@ -197,12 +225,23 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
           </ReactFlow>
         </ReactFlowProvider>
       </div>
+
+      {showHistory && workflowId && (
+        <div className="w-full bg-[#1a1c1c] border border-[#3f3f46] rounded-xl p-6 shadow-2xl animate-in fade-in slide-in-from-top-4">
+          <h3 className="text-lg font-semibold text-[#e2e2e2] flex items-center gap-2 mb-6">
+            <span className="material-symbols-outlined text-[#7c3aed]">history</span>
+            Bitácora de Trazabilidad
+          </h3>
+          <WorkflowHistoryTimeline workflowId={workflowId} />
+        </div>
+      )}
     </div>
   );
 }
 
-export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { workflowId: string, nodes: any[], onActionComplete: () => void }) {
+export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgId }: { workflowId: string, nodes: any[], onActionComplete: () => void, orgId: string | null }) {
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userCargoId, setUserCargoId] = useState<string | null>(null);
   const [passwordModal, setPasswordModal] = useState<{ isOpen: boolean, nodeId: string } | null>(null);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -210,29 +249,39 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete }: { 
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.json()).then(data => {
-      // In Next.js App Router, some routes return { data: { user } }, while /api/auth/me returns the profile fields directly or nested. 
-      // If it has id, it's the user directly.
-      if (data.user) setCurrentUser(data.user);
-      else if (data.id) setCurrentUser(data);
+      const user = data.user || data.id ? (data.user || data) : null;
+      if (user) {
+        setCurrentUser(user);
+        
+        // Buscamos si el usuario tiene el cargo requerido en esta org
+        if (orgId) {
+          fetch(`/api/organizations/${orgId}/members`)
+            .then(res => res.ok ? res.json() : { data: { members: [] } })
+            .then(orgData => {
+               const member = orgData.data?.members?.find((m: any) => m.userId === user.id);
+               if (member) setUserCargoId(member.cargoId);
+            }).catch(console.error);
+        }
+      }
     }).catch(console.error);
-  }, []);
+  }, [orgId]);
 
   if (!currentUser) return null;
 
-  // Determinar el step actual (el primer step que tenga algún nodo pendiente)
-  const pendingNodes = nodes.filter(n => n.status === 'pending');
+  // Determinar el step actual (el primer step que tenga algún nodo in_turn)
+  const pendingNodes = nodes.filter(n => n.status === 'in_turn');
   if (pendingNodes.length === 0) return null; // No hay acciones pendientes
 
   const currentStepOrder = Math.min(...pendingNodes.map(n => n.step_order));
   
   // Buscar si el usuario actual está asignado a un nodo en el paso activo
-  // OJO: En la vida real, si assigned_user_id es null, habría que checar si el usuario tiene el cargo requerido
-  // Aquí simplificamos asumiendo assigned_user_id.
   const activeNodesInCurrentStep = pendingNodes.filter(n => n.step_order === currentStepOrder);
   
-  const myActiveNode = activeNodesInCurrentStep.find(n => 
-    n.assigned_user_id === currentUser.id || n.assigned_user_id === null
-  );
+  const myActiveNode = activeNodesInCurrentStep.find(n => {
+    if (n.assigned_user_id === currentUser.id) return true;
+    if (n.assigned_user_id === null && userCargoId && n.cargo_id === userCargoId) return true;
+    return false;
+  });
 
   if (!myActiveNode) {
     // Si no es mi turno, mostramos a quién estamos esperando

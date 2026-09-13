@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 import { CargosService } from "@/lib/services/cargos.service";
 import { createCargoSchema } from "@/lib/validations/schemas";
 import { z } from "zod";
@@ -11,18 +10,7 @@ export async function GET(
 ) {
   try {
     const { orgId } = await params;
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createClient();
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -40,18 +28,7 @@ export async function POST(
 ) {
   try {
     const { orgId } = await params;
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    const supabase = await createClient();
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });

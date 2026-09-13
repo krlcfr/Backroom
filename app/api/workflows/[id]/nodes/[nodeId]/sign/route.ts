@@ -175,7 +175,7 @@ export async function POST(
     }
 
     // 7. Guardar metadatos de la firma en la BD
-    const { error: sigError } = await supabase.from("document_signatures").insert({
+    const { error: sigError } = await supabaseAdmin.from("document_signatures").insert({
       recurso_id: workflow.document_id,
       usuario_id: perfil.id,
       workflow_id: id,
@@ -183,11 +183,17 @@ export async function POST(
       signature_hash: signatureBase64,
       certificate_serial: serial || "visual",
       signed_content_hash: contentHash || "visual",
-      is_pki: isPki
+      is_pki: isPki,
+      page_number: posData ? posData.page_number : 1,
+      pos_x: posData ? posData.pos_x_percent : 0,
+      pos_y: posData ? posData.pos_y_percent : 0,
+      width: posData ? posData.width_px : 0,
+      height: posData ? posData.height_px : 0
     });
 
     if (sigError) {
-      throw new ApiError(500, "Error al guardar la firma en la base de datos.");
+      console.error("Detalle del error al insertar en document_signatures:", sigError);
+      throw new ApiError(500, "Error al guardar la firma: " + sigError.message);
     }
 
     // 8. Audit Log specific to Signature
