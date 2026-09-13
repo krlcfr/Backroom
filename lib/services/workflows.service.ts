@@ -203,7 +203,8 @@ export class WorkflowsService {
     const currentOrder = updatedNode.step_order;
 
     // 3. Revisar si quedan nodos paralelos pendientes en el MISMO step_order
-    const pendingSiblings = allNodes.filter(n => n.step_order === currentOrder && n.status !== 'approved');
+    // (Consideramos que 'pending' o 'in_turn' significa que no ha sido aprobado/rechazado)
+    const pendingSiblings = allNodes.filter(n => n.step_order === currentOrder && (n.status === 'pending' || n.status === 'in_turn'));
 
     if (pendingSiblings.length === 0) {
       // Todos los de este nivel aprobaron. Activar el siguiente paso.
@@ -211,8 +212,13 @@ export class WorkflowsService {
       const nextNodes = allNodes.filter(n => n.step_order === nextOrder);
 
       if (nextNodes.length > 0) {
-        // En una implementación robusta, los nodos futuros deberían estar en estado 'waiting',
-        // y aquí los pasaríamos a 'pending'. Actualmente se disparan las notificaciones.
+        // Actualizamos el estado a in_turn para que aparezcan en Mis Pendientes
+        await supabase
+          .from("workflow_nodes")
+          .update({ status: 'in_turn' })
+          .eq("workflow_id", workflowId)
+          .eq("step_order", nextOrder);
+
         await NotificationService.notifyNextStep(workflowId, nextNodes);
         
         await supabase.from("document_workflows").update({ status: 'in_progress' }).eq("id", workflowId);

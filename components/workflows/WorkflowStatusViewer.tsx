@@ -41,6 +41,12 @@ const StatusNode = ({ data }: any) => {
     textColor = "text-[#ef4444]";
     badgeClass = "border-[#ef4444]/30 text-[#ef4444] bg-[#ef4444]/10";
     statusText = "Rechazado";
+  } else if (data.status === 'in_turn') {
+    borderColor = "border-[#7c3aed]";
+    bgColor = "bg-[#7c3aed]/10";
+    textColor = "text-[#d2bbff]";
+    badgeClass = "border-[#7c3aed]/30 text-[#d2bbff] bg-[#7c3aed]/10";
+    statusText = "En Turno";
   }
 
   return (
@@ -239,8 +245,8 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
 
   if (!currentUser) return null;
 
-  // Determinar el step actual (el primer step que tenga algún nodo pendiente)
-  const pendingNodes = nodes.filter(n => n.status === 'pending');
+  // Determinar el step actual (el primer step que tenga algún nodo in_turn)
+  const pendingNodes = nodes.filter(n => n.status === 'in_turn');
   if (pendingNodes.length === 0) return null; // No hay acciones pendientes
 
   const currentStepOrder = Math.min(...pendingNodes.map(n => n.step_order));

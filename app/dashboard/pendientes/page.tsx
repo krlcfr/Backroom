@@ -54,7 +54,7 @@ export default async function PendientesPage() {
         )
       )
     `)
-    .eq('status', 'pending');
+    .eq('status', 'in_turn');
 
   if (cargoIds.length > 0) {
     query = query.or(`assigned_user_id.eq.${perfil.id},and(assigned_user_id.is.null,cargo_id.in.(${cargoIds.join(',')}))`);
