@@ -75,6 +75,8 @@ const StatusNode = ({ data }: any) => {
   );
 };
 
+import { WorkflowHistoryTimeline } from "./WorkflowHistoryTimeline";
+
 const nodeTypes = { circle: StatusNode, statusCircle: StatusNode };
 
 export function WorkflowStatusViewer({ documentId, hideActions = false }: WorkflowStatusViewerProps) {
@@ -85,6 +87,7 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
   const [dbNodes, setDbNodes] = useState<any[]>([]);
   const [workflowId, setWorkflowId] = useState<string>("");
   const [orgId, setOrgId] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     async function loadWorkflow() {
@@ -189,10 +192,20 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
             <span className="material-symbols-outlined text-[18px] text-[#7c3aed]">account_tree</span>
             Estado de Aprobación
           </h3>
-          <div className="flex gap-4 text-xs font-medium">
-            <span className="flex items-center gap-1 text-[#10b981]"><span className="w-2 h-2 rounded-full bg-[#10b981]"></span> Aprobado</span>
-            <span className="flex items-center gap-1 text-[#f59e0b]"><span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Pendiente</span>
-            <span className="flex items-center gap-1 text-[#ef4444]"><span className="w-2 h-2 rounded-full bg-[#ef4444]"></span> Rechazado</span>
+          <div className="flex items-center gap-4 text-xs font-medium">
+            <div className="hidden md:flex gap-3">
+              <span className="flex items-center gap-1 text-[#10b981]"><span className="w-2 h-2 rounded-full bg-[#10b981]"></span> Aprobado</span>
+              <span className="flex items-center gap-1 text-[#d2bbff]"><span className="w-2 h-2 rounded-full bg-[#7c3aed]"></span> En Turno</span>
+              <span className="flex items-center gap-1 text-[#f59e0b]"><span className="w-2 h-2 rounded-full bg-[#f59e0b]"></span> Pendiente</span>
+              <span className="flex items-center gap-1 text-[#ef4444]"><span className="w-2 h-2 rounded-full bg-[#ef4444]"></span> Rechazado</span>
+            </div>
+            <button 
+              onClick={() => setShowHistory(!showHistory)}
+              className="px-3 py-1.5 bg-[#27272a] hover:bg-[#3f3f46] text-[#e2e2e2] rounded-lg transition-colors border border-[#3f3f46] flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[16px]">{showHistory ? 'visibility_off' : 'history'}</span>
+              {showHistory ? 'Ocultar Bitácora' : 'Ver Histórico'}
+            </button>
           </div>
         </div>
 
@@ -212,6 +225,16 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
           </ReactFlow>
         </ReactFlowProvider>
       </div>
+
+      {showHistory && workflowId && (
+        <div className="w-full bg-[#1a1c1c] border border-[#3f3f46] rounded-xl p-6 shadow-2xl animate-in fade-in slide-in-from-top-4">
+          <h3 className="text-lg font-semibold text-[#e2e2e2] flex items-center gap-2 mb-6">
+            <span className="material-symbols-outlined text-[#7c3aed]">history</span>
+            Bitácora de Trazabilidad
+          </h3>
+          <WorkflowHistoryTimeline workflowId={workflowId} />
+        </div>
+      )}
     </div>
   );
 }
