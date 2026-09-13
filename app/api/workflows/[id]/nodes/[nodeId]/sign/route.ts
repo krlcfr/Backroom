@@ -183,7 +183,12 @@ export async function POST(
       signature_hash: signatureBase64,
       certificate_serial: serial || "visual",
       signed_content_hash: contentHash || "visual",
-      is_pki: isPki
+      is_pki: isPki,
+      page_number: posData ? posData.page_number : 1,
+      pos_x: posData ? posData.pos_x_percent : 0,
+      pos_y: posData ? posData.pos_y_percent : 0,
+      width: posData ? posData.width_px : 0,
+      height: posData ? posData.height_px : 0
     });
 
     if (sigError) {

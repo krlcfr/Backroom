@@ -28,10 +28,17 @@ export default async function PendientesPage() {
     return <div>Perfil no encontrado</div>;
   }
 
-  // Obtener los workflows pendientes del usuario
   // Buscamos en workflow_nodes donde status = 'pending'
   // y que esté asignado al usuario o a su cargo
-  const { data: nodes, error } = await supabase
+  const { data: misCargos } = await supabase
+    .from('organization_members')
+    .select('cargo_id')
+    .eq('user_id', perfil.id)
+    .not('cargo_id', 'is', null);
+
+  const cargoIds = (misCargos || []).map(c => c.cargo_id).filter(Boolean);
+
+  let query = supabase
     .from('workflow_nodes')
     .select(`
       id,
@@ -47,10 +54,15 @@ export default async function PendientesPage() {
         )
       )
     `)
-    .eq('status', 'pending')
-    // Nota: Por brevedad, este query directo asume asignación directa.
-    // Si queremos por cargo, en el backend se debería hacer una subquery con rpc o filtrarlo
-    .eq('assigned_user_id', perfil.id);
+    .eq('status', 'pending');
+
+  if (cargoIds.length > 0) {
+    query = query.or(`assigned_user_id.eq.${perfil.id},and(assigned_user_id.is.null,cargo_id.in.(${cargoIds.join(',')}))`);
+  } else {
+    query = query.eq('assigned_user_id', perfil.id);
+  }
+
+  const { data: nodes, error } = await query;
 
   const tasks = nodes || [];
 
