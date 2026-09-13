@@ -254,7 +254,12 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
         document_id: documentId,
         title: documentTitle || "Flujo de aprobación",
         nodes: parsedNodes,
-        flow_graph_json: { nodes, edges, final_recipient_id: finalRecipientId || null }
+        flow_graph_json: { 
+          nodes, 
+          edges, 
+          final_recipient_id: finalRecipientId || null,
+          parsedNodes
+        }
       };
 
       const res = await fetch("/api/workflows", {
@@ -420,6 +425,23 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                         <option value="sign">Firmar</option>
                         <option value="review">Solo Revisar</option>
                       </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-[#958da1]">Compuerta Lógica (Para paralelos)</label>
+                      <select 
+                        className="bg-[#27272a] border border-[#3f3f46] text-white text-sm rounded-lg p-2.5 outline-none focus:border-[#7c3aed]"
+                        value={selectedNode.data.condition || 'AND'}
+                        onChange={(e) => {
+                          updateNodeData(selectedNode.id, { condition: e.target.value });
+                        }}
+                      >
+                        <option value="AND">Todos deben aprobar (AND)</option>
+                        <option value="OR">Con 1 basta (OR)</option>
+                      </select>
+                      <p className="text-[10px] text-[#958da1] mt-1 leading-tight">
+                        Si varias personas están en este mismo paso, elige si se requiere que todas aprueben o si basta con una sola.
+                      </p>
                     </div>
 
                     <div className="flex flex-col gap-1">

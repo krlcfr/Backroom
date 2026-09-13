@@ -6,6 +6,7 @@ export interface ParsedNode {
   assigned_user_id?: string;
   node_type: 'linear' | 'parallel' | 'final';
   action_required: 'sign' | 'approve' | 'review';
+  condition?: 'AND' | 'OR';
   step_order: number;
 }
 
@@ -72,6 +73,7 @@ export function parseFlowToSteps(
       const action_required = data.action_required || 'approve';
       const assigned_user_id = data.assigned_user_id || undefined;
       const cargo_id = data.cargoId || ''; // assuming 'cargoId' is set in UI
+      const condition = data.condition || 'AND';
 
       let node_type: 'linear' | 'parallel' | 'final' = isParallel ? 'parallel' : 'linear';
       if (outgoingCount === 0) {
@@ -84,6 +86,7 @@ export function parseFlowToSteps(
         assigned_user_id,
         node_type,
         action_required,
+        condition,
         step_order: currentStepOrder,
       });
 

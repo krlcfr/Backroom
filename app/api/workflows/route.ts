@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { WorkflowsService } from "@/lib/services/workflows.service";
 import { handleApiError, ApiError } from "@/lib/api-error";
 import { z } from "zod";
@@ -14,6 +14,7 @@ const createWorkflowSchema = z.object({
     assigned_user_id: z.string().uuid().optional(),
     node_type: z.enum(['linear', 'parallel', 'final']),
     action_required: z.enum(['sign', 'approve', 'review']),
+    condition: z.enum(['AND', 'OR']).optional(),
     step_order: z.number().int().min(1)
   })).min(1, "El flujo debe tener al menos un nodo")
 });

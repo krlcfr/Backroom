@@ -167,10 +167,12 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[14px] font-bold ${
                           node.status === 'approved' ? 'bg-green-500/20 text-green-400' :
                           node.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                          node.status === 'skipped' ? 'bg-gray-500/20 text-gray-400' :
                           'bg-[#3f3f46] text-[#e2e2e2]'
                         }`}>
                           {node.status === 'approved' ? <span className="material-symbols-outlined text-[16px]">check</span> :
                            node.status === 'rejected' ? <span className="material-symbols-outlined text-[16px]">close</span> :
+                           node.status === 'skipped' ? <span className="material-symbols-outlined text-[16px]">do_not_disturb_on</span> :
                            node.usuarios?.nombre_completo?.[0]?.toUpperCase() || '?'}
                         </div>
                         <div className="flex-1">
@@ -195,6 +197,10 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
                       
                       {node.status === 'approved' && (
                         <span className="text-[12px] font-medium text-green-400 bg-green-500/10 px-2 py-1 rounded">Completado</span>
+                      )}
+
+                      {node.status === 'skipped' && (
+                        <span className="text-[12px] font-medium text-gray-400 bg-gray-500/10 px-2 py-1 rounded">Omitido</span>
                       )}
                     </div>
                   ))}

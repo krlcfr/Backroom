@@ -203,10 +203,21 @@ export class WorkflowsService {
     const currentOrder = updatedNode.step_order;
 
     // 3. Revisar si quedan nodos paralelos pendientes en el MISMO step_order
-    const pendingSiblings = allNodes.filter(n => n.step_order === currentOrder && n.status !== 'approved');
+    const pendingSiblings = allNodes.filter(n => n.step_order === currentOrder && n.status !== 'approved' && n.status !== 'skipped');
 
-    if (pendingSiblings.length === 0) {
-      // Todos los de este nivel aprobaron. Activar el siguiente paso.
+    const parsedNodes = (workflow.flow_graph_json as any)?.parsedNodes || [];
+    const isOrStep = parsedNodes.some((pn: any) => pn.step_order === currentOrder && pn.condition === 'OR');
+
+    if (isOrStep || pendingSiblings.length === 0) {
+      // Si es OR y hay hermanos pendientes, cancelarlos (saltarlos)
+      if (isOrStep && pendingSiblings.length > 0) {
+        const siblingIds = pendingSiblings.map(n => n.id);
+        await supabase.from("workflow_nodes")
+          .update({ status: 'skipped' })
+          .in('id', siblingIds);
+      }
+
+      // Todos los de este nivel aprobaron o se cumplió la compuerta OR. Activar el siguiente paso.
       const nextOrder = currentOrder + 1;
       const nextNodes = allNodes.filter(n => n.step_order === nextOrder);
 
