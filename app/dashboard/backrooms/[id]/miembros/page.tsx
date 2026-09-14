@@ -61,7 +61,7 @@ export default function MiembrosPage() {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { user } } = await supabase.auth.getUser();
       if (session) {
         setCurrentUserId(session.user.id)
       }

@@ -12,7 +12,7 @@ export async function GET(
     const { orgId } = await params;
     const supabase = await createClient();
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const cargos = await CargosService.listByOrg(session.user.id, orgId);
@@ -30,7 +30,7 @@ export async function POST(
     const { orgId } = await params;
     const supabase = await createClient();
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const body = await request.json();

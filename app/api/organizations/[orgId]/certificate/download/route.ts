@@ -8,8 +8,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ orgI
   try {
     const { orgId } = await params;
     const supabase = await createClient();
-    const { data: sessionData } = await supabase.auth.getSession();
-    const authId = sessionData.session?.user?.id;
+    const { data: { user } } = await supabase.auth.getUser();
+    const authId = user?.id;
 
     if (!authId) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 

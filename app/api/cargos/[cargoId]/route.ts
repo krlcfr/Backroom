@@ -24,7 +24,7 @@ export async function PATCH(
       }
     );
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const body = await request.json();
@@ -59,7 +59,7 @@ export async function DELETE(
       }
     );
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
     if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     await CargosService.remove(session.user.id, cargoId);

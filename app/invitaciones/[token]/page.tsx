@@ -16,8 +16,8 @@ export default async function InvitationLandingPage({ params }: { params: Promis
   }
 
   const supabase = await createClient()
-  const { data: sessionData } = await supabase.auth.getSession()
-  const isAuthenticated = !!sessionData.session
+  const { data: { user } } = await supabase.auth.getUser();
+  const isAuthenticated = !!user
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#09090b] p-4 font-sans text-[#fafafa]">
@@ -64,7 +64,7 @@ export default async function InvitationLandingPage({ params }: { params: Promis
                 action={async () => {
                   "use server"
                   try {
-                    await InvitationsService.acceptInvitation(sessionData.session!.user.id, token)
+                    await InvitationsService.acceptInvitation(user!.id, token)
                   } catch (e: any) {
                     return redirect(`/invitaciones/${token}?error=${encodeURIComponent(e.message)}`)
                   }

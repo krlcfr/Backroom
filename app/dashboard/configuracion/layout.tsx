@@ -6,8 +6,8 @@ import ConfigTabs from './config-tabs';
 
 export default async function ConfigLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const { data: sessionData } = await supabase.auth.getSession();
-  const authId = sessionData.session?.user?.id;
+  const { data: { user } } = await supabase.auth.getUser();
+  const authId = user?.id;
 
   if (!authId) {
     redirect('/auth/login');

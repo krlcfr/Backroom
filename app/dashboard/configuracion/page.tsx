@@ -13,8 +13,8 @@ import InviteButton from "./miembros/invite-button"
 
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
-  const { data: sessionData } = await supabase.auth.getSession()
-  const authId = sessionData.session?.user?.id ?? null
+  const { data: { user } } = await supabase.auth.getUser();
+  const authId = user?.id ?? null
 
   let org = null
   let esPropietario = false

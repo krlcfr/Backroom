@@ -39,12 +39,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
   }
 
-  const userName = sessionData.session?.user?.user_metadata?.full_name
-    ?? sessionData.session?.user?.user_metadata?.name
-    ?? sessionData.session?.user?.email
+  const userName = user?.user_metadata?.full_name
+    ?? user?.user_metadata?.name
+    ?? user?.email
     ?? "Usuario"
 
-  const userAvatar = sessionData.session?.user?.user_metadata?.avatar_url ?? null
+  const userAvatar = user?.user_metadata?.avatar_url ?? null
 
   return (
     <LimitsProvider>
