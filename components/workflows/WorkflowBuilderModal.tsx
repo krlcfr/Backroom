@@ -252,9 +252,9 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
     if (!resolvedFinalRecipientId) {
       // Encontrar la última persona asignada en el flujo
       const lastStep = parsedNodes.length > 0 ? parsedNodes[parsedNodes.length - 1] : null;
-      if (lastStep && lastStep.users && lastStep.users.length > 0) {
-        // Intentamos tomar el user_id de la última persona
-        resolvedFinalRecipientId = lastStep.users[0].user_id;
+      if (lastStep && lastStep.assigned_user_id) {
+        // Tomamos el user_id de la última persona
+        resolvedFinalRecipientId = lastStep.assigned_user_id;
       }
     }
 

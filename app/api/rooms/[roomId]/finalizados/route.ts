@@ -1,7 +1,7 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { handleApiError, ApiError } from "@/lib/api-error";
+import { getUsuarioInterno, isOwner } from "@/lib/auth/rbac";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ roomId: string }> }) {
   try {
@@ -10,13 +10,33 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ room
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new ApiError(401, "No autorizado");
 
-    // Fetch resources in this room that have a completed workflow
-    const { data: workflows, error } = await supabase
+    const usuario = await getUsuarioInterno(user.id);
+    if (!usuario) throw new ApiError(401, "Usuario interno no encontrado");
+
+    // Check if owner or superadmin
+    let hasFullAccess = false;
+    if (usuario.es_superadmin) {
+      hasFullAccess = true;
+    } else {
+      // Find backroom_id for this room
+      const { data: roomData } = await supabase
+        .from("salas")
+        .select("backroom_id")
+        .eq("id", roomId)
+        .single();
+        
+      if (roomData) {
+        hasFullAccess = await isOwner(user.id, roomData.backroom_id);
+      }
+    }
+
+    let query = supabase
       .from("document_workflows")
       .select(`
         id,
         status,
         updated_at,
+        flow_graph_json,
         recursos!inner (
           id,
           nombre,
@@ -33,6 +53,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ room
       .eq("status", "completed")
       .eq("recursos.sala_id", roomId)
       .order("updated_at", { ascending: false });
+
+    // Si NO tiene full access, solo ve los que se le asignaron como destinatario final
+    if (!hasFullAccess) {
+      query = query.filter("flow_graph_json->>final_recipient_id", "eq", usuario.id);
+    }
+
+    const { data: workflows, error } = await query;
 
     if (error) {
       throw new ApiError(500, "Error al obtener documentos finalizados");
@@ -52,4 +79,3 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ room
     return handleApiError(error);
   }
 }
-
