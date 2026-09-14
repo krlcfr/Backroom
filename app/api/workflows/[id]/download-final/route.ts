@@ -38,12 +38,20 @@ export async function GET(
     }
 
     const buffer = await fileData.arrayBuffer();
-    const fileName = (wf.recursos as any)?.nombre || "documento_final";
+    
+    // Obtener nombre base quitando la extensión si existe
+    let baseName = (wf.recursos as any)?.nombre || "documento_final";
+    if (baseName.toLowerCase().endsWith('.pdf')) {
+      baseName = baseName.slice(0, -4);
+    }
+    
+    const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+    const finalFileName = `${baseName}_br_${today}.pdf`;
 
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": "inline; filename=\"_firmado.pdf\""
+        "Content-Disposition": `inline; filename="${finalFileName}"`
       }
     });
   } catch (error) {

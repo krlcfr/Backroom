@@ -91,12 +91,15 @@ export async function GET(
       details: { workflow_id: workflow.id, maxStepOrder }
     });
 
+    const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+    const finalFileName = `documento_parcial_${documentId}_br_${today}.pdf`;
+
     // Retornar el archivo como blob descargable
     return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="documento_parcial_${documentId}.pdf"`,
+        'Content-Disposition': `attachment; filename="${finalFileName}"`,
       }
     });
 
