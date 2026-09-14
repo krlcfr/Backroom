@@ -88,7 +88,7 @@ export default function DocumentosFinalesPage() {
 
       {selectedDoc && (
         <FloatingViewer
-          url={selectedDoc.url}
+          url={`/api/resources/${selectedDoc.id}/download`}
           tipo={selectedDoc.tipo}
           nombre={selectedDoc.nombre}
           onClose={() => setSelectedDoc(null)}

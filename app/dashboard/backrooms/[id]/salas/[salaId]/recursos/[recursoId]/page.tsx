@@ -36,11 +36,8 @@ export default async function RecursoViewerPage({ params }: { params: Promise<{ 
   // Get signed URL if it's a file
   let finalUrl = recurso.url;
   if (recurso.tipo !== "enlace" && recurso.tipo !== "youtube") {
-    // Es posible que el storage también tenga RLS, usamos admin por si acaso
-    const { data: urlData } = await supabaseAdmin.storage.from("recursos").createSignedUrl(recurso.url, 3600);
-    if (urlData) {
-      finalUrl = urlData.signedUrl;
-    }
+    // Es mejor usar nuestra ruta de descarga que funciona de forma consistente para iframes
+    finalUrl = `/api/resources/${recurso.id}/download`;
   }
 
   // Same logic as FloatingViewer

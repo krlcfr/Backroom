@@ -10,8 +10,17 @@ export async function GET(req: NextRequest) {
     
     if (authError || !user) throw new ApiError(401, "No autorizado");
 
-    // Fetch workflows that are completed and have final_recipient_id == user.id
-    // Wait, Supabase Postgres filter on jsonb: flow_graph_json->>final_recipient_id
+    // 1. Get internal user ID (usuarios.id)
+    const { data: userProfile } = await supabase
+      .from("usuarios")
+      .select("id")
+      .eq("auth_id", user.id)
+      .single();
+
+    const internalUserId = userProfile?.id;
+    if (!internalUserId) throw new ApiError(404, "Perfil no encontrado");
+
+    // Fetch workflows that are completed and have final_recipient_id == internalUserId
     const { data: workflows, error } = await supabase
       .from("document_workflows")
       .select(`
@@ -30,7 +39,7 @@ export async function GET(req: NextRequest) {
         )
       `)
       .eq("status", "completed")
-      .filter("flow_graph_json->>final_recipient_id", "eq", user.id)
+      .filter("flow_graph_json->>final_recipient_id", "eq", internalUserId)
       .order("updated_at", { ascending: false });
 
     if (error) {
