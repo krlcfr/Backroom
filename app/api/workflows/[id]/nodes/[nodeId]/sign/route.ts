@@ -50,7 +50,7 @@ export async function POST(
     const supabaseAdmin = createAdminClient();
     
     // Get workflow traveling file path if any
-    const { data: wfData } = await supabaseAdmin.from('document_workflows').select('traveling_file_path').eq('id', workflow.id).single();
+    const { data: wfData } = await supabaseAdmin.from('document_workflows').select('traveling_file_path').eq('id', id).single();
 
     const { data: document } = await supabaseAdmin
       .from("recursos")
