@@ -15,7 +15,7 @@ export function WorkflowHistoryModal({ workflowId, onClose }: WorkflowHistoryMod
         <div className="flex items-center justify-between p-4 border-b border-[#3f3f46]">
           <h3 className="text-[#e2e2e2] font-semibold flex items-center gap-2">
             <span className="material-symbols-outlined text-[#7c3aed]">history</span>
-            Bit·cora del Documento
+            Bit√°cora del Documento
           </h3>
           <button
             onClick={onClose}
@@ -32,3 +32,4 @@ export function WorkflowHistoryModal({ workflowId, onClose }: WorkflowHistoryMod
     </div>
   );
 }
+
