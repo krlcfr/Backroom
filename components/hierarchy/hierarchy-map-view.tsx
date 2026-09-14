@@ -107,12 +107,8 @@ export default function HierarchyMapView({ tree, backroomId, backroomName, activ
     const RADIUS_STEP = 200; // Distancia entre anillos (profundidades)
 
     // Desenvolver la sala raíz si existe para que el BackRoom se conecte directamente a las sub-salas reales
-    let directSalas: RoomNode[] = []
-    if (tree.length === 1 && tree[0].depth === 0) {
-      directSalas = tree[0].children ?? []
-    } else {
-      directSalas = tree.flatMap((node) => (node.depth === 0 ? (node.children ?? []) : [node]))
-    }
+    // La API devuelve en 'tree' todos los nodos raíz (depth === 0 o parent_id === null)
+    const directSalas: RoomNode[] = tree;
 
     // Nodo sintético de la BackRoom que actuará como centro absoluto
     const syntheticBackroom: RoomNode = {
