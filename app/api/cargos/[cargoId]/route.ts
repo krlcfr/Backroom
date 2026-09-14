@@ -25,12 +25,12 @@ export async function PATCH(
     );
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const body = await request.json();
     const input = updateCargoSchema.parse(body);
 
-    const cargo = await CargosService.update(session.user.id, cargoId, input);
+    const cargo = await CargosService.update(user.id, cargoId, input);
     return NextResponse.json({ cargo });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
@@ -60,9 +60,9 @@ export async function DELETE(
     );
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-    await CargosService.remove(session.user.id, cargoId);
+    await CargosService.remove(user.id, cargoId);
     return new NextResponse(null, { status: 204 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: error.status || 500 });

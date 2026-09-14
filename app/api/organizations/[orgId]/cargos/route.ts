@@ -13,9 +13,9 @@ export async function GET(
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-    const cargos = await CargosService.listByOrg(session.user.id, orgId);
+    const cargos = await CargosService.listByOrg(user.id, orgId);
     return NextResponse.json({ cargos });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: error.status || 500 });
@@ -31,12 +31,12 @@ export async function POST(
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const body = await request.json();
     const input = createCargoSchema.parse(body);
 
-    const cargo = await CargosService.create(session.user.id, orgId, input);
+    const cargo = await CargosService.create(user.id, orgId, input);
     return NextResponse.json({ cargo }, { status: 201 });
   } catch (error: any) {
     if (error instanceof z.ZodError) {

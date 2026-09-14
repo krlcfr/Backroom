@@ -92,7 +92,7 @@ export default function BackRoomPage() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
     supabase.auth.getSession().then(({ data }) => {
-      setCurrentUserId(data.user?.id ?? null)
+      setCurrentUserId(data.session?.user.id ?? null)
     })
   }, [])
 

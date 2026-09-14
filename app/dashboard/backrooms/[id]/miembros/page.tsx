@@ -62,8 +62,8 @@ export default function MiembrosPage() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
       const { data: { user } } = await supabase.auth.getUser();
-      if (session) {
-        setCurrentUserId(session.user.id)
+      if (user) {
+        setCurrentUserId(user.id)
       }
 
       const [brRes, memRes] = await Promise.all([
