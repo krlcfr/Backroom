@@ -248,6 +248,21 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
       return;
     }
 
+    let resolvedFinalRecipientId = finalRecipientId;
+    if (!resolvedFinalRecipientId) {
+      // Encontrar la última persona asignada en el flujo
+      const lastStep = parsedNodes.length > 0 ? parsedNodes[parsedNodes.length - 1] : null;
+      if (lastStep && lastStep.users && lastStep.users.length > 0) {
+        // Intentamos tomar el user_id de la última persona
+        resolvedFinalRecipientId = lastStep.users[0].user_id;
+      }
+    }
+
+    if (!resolvedFinalRecipientId) {
+      toast.error("No se pudo determinar el destinatario final por defecto porque el último paso no tiene una persona específica asignada. Por favor, elige un destinatario final manualmente.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const payload = {
@@ -258,7 +273,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
         flow_graph_json: { 
           nodes, 
           edges, 
-          final_recipient_id: finalRecipientId || null,
+          final_recipient_id: resolvedFinalRecipientId,
           parsedNodes
         }
       };
@@ -333,19 +348,12 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                 Constructor de Mapa Mental {documentTitle ? `- ${documentTitle}` : ''}
               </h2>
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 mr-2 border-r border-[#3f3f46] pr-4">
-                  <label className="text-[12px] text-[#958da1]">Destinatario Final:</label>
-                  <select
-                    value={finalRecipientId}
-                    onChange={(e) => setFinalRecipientId(e.target.value)}
-                    className="bg-[#27272a] text-[#e2e2e2] text-[13px] border border-[#3f3f46] rounded-md px-2 py-1 outline-none"
-                  >
-                    <option value="">Nadie</option>
-                    {members.map((m, idx) => (
-                      <option key={m.userId || m.id || idx} value={m.userId || m.id}>{m.nombre} {m.apellidos}</option>
-                    ))}
-                  </select>
-                </div>
+                <button
+                  onClick={onClose}
+                  className="text-[#958da1] hover:text-[#e2e2e2] px-3 py-1.5 rounded-lg text-[13px] font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
                 <button 
                   onClick={handleSave}
                   disabled={nodes.length === 0 || isSaving}
@@ -477,6 +485,24 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                       {eligibleMembers.length === 0 && (
                         <p className="text-[10px] text-yellow-500 mt-1">No hay usuarios con este cargo.</p>
                       )}
+                    </div>
+
+                    <hr className="border-[#3f3f46] my-4" />
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-[#958da1] font-medium">Destinatario Final (Al finalizar)</label>
+                      <select 
+                        className="bg-[#27272a] border border-[#3f3f46] text-white text-sm rounded-lg p-2.5 outline-none focus:border-[#7c3aed]"
+                        value={finalRecipientId || ''}
+                        onChange={(e) => setFinalRecipientId(e.target.value)}
+                      >
+                        <option value="">Por defecto (Última persona del flujo)</option>
+                        {members.map((m, idx) => (
+                          <option key={m.userId || m.id || idx} value={m.userId || m.id}>{m.nombre} {m.apellidos}</option>
+                        ))}
+                      </select>
+                      <p className="text-[10px] text-[#958da1] mt-1 leading-tight">
+                        El documento finalizado se enviará a la sección de esta persona de forma permanente.
+                      </p>
                     </div>
 
                     <div className="mt-8">
