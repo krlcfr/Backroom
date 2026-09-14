@@ -55,20 +55,20 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
   useEffect(() => {
     async function fetchPdf() {
       try {
-        const res = await fetch(`/api/resources/${workflowData.document_id}/download`)
+        // Obtenemos la copia viajera (que tiene las firmas anteriores quemadas)
+        const res = await fetch(`/api/workflows/${workflowData.id}/download-final`)
         if (res.ok) {
           const blob = await res.blob()
           const url = URL.createObjectURL(blob)
           setPdfUrl(url)
         }
+        setLoadingPdf(false)
       } catch (e) {
-        console.error("Error loading PDF", e)
-      } finally {
         setLoadingPdf(false)
       }
     }
     fetchPdf()
-  }, [workflowData.document_id])
+  }, [workflowData.id])
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages)

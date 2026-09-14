@@ -72,7 +72,7 @@ export default function DocumentosFinalesPage() {
                     Ver Documento
                   </button>
                   <a 
-                    href={`/api/resources/${res.id}/download`}
+                    href={`/api/workflows/${res.workflow_id}/download-final`}
                     download
                     className="w-9 h-9 bg-[#27272a] hover:bg-[#333535] text-[#958da1] hover:text-white rounded-lg flex items-center justify-center transition-colors shrink-0"
                     title="Descargar"
@@ -88,7 +88,7 @@ export default function DocumentosFinalesPage() {
 
       {selectedDoc && (
         <FloatingViewer
-          url={`/api/resources/${selectedDoc.id}/download`}
+          url={`/api/workflows/${selectedDoc.workflow_id}/download-final`}
           tipo={selectedDoc.tipo}
           nombre={selectedDoc.nombre}
           onClose={() => setSelectedDoc(null)}

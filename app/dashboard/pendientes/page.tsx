@@ -101,8 +101,8 @@ export default async function PendientesPage() {
                   const wf = task.document_workflows;
                   const doc = wf.recursos;
                   
-                  // Para abrir el recurso, generamos la URL
-                  const viewerUrl = `/dashboard/documents/${doc.id}`;
+                  // Para abrir el recurso en modo workflow, pasamos el ID del flujo
+                  const viewerUrl = `/dashboard/documents/${doc.id}?workflow=${task.workflow_id}`;
 
                   return (
                     <tr key={task.id} className="hover:bg-[#27272a]/30 transition-colors">
@@ -134,7 +134,7 @@ export default async function PendientesPage() {
                           href={viewerUrl}
                           className="inline-flex items-center gap-2 px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-medium rounded-lg transition-colors"
                         >
-                          Ver Documento
+                          Ver Tarea
                           <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                         </Link>
                       </td>

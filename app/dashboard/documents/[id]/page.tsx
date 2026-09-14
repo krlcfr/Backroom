@@ -1,8 +1,15 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 
-export default async function DocumentRedirectPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function DocumentRedirectPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const { id } = await params;
+  const search = await searchParams;
   const supabaseAdmin = createAdminClient();
 
   const { data: recurso } = await supabaseAdmin
@@ -35,5 +42,9 @@ export default async function DocumentRedirectPage({ params }: { params: Promise
   const backroomId = (recurso.salas as any).backroom_id;
   const salaId = recurso.sala_id;
 
-  redirect(`/dashboard/backrooms/${backroomId}/salas/${salaId}/recursos/${id}`);
+  // Preserve workflow parameter if present (Phase 3: Copia Fantasma)
+  const workflowId = search.workflow;
+  
+  const destUrl = `/dashboard/backrooms/${backroomId}/salas/${salaId}/recursos/${id}${workflowId ? `?workflow=${workflowId}` : ''}`;
+  redirect(destUrl);
 }

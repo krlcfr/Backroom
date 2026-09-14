@@ -52,6 +52,24 @@ export async function POST(
 
 
     if (wfData) {
+      // PHASE 3: COPIA FANTASMA (Traveling Copy)
+      // Sacamos una copia aislada para que el archivo maestro no se llene de firmas
+      const supabaseAdmin = (await import('@/lib/supabase/admin')).createAdminClient();
+      const { data: resource } = await supabaseAdmin.from('recursos').select('url').eq('id', wfData.document_id).single();
+      
+      if (resource) {
+        const extension = resource.url.split('.').pop() || 'pdf';
+        const newPath = `workflows/${workflowId}/copia_viajera.${extension}`;
+        
+        const { error: copyError } = await supabaseAdmin.storage.from('recursos').copy(resource.url, newPath);
+        
+        if (!copyError) {
+          await supabaseAdmin.from('document_workflows').update({ traveling_file_path: newPath }).eq('id', workflowId);
+        } else {
+          console.error("Error creating traveling copy:", copyError);
+        }
+      }
+
       await AuditService.logAction({
         orgId: wfData.organization_id,
         actorId: user.id,

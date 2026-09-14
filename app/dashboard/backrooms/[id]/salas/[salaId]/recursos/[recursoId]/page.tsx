@@ -5,8 +5,17 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { checkRoomPermission } from "@/lib/auth/rbac";
 
-export default async function RecursoViewerPage({ params }: { params: Promise<{ id: string, salaId: string, recursoId: string }> }) {
+export default async function RecursoViewerPage({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ id: string, salaId: string, recursoId: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const { id, salaId, recursoId } = await params;
+  const search = await searchParams;
+  const workflowId = search.workflow as string | undefined;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -37,7 +46,12 @@ export default async function RecursoViewerPage({ params }: { params: Promise<{ 
   let finalUrl = recurso.url;
   if (recurso.tipo !== "enlace" && recurso.tipo !== "youtube") {
     // Es mejor usar nuestra ruta de descarga que funciona de forma consistente para iframes
-    finalUrl = `/api/resources/${recurso.id}/download`;
+    if (workflowId) {
+      // PHASE 3: Si estamos viendo el documento en el contexto de un flujo (Copia Fantasma)
+      finalUrl = `/api/workflows/${workflowId}/download-final`;
+    } else {
+      finalUrl = `/api/resources/${recurso.id}/download`;
+    }
   }
 
   // Same logic as FloatingViewer

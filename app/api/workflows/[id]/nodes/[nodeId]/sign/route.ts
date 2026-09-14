@@ -48,6 +48,10 @@ export async function POST(
     if (!workflow) throw new ApiError(404, "Workflow no encontrado");
 
     const supabaseAdmin = createAdminClient();
+    
+    // Get workflow traveling file path if any
+    const { data: wfData } = await supabaseAdmin.from('document_workflows').select('traveling_file_path').eq('id', workflow.id).single();
+
     const { data: document } = await supabaseAdmin
       .from("recursos")
       .select("url")
@@ -55,6 +59,9 @@ export async function POST(
       .single();
     
     if (!document) throw new ApiError(404, "Documento no encontrado");
+
+    // PHASE 3: Use traveling copy if available, else original
+    const filePath = wfData?.traveling_file_path || document.url;
 
     const { data: perfil } = await supabase
       .from("usuarios")
@@ -71,10 +78,10 @@ export async function POST(
       .eq('workflow_node_id', nodeId)
       .single();
 
-    // 4. Descargar el PDF del Storage
+    // 4. Descargar el PDF del Storage (Copia Viajera)
     const { data: fileData, error: fileError } = await supabaseAdmin.storage
       .from("recursos")
-      .download(document.url);
+      .download(filePath);
 
     if (fileError || !fileData) {
       throw new ApiError(500, "Error descargando el PDF para la firma.");
@@ -123,7 +130,7 @@ export async function POST(
             buffer = Buffer.from(pdfBytes);
             
             // Sobrescribir el PDF en Supabase con la nueva versión visual
-            await supabaseAdmin.storage.from('recursos').upload(document.url, buffer, {
+            await supabaseAdmin.storage.from('recursos').upload(filePath, buffer, {
               contentType: 'application/pdf',
               upsert: true
             });
