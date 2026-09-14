@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { handleApiError, ApiError } from "@/lib/api-error";
 import { isOwner } from "@/lib/auth/rbac";
 
-type Permiso = "solo_visualizar" | "contribuir";
+import { Permiso } from "@/lib/auth/rbac";
 
 // PATCH /api/backrooms/[backroomId]/members/[userId] — BE-19a
 // Cambia el permiso de un miembro. Solo el propietario puede hacerlo.
@@ -22,8 +22,8 @@ export async function PATCH(
     const body = await request.json();
     const permiso: Permiso = body?.permiso;
 
-    if (permiso !== "solo_visualizar" && permiso !== "contribuir") {
-      throw new ApiError(400, "Permiso inválido. Use 'solo_visualizar' o 'contribuir'.");
+    if (permiso !== "solo_visualizar" && permiso !== "contribuir" && permiso !== "admin") {
+      throw new ApiError(400, "Permiso inválido. Use 'solo_visualizar', 'contribuir' o 'admin'.");
     }
 
     const supabase = await createClient();

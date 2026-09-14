@@ -63,6 +63,27 @@ export async function GET(request: NextRequest) {
     let esSuperadmin = existing?.es_superadmin ?? false;
 
     if (!perfilId) {
+      if (user.email) {
+        // Buscar si existe un perfil huérfano con este correo
+        const { data: existingByEmail } = await supabaseAdmin
+          .from("usuarios")
+          .select("id, es_superadmin")
+          .eq("correo", user.email)
+          .maybeSingle();
+
+        if (existingByEmail) {
+          await supabaseAdmin
+            .from("usuarios")
+            .update({ auth_id: user.id })
+            .eq("id", existingByEmail.id);
+
+          perfilId = existingByEmail.id;
+          esSuperadmin = existingByEmail.es_superadmin;
+        }
+      }
+    }
+
+    if (!perfilId) {
       // Username único: base + sufijo si colisiona
       const base = baseUsername(user);
       let username = base;
@@ -98,29 +119,9 @@ export async function GET(request: NextRequest) {
       perfilId = insert.id;
       esSuperadmin = insert.es_superadmin ?? false;
     }
-
-    if (esSuperadmin) {
-      return NextResponse.redirect(`${origin}/admin`);
-    }
-
-    const { data: member } = await supabaseAdmin
-      .from("backroom_miembros")
-      .select("backroom_id")
-      .eq("usuario_id", perfilId)
-      .limit(1)
-      .maybeSingle();
-    const { data: owner } = await supabaseAdmin
-      .from("backrooms")
-      .select("id")
-      .eq("propietario_id", perfilId)
-      .limit(1)
-      .maybeSingle();
-
-    if (member || owner) {
-      return NextResponse.redirect(`${origin}/dashboard`);
-    }
-
-    return NextResponse.redirect(`${origin}/demo/backroom`);
+    // Siempre mandar al dashboard, ya sea que tenga org/salas o no.
+    // El dashboard sabe cómo manejar el estado "Sin organización".
+    return NextResponse.redirect(`${origin}/dashboard`);
   } catch (error) {
     return handleApiError(error);
   }

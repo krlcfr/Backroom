@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { handleApiError, ApiError } from "@/lib/api-error";
-import { getUsuarioInterno } from "@/lib/auth/rbac";
+import { getUsuarioInterno, checkRoomPermission } from "@/lib/auth/rbac";
 
 const ALLOWED_TYPES = ["docx", "pptx", "mp3", "mp4", "enlace"] as const;
 const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
     const { sala_id, tipo, nombre, url, tamano_bytes } = body;
 
     if (!sala_id) throw new ApiError(400, "Se requiere sala_id.");
+
+    const hasAccess = await checkRoomPermission(user.id, sala_id, "archivos.subir");
+    if (!hasAccess) throw new ApiError(403, "No tienes permiso para subir archivos a esta sala.");
+
     if (!tipo || !ALLOWED_TYPES.includes(tipo)) {
       throw new ApiError(400, `Tipo inválido. Permitidos: ${ALLOWED_TYPES.join(", ")}.`);
     }

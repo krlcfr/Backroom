@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getUsuarioInterno, isOwner } from "@/lib/auth/rbac";
 import { ApiError } from "@/lib/api-error";
 import type { CreateBackroomInput, UpdateBackroomInput } from "@/lib/validations/schemas";
@@ -10,6 +11,7 @@ function toBackroomResponse(row: {
   descripcion: string | null;
   portada_url: string | null;
   created_at: string;
+  icono?: string;
   usuarios?: { auth_id: string; username: string } | null;
 }, ownerAuthIdOverride?: string) {
   return {
@@ -20,6 +22,7 @@ function toBackroomResponse(row: {
     description: row.descripcion,
     coverUrl: row.portada_url,
     createdAt: row.created_at,
+    icono: row.icono ?? "domain",
   };
 }
 
@@ -32,6 +35,37 @@ export class BackroomsService {
     }
 
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
+
+    // -- PAYMENT PLAN LIMIT ENFORCEMENT --
+    // Obtener la organización del usuario
+    const { OrganizationsService } = await import("@/lib/services/organizations.service");
+    const org = await OrganizationsService.getOrgForUser(authId);
+    
+    if (!org) {
+      throw new ApiError(403, "Necesitas una organización para crear BackRooms.");
+    }
+
+    if (org) {
+      const { data: orgData } = await adminSupabase
+        .from("organizations")
+        .select("plan")
+        .eq("id", org.id)
+        .single();
+        
+      if (orgData?.plan === "free") {
+        // Contar cuántos backrooms tiene el propietario de esta organización
+        const { count } = await adminSupabase
+          .from("backrooms")
+          .select("*", { count: "exact", head: true })
+          .eq("propietario_id", org.ownerId);
+          
+        if (count && count >= 1) {
+          throw new ApiError(403, "LÍMITE_PLAN: Has alcanzado el límite de 1 BackRoom en el plan Free.");
+        }
+      }
+    }
+    // ------------------------------------
 
     const { data: backroom, error: backroomError } = await supabase
       .from("backrooms")
@@ -40,6 +74,7 @@ export class BackroomsService {
         nombre: input.name,
         descripcion: input.description,
         portada_url: input.coverUrl,
+        icono: input.icono ?? "domain",
       })
       .select()
       .single();
@@ -60,10 +95,42 @@ export class BackroomsService {
       throw new ApiError(500, "No se pudo crear la BackRoom");
     }
 
+    const { error: salaError } = await adminSupabase.from("salas").insert({
+      backroom_id: backroom.id,
+      nombre: input.name,
+      depth: 0,
+      icono: input.icono ?? "domain",
+    });
+
+    if (salaError) {
+      throw new ApiError(500, "No se pudo crear la sala raíz");
+    }
+
     return toBackroomResponse(backroom, authId);
   }
 
-  static async listForUser() {
+  static async listForUser(authId?: string) {
+    const admin = createAdminClient();
+
+    if (authId) {
+      const { OrganizationsService } = await import("@/lib/services/organizations.service");
+      const org = await OrganizationsService.getOrgForUser(authId);
+      if (org) {
+        // Traer todos los backrooms del propietario de la organización
+        const { data, error } = await admin
+          .from("backrooms")
+          .select("*, usuarios(auth_id, username)")
+          .eq("propietario_id", org.ownerId)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          throw new ApiError(500, "No se pudieron obtener las BackRooms");
+        }
+
+        return data.map((row) => toBackroomResponse(row));
+      }
+    }
+
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -79,9 +146,9 @@ export class BackroomsService {
   }
 
   static async getById(backroomId: string) {
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("backrooms")
       .select("*, usuarios(auth_id, username)")
       .eq("id", backroomId)
@@ -117,18 +184,19 @@ export class BackroomsService {
       throw new ApiError(403, "Solo el propietario puede editar el BackRoom");
     }
 
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
     const updateData: any = {};
     if (input.name !== undefined) updateData.nombre = input.name;
     if (input.description !== undefined) updateData.descripcion = input.description;
     if (input.coverUrl !== undefined) updateData.portada_url = input.coverUrl;
+    if (input.icono !== undefined) updateData.icono = input.icono;
 
     if (Object.keys(updateData).length === 0) {
       return this.getById(backroomId); // Nothing to update
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("backrooms")
       .update(updateData)
       .eq("id", backroomId)

@@ -1,9 +1,21 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useState, useEffect, useRef } from "react"
+import { useParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { createBrowserClient } from "@supabase/ssr"
+import RoomTree from "@/components/salas/room-tree"
+import SubRoomsGrid from "@/components/salas/sub-rooms-grid"
+import RightPanel from "@/components/salas/right-panel"
+import CreateRoomModal from "@/components/modals/create-room-modal"
+import Breadcrumb from "@/components/ui/breadcrumb"
+import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
+import AddResourceModal from "@/components/salas/resources/add-resource-modal"
+import FinalResourcesTab from "@/components/salas/resources/final-resources-tab"
+import { useLimits } from "@/components/providers/limits-provider"
+import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
+import ActiveWorkflowsModal from "@/components/workflows/ActiveWorkflowsModal"
+import { SalaPermissionsModal } from "@/components/salas/permissions/sala-permissions-modal"
 
 interface Backroom {
   id: string
@@ -13,37 +25,67 @@ interface Backroom {
   ownerId: string
   ownerName: string | null
   createdAt: string
+  icono?: string
+}
+
+interface Sala {
+  id: string
+  nombre: string
+  descripcion: string | null
+  depth: number
+  created_at: string
+  icono?: string
+}
+
+interface SalaNode {
+  id: string
+  nombre: string
+  depth: number
+  children?: SalaNode[]
 }
 
 export default function BackRoomPage() {
-  const { id } = useParams<{ id: string }>()
+  const params = useParams()
   const router = useRouter()
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deleting, setDeleting] = useState(false)
+  const pathname = usePathname()
+  const { canCreateSala } = useLimits()
+  const id = typeof params.id === "string" ? params.id : params.id?.[0]
+
   const [backroom, setBackroom] = useState<Backroom | null>(null)
+  const [rooms, setRooms] = useState<Sala[]>([])
+  const [tree, setTree] = useState<SalaNode[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState(false)
+
+
+
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'finalizados'>('subsalas')
   const [error, setError] = useState<string | null>(null)
+  
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false)
 
-  useEffect(() => {
-    async function fetchBackroom() {
-      try {
-        const res = await fetch(`/api/backrooms/${id}`)
-        if (!res.ok) {
-          throw new Error("No se pudo cargar la BackRoom")
-        }
-        const data = await res.json()
-        setBackroom(data)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error desconocido")
-      } finally {
-        setLoading(false)
-      }
-    }
-    if (id) fetchBackroom()
-  }, [id])
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
+  const [editNombre, setEditNombre] = useState("")
+  const [editDescripcion, setEditDescripcion] = useState("")
+  const [editError, setEditError] = useState("")
+  const [editLoading, setEditLoading] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+
+  const [showCreateRoom, setShowCreateRoom] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  
+  const [resources, setResources] = useState<Resource[]>([])
+  const [canUpload, setCanUpload] = useState(false)
+  const [canDeleteRes, setCanDeleteRes] = useState(false)
+  const [addResourceType, setAddResourceType] = useState<'doc' | 'pdf' | 'media' | 'link' | null>(null)
+  const [showCreateDocument, setShowCreateDocument] = useState(false)
+  const [showActiveWorkflows, setShowActiveWorkflows] = useState(false)
+  const [rootRoomId, setRootRoomId] = useState<string | null>(null)
+  const [currentOrgId, setCurrentOrgId] = useState<string>("")
+
   const esPropietario = currentUserId !== null && backroom?.ownerId === currentUserId
 
   useEffect(() => {
@@ -52,17 +94,95 @@ export default function BackRoomPage() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
     supabase.auth.getSession().then(({ data }) => {
-      setCurrentUserId(data.session?.user?.id ?? null)
+      setCurrentUserId(data.session?.user.id ?? null)
     })
   }, [])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [menuOpen])
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [backroomRes, roomsRes, orgRes] = await Promise.all([
+          fetch(`/api/backrooms/${id}`),
+          fetch(`/api/backrooms/${id}/rooms`),
+          fetch('/api/organizations/current')
+        ])
+
+        if (!backroomRes.ok) throw new Error("No se pudo cargar la BackRoom")
+        const backroomData = await backroomRes.json()
+        setBackroom(backroomData)
+
+        if (orgRes.ok) {
+          const orgData = await orgRes.json()
+          setCurrentOrgId(orgData.orgId)
+        }
+
+        if (roomsRes.ok) {
+          const roomsData = await roomsRes.json()
+          setRooms(roomsData)
+
+          // Fetch the full tree using the root room (depth === 0)
+          const rootRoom = roomsData.find((r: any) => r.depth === 0)
+          if (rootRoom) {
+            setRootRoomId(rootRoom.id)
+            const [treeRes, resourcesRes] = await Promise.all([
+              fetch(`/api/rooms/${rootRoom.id}/tree`),
+              fetch(`/api/rooms/${rootRoom.id}/resources`)
+            ])
+            
+            if (treeRes.ok) {
+              const treeData = await treeRes.json()
+              setTree(treeData.data.room)
+            }
+
+            if (resourcesRes.ok) {
+              const resData = await resourcesRes.json()
+              setResources(resData.data)
+              setCanUpload(resData.canUpload)
+              setCanDeleteRes(resData.canDelete)
+            }
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error desconocido")
+      } finally {
+        setLoading(false)
+      }
+    }
+    if (id) fetchData()
+  }, [id, pathname])
+
+  const reloadResources = async () => {
+    if (!rootRoomId) return
+    try {
+      const resourcesRes = await fetch(`/api/rooms/${rootRoomId}/resources`)
+      if (resourcesRes.ok) {
+        const resData = await resourcesRes.json()
+        setResources(resData.data)
+        setCanUpload(resData.canUpload)
+        setCanDeleteRes(resData.canDelete)
+      }
+    } catch (e) {
+      console.error("Error reloading resources", e)
+    }
+  }
 
   async function handleDelete() {
     if (!id) return
     setDeleting(true)
     try {
-      const res = await fetch(`/api/backrooms/${id}`, {
-        method: "DELETE",
-      })
+      const res = await fetch(`/api/backrooms/${id}`, { method: "DELETE" })
       if (!res.ok) throw new Error("No se pudo eliminar")
       router.push("/dashboard")
       router.refresh()
@@ -72,12 +192,68 @@ export default function BackRoomPage() {
     }
   }
 
+  function openEdit() {
+    setMenuOpen(false)
+    if (!backroom) return
+    setEditNombre(backroom.name)
+    setEditDescripcion(backroom.description ?? "")
+    setEditError("")
+    setShowEditModal(true)
+  }
+
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!backroom) return
+    setEditError("")
+
+    const trimmed = editNombre.trim()
+    if (trimmed.length < 3) {
+      setEditError("El nombre debe tener al menos 3 caracteres")
+      return
+    }
+
+    setEditLoading(true)
+
+    try {
+      const res = await fetch(`/api/backrooms/${backroom.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: trimmed,
+          description: editDescripcion.trim() || undefined,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "No se pudo actualizar")
+      }
+
+      const updated = await res.json()
+      setBackroom(updated)
+      setShowEditModal(false)
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "No se pudo actualizar")
+    } finally {
+      setEditLoading(false)
+    }
+  }
+
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-zinc-200 rounded w-1/4" />
-          <div className="h-32 bg-zinc-200 rounded" />
+      <div className="flex gap-6">
+        <div className="w-64 shrink-0">
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 bg-[#333535] rounded w-3/4" />
+            <div className="h-4 bg-[#333535] rounded w-1/2" />
+            <div className="h-4 bg-[#333535] rounded w-2/3" />
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-[#333535] rounded w-1/4" />
+            <div className="h-32 bg-[#333535] rounded" />
+          </div>
         </div>
       </div>
     )
@@ -85,12 +261,9 @@ export default function BackRoomPage() {
 
   if (error || !backroom) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-8 text-center">
-        <p className="text-red-600">{error || "BackRoom no encontrada"}</p>
-        <Link
-          href="/dashboard"
-          className="mt-4 inline-block text-zinc-500 hover:text-zinc-900"
-        >
+      <div className="text-center py-16">
+        <p className="text-[#ffb4ab]">{error || "BackRoom no encontrada"}</p>
+        <Link href="/dashboard" className="mt-4 inline-block text-[#ccc3d8] hover:text-[#d2bbff]">
           Volver al dashboard
         </Link>
       </div>
@@ -98,115 +271,296 @@ export default function BackRoomPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
-      <nav className="mb-6 text-sm text-zinc-500">
-        <Link href="/dashboard" className="hover:text-zinc-900">
-          Dashboard
-        </Link>
-        <span className="mx-2">›</span>
-        <span className="text-zinc-900">{backroom.name}</span>
-      </nav>
+    <div className="flex gap-6">
+      <main className="flex-1 flex flex-col gap-6 min-w-0">
+        <div className="flex items-start justify-between">
+          <div>
+            <Breadcrumb items={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: backroom.name },
+            ]} />
+            <h1 className="text-[28px] font-bold text-[#e2e2e2] mb-2">{backroom.name}</h1>
+            {backroom.description && (
+              <p className="text-[#ccc3d8] text-[16px] max-w-2xl">{backroom.description}</p>
+            )}
+          </div>
 
-      <div className="mb-8 overflow-hidden rounded-lg border border-zinc-200">
-        <div
-          className="flex h-32 items-end p-6 bg-cover bg-center"
-          style={
-            backroom.coverUrl
-              ? { backgroundImage: `url(${backroom.coverUrl})` }
-              : { backgroundImage: "linear-gradient(to bottom right, #8B5CF6, #7C3AED)" }
-          }
-        >
-          <h1 className="text-2xl font-bold text-white">{backroom.name}</h1>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowActiveWorkflows(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#7c3aed] hover:bg-[#6d28d9] text-white transition-colors text-[13px] font-medium"
+            >
+              <span className="material-symbols-outlined text-[16px]">account_tree</span>
+              Estado de Flujos
+            </button>
+
+            {esPropietario && (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#333535] text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 top-full mt-1 w-44 bg-[#27272a] border border-[#4a4455] rounded-lg shadow-[0_8px_24px_rgba(0,0,0,0.4)] z-50 py-1">
+                    <button
+                      onClick={openEdit}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-[13px] text-[#ccc3d8] hover:bg-[#333535] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">edit</span>
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => { setMenuOpen(false); setConfirmDelete(true) }}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-left text-[13px] text-[#ffb4ab] hover:bg-[#333535] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex items-center justify-between px-6 py-4">
-          <p className="text-sm text-zinc-500">
-            Propietario: <span className="text-zinc-900">{backroom.ownerName ?? "Desconocido"}</span>
-          </p>
-          {esPropietario && (
-            <div className="relative">
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="rounded-md px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
-              >
-                ⋮
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-full z-10 mt-1 w-56 rounded-md border border-zinc-200 bg-white py-1 shadow-lg">
-                  <Link
-                    href={`/dashboard/backrooms/${id}/miembros`}
-                    className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
-                  >
-                    Gestionar miembros
-                  </Link>
-                  <button
-                    onClick={() => setConfirmDelete(true)}
-                    className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-zinc-50"
-                  >
-                    Eliminar BackRoom
-                  </button>
-                </div>
+
+        {showActiveWorkflows && currentOrgId && (
+          <ActiveWorkflowsModal
+            orgId={currentOrgId}
+            onClose={() => setShowActiveWorkflows(false)}
+          />
+        )}
+
+        {rootRoomId && (
+          <div className="flex border-b border-[#3f3f46] mb-4">
+            <button
+              onClick={() => setActiveTab('recursos')}
+              className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+                activeTab === 'recursos' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+              }`}
+            >
+              Recursos Generales
+            </button>
+            <button
+              onClick={() => setActiveTab('finalizados')}
+              className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+                activeTab === 'finalizados' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+              }`}
+            >
+              Documentos Finales
+            </button>
+            <button
+              onClick={() => setActiveTab('subsalas')}
+              className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors ${
+                activeTab === 'subsalas' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
+              }`}
+            >
+              Salas Principales
+            </button>
+          </div>
+        )}
+
+        {(!rootRoomId || activeTab === 'subsalas') && (
+          <SubRoomsGrid
+            rooms={rooms.filter((r: any) => r.id !== rootRoomId && (r.parent_id === rootRoomId || !r.parent_id))}
+            backroomId={backroom.id}
+            onCreateClick={() => setShowCreateRoom(true)}
+            canCreate={canCreateSala(0) && (esPropietario || (rooms.find(r => r.id === rootRoomId) as any)?.can_create_subrooms !== false)}
+          />
+        )}
+
+        {rootRoomId && activeTab === 'finalizados' && (
+          <FinalResourcesTab roomId={rootRoomId} />
+        )}
+
+        {rootRoomId && activeTab === 'recursos' && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Recursos Generales</h2>
+                <p className="text-[#958da1] text-[13px] mt-1">Archivos y enlaces compartidos en la Backroom principal.</p>
+              </div>
+              {canUpload && (
+                <button
+                  onClick={() => setShowCreateDocument(true)}
+                  className="flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white px-4 py-2 rounded-lg transition-colors text-[13px] font-medium"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add</span>
+                  Recursos
+                </button>
               )}
             </div>
-          )}
-        </div>
-      </div>
 
-      {backroom.description && (
-        <div className="mb-6 text-zinc-600">
-          <p>{backroom.description}</p>
+            <ResourcesGrid 
+              resources={resources}
+              roomId={rootRoomId}
+              canDelete={canDeleteRes}
+              onResourceDeleted={reloadResources}
+            />
+          </div>
+        )}
+
+        </main>
+
+      <RightPanel 
+        backroom={backroom} 
+        esPropietario={esPropietario} 
+        tree={tree}
+        activeRoomId={rootRoomId || backroom.id}
+        rootRoomId={rootRoomId ?? undefined}
+        onUploadClick={canUpload ? () => setShowCreateDocument(true) : undefined}
+        onPermissionsClick={(esPropietario || canCreateSala(0)) && rootRoomId ? () => setShowPermissionsModal(true) : undefined}
+      />
+
+      {rootRoomId && (
+        <SalaPermissionsModal
+          isOpen={showPermissionsModal}
+          onClose={() => setShowPermissionsModal(false)}
+          salaId={rootRoomId}
+          salaParentId={null}
+        />
+      )}
+
+      {showCreateRoom && (
+        <CreateRoomModal
+          backroomId={backroom.id}
+          parentRoomId={rootRoomId}
+          parentRoomName={backroom.name}
+          currentDepth={0}
+          onClose={() => setShowCreateRoom(false)}
+          onCreated={async (room) => {
+            setShowCreateRoom(false)
+            setRooms((prev) => [...prev, { ...room, descripcion: null, depth: 1, parent_id: rootRoomId, created_at: new Date().toISOString() }])
+            const rootRoom = rooms.find(r => r.depth === 0) || room
+            if (rootRoom) {
+              const treeRes = await fetch(`/api/rooms/${rootRoom.id}/tree`)
+              if (treeRes.ok) {
+                const treeData = await treeRes.json()
+                setTree(treeData.data.room)
+              }
+            }
+          }}
+        />
+      )}
+
+      {showEditModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-[6px] p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false) }}
+        >
+          <div className="bg-[#303036] border border-[#4a4455] rounded-2xl shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)] w-full max-w-[480px] overflow-hidden flex flex-col">
+            <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+              <h2 className="text-[20px] font-semibold text-[#e2e2e2]">Editar BackRoom</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#333535] text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleEdit} className="px-6 py-2 flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-[12px] font-medium text-[#ccc3d8]">Nombre</label>
+                <input
+                  type="text"
+                  required
+                  value={editNombre}
+                  onChange={(e) => setEditNombre(e.target.value)}
+                  className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 transition-all"
+                  disabled={editLoading}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-[12px] font-medium text-[#ccc3d8]">
+                  Descripción <span className="text-[#ccc3d8]/50 font-normal">(Opcional)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={editDescripcion}
+                  onChange={(e) => setEditDescripcion(e.target.value)}
+                  placeholder="Define el propósito y nivel de acceso..."
+                  className="w-full bg-[#1e2020] border border-[#4a4455] rounded-lg px-3 py-2.5 text-[14px] text-[#e2e2e2] focus:outline-none focus:border-[#a78bfa] focus:ring-2 focus:ring-[#a78bfa]/20 placeholder:text-[#ccc3d8]/40 resize-none transition-all"
+                  disabled={editLoading}
+                />
+              </div>
+
+              {editError && <p className="text-[12px] text-[#ffb4ab]">{editError}</p>}
+
+              <div className="px-0 py-4 flex items-center justify-end gap-3 border-t border-[#4a4455]/50">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  disabled={editLoading}
+                  className="px-4 py-2 rounded-lg border border-[#4a4455] bg-transparent text-[#e2e2e2] text-[12px] font-medium hover:bg-[#333535] transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="px-5 py-2 rounded-lg bg-[#7c3aed] text-[#fafafa] text-[12px] font-semibold hover:bg-[#8b5cf6] transition-colors disabled:opacity-50 shadow-sm"
+                >
+                  {editLoading ? "Guardando..." : "Guardar"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Salas</h2>
-        {esPropietario && (
-          <button
-            disabled
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white opacity-50"
-          >
-            Nueva sala
-          </button>
-        )}
-      </div>
-
-      <div className="rounded-lg border border-dashed border-zinc-300 py-12 text-center">
-        <p className="mb-4 text-sm text-zinc-500">
-          Las salas se implementarán en el Módulo 3 (M-03).
-        </p>
-        {esPropietario && (
-          <button
-            disabled
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white opacity-50"
-          >
-            Crear primera sala (próximamente)
-          </button>
-        )}
-      </div>
-
       {confirmDelete && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-2 text-lg font-semibold">Eliminar BackRoom</h3>
-            <p className="mb-6 text-sm text-zinc-500">
-              Esta acción es irreversible. Se eliminarán todas las salas y recursos asociados.
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#121414]/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-md rounded-xl border border-[#4a4455] bg-[#1e2020] p-6 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.5)]">
+            <div className="flex items-center gap-3 text-[#ffb4ab] mb-4">
+              <span className="material-symbols-outlined text-[36px]">warning</span>
+              <h3 className="text-[20px] font-semibold">Eliminar BackRoom</h3>
+            </div>
+            <p className="mb-6 text-[14px] text-[#ccc3d8]">
+              Esta acción es <strong className="text-[#e2e2e2]">irreversible</strong>. Se eliminarán todas las salas y recursos asociados.
             </p>
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="text-sm text-zinc-500 hover:text-zinc-900"
+                className="px-4 py-2 border border-[#4a4455] rounded-lg text-[12px] font-medium text-[#ccc3d8] hover:bg-[#333535] transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className="px-4 py-2 bg-[#ffb4ab] text-[#690005] hover:bg-[#ffb4ab]/80 rounded-lg text-[12px] font-medium transition-colors disabled:opacity-50"
               >
-                {deleting ? "Eliminando…" : "Eliminar"}
+                {deleting ? "Eliminando..." : "Eliminar"}
               </button>
             </div>
           </div>
         </div>
+      )}
+      
+      {addResourceType && rootRoomId && (
+        <AddResourceModal
+          roomId={rootRoomId}
+          onClose={() => setAddResourceType(null)}
+          onSuccess={() => {
+            setAddResourceType(null)
+            reloadResources()
+          }}
+          initialType={addResourceType}
+        />
+      )}
+
+      {showCreateDocument && currentOrgId && (
+        <DocumentCreationWizardModal
+          orgId={currentOrgId}
+          onClose={() => setShowCreateDocument(false)}
+          onAddResource={(type) => {
+            setShowCreateDocument(false)
+            setAddResourceType(type)
+          }}
+        />
       )}
     </div>
   )

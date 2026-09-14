@@ -5,6 +5,7 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   captchaToken: z.string().min(1),
+  invitationToken: z.string().optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -34,6 +35,7 @@ export const createBackroomSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(2000).optional().nullable(),
   coverUrl: z.string().url().optional().nullable(),
+  icono: z.string().optional(),
 });
 
 export type CreateBackroomInput = z.infer<typeof createBackroomSchema>;
@@ -42,6 +44,7 @@ export const updateBackroomSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional().nullable(),
   coverUrl: z.string().url().optional().nullable(),
+  icono: z.string().optional(),
 });
 
 export type UpdateBackroomInput = z.infer<typeof updateBackroomSchema>;
@@ -65,3 +68,24 @@ export const updateMemberRoleSchema = z.object({
 });
 
 export type UpdateMemberRoleInput = z.infer<typeof updateMemberRoleSchema>;
+
+export const createCargoSchema = z.object({
+  nombre: z.string().trim().min(1).max(200),
+  descripcion: z.string().trim().max(2000).optional().nullable(),
+});
+
+export type CreateCargoInput = z.infer<typeof createCargoSchema>;
+
+export const updateCargoSchema = z.object({
+  nombre: z.string().trim().min(1).max(200).optional(),
+  descripcion: z.string().trim().max(2000).nullable().optional(),
+});
+
+export type UpdateCargoInput = z.infer<typeof updateCargoSchema>;
+
+
+export const updateMemberCargoSchema = z.object({
+  cargo_id: z.string().uuid().nullable(),
+});
+export type UpdateMemberCargoInput = z.infer<typeof updateMemberCargoSchema>;
+

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useRef, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import OAuthButtons from "@/components/oauth-buttons"
 import LegalModal from "@/components/legal-modal"
@@ -49,10 +49,16 @@ const inputBase =
 const inputError = "border-[#ffb4ab]/60"
 const inputNormal = "border-[#4a4455]"
 
-export default function RegistroPage() {
+import { Suspense } from "react"
+
+function RegistroForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const invitationToken = searchParams.get("invitationToken") || undefined
+  const prefillEmail = searchParams.get("email") || ""
+
   const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(prefillEmail)
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -92,7 +98,7 @@ export default function RegistroPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, captchaToken }),
+        body: JSON.stringify({ username, email, password, captchaToken, invitationToken }),
       })
 
       const data = await res.json()
@@ -125,7 +131,14 @@ export default function RegistroPage() {
 
   return (
     <>
-      <div className="p-6 pb-4 text-center border-b border-[#4a4455]/50">
+      <div className="p-6 pb-4 text-center border-b border-[#4a4455]/50 relative">
+        <Link 
+          href="/" 
+          className="absolute left-6 top-6 text-[#958da1] hover:text-[#e2e2e2] transition-colors flex items-center justify-center"
+          title="Volver al inicio"
+        >
+          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+        </Link>
         <h1 className="text-[24px] font-semibold leading-8 text-[#d2bbff] tracking-tight mb-1.5">Crear cuenta</h1>
         <p className="text-[13px] leading-5 text-[#ccc3d8]">Únete a la plataforma para gestionar tu espacio.</p>
       </div>
@@ -333,3 +346,12 @@ function ArrowIcon({ className = "" }: { className?: string }) {
     </svg>
   )
 }
+
+export default function RegistroPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <RegistroForm />
+    </Suspense>
+  )
+}
+

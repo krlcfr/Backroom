@@ -18,3 +18,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.depth-2 {
+  background-color: #27272A;
+  border: 1px solid #3F3F46;
+}
+
+.btn-primary {
+  background-color: #7C3AED;
+  color: #FAFAFA;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #8B5CF6;
+}
+
+.btn-secondary {
+  border: 1px solid #3F3F46;
+  background-color: transparent;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #27272A;
+}

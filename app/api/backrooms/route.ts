@@ -6,8 +6,8 @@ import { handleApiError } from "@/lib/api-error";
 
 export async function GET() {
   try {
-    await requireAuth();
-    const backrooms = await BackroomsService.listForUser();
+    const user = await requireAuth();
+    const backrooms = await BackroomsService.listForUser(user.id);
 
     return NextResponse.json(backrooms, { status: 200 });
   } catch (error) {
@@ -22,6 +22,9 @@ export async function POST(request: NextRequest) {
     const input = createBackroomSchema.parse(body);
 
     const backroom = await BackroomsService.create(user.id, input);
+    
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/dashboard", "layout");
 
     return NextResponse.json(backroom, { status: 201 });
   } catch (error) {

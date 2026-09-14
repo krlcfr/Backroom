@@ -17,7 +17,7 @@ export interface RateLimitResult {
   retryAfter?: number; // segundos hasta poder reintentar
 }
 
-export function checkRateLimit(identifier: string): RateLimitResult {
+export function checkRateLimit(identifier: string, maxRequests: number = MAX_REQUESTS): RateLimitResult {
   const now = Date.now();
   const entry = requestMap.get(identifier);
 
@@ -26,7 +26,7 @@ export function checkRateLimit(identifier: string): RateLimitResult {
     return { allowed: true };
   }
 
-  if (entry.count >= MAX_REQUESTS) {
+  if (entry.count >= maxRequests) {
     const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
     return { allowed: false, retryAfter };
   }

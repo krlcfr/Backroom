@@ -1,0 +1,1 @@
+﻿"use client"; import { useSidebar } from "@/components/providers/sidebar-provider"; export default function SidebarWrapper({ children }: { children: React.ReactNode }) { const { collapsed } = useSidebar(); return <main className={`flex-1 p-4 md:p-8 w-full transition-all duration-300 ${collapsed ? "md:ml-[80px]" : "md:ml-[260px]"}`}>{children}</main>; }

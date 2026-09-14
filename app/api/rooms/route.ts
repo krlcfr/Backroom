@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { handleApiError, ApiError } from "@/lib/api-error";
-import { checkPermission } from "@/lib/auth/rbac";
+import { checkPermission, checkRoomPermission } from "@/lib/auth/rbac";
 import { z } from "zod";
 
 const createRoomSchema = z.object({
@@ -10,6 +11,7 @@ const createRoomSchema = z.object({
   parent_id: z.string().uuid().optional().nullable(),
   nombre: z.string().min(1).max(200),
   descripcion: z.string().max(2000).optional(),
+  icono: z.string().optional(),
 });
 
 // POST /api/rooms — BE-33
@@ -20,10 +22,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const input = createRoomSchema.parse(body);
 
-    const hasAccess = await checkPermission(user.id, input.backroom_id, "contribuir");
-    if (!hasAccess) throw new ApiError(403, "Se requiere permiso 'contribuir' para crear salas.");
+    if (input.parent_id) {
+      const hasRoomAccess = await checkRoomPermission(user.id, input.parent_id, "salas.crear");
+      if (!hasRoomAccess) throw new ApiError(403, "No tienes permiso para crear sub-salas aquí.");
+    } else {
+      const hasAccess = await checkPermission(user.id, input.backroom_id, "contribuir");
+      if (!hasAccess) throw new ApiError(403, "Se requiere permiso 'contribuir' para crear salas principales.");
+    }
 
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
     // Calcular profundidad según el padre
     let depth = 0;
@@ -37,7 +45,21 @@ export async function POST(request: NextRequest) {
       depth = (parent.depth ?? 0) + 1;
     }
 
-    const { data, error } = await supabase
+    // Chequeo de límites del plan
+    const { data: backroomData } = await adminSupabase.from("backrooms").select("propietario_id").eq("id", input.backroom_id).single();
+    if (backroomData && backroomData.propietario_id) {
+      const { data: orgData } = await adminSupabase.from("organizations").select("id").eq("owner_id", backroomData.propietario_id).single();
+      if (orgData) {
+        const { getOrganizationPlan, PLAN_LIMITS } = await import("@/lib/limits");
+        const plan = await getOrganizationPlan(orgData.id);
+        const limits = PLAN_LIMITS[plan];
+        if (depth > limits.max_depth) {
+          throw new ApiError(422, `Límite de profundidad alcanzado para el plan ${plan.toUpperCase()} (máximo ${limits.max_depth} niveles)`);
+        }
+      }
+    }
+
+    const { data, error } = await adminSupabase
       .from("salas")
       .insert({
         backroom_id: input.backroom_id,
@@ -45,6 +67,7 @@ export async function POST(request: NextRequest) {
         descripcion: input.descripcion ?? null,
         parent_id: input.parent_id ?? null,
         depth,
+        icono: input.icono ?? "grid_view",
       })
       .select()
       .single();

@@ -39,12 +39,15 @@ export async function PATCH(
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
+
+      const rawName = formData.get("name");
+      const rawDesc = formData.get("description");
+
       input = updateOrganizationSchema.parse({
-        name: String(formData.get("name") ?? undefined) || undefined,
-        description: formData.has("description")
-          ? String(formData.get("description"))
-          : undefined,
+        name: typeof rawName === "string" && rawName.trim() ? rawName.trim() : undefined,
+        description: typeof rawDesc === "string" ? rawDesc.trim() || null : undefined,
       });
+
       const logoEntry = formData.get("logo");
       logoFile = logoEntry instanceof File && logoEntry.size > 0 ? logoEntry : null;
     } else {
@@ -55,6 +58,7 @@ export async function PATCH(
 
     return NextResponse.json({ data: { organization } }, { status: 200 });
   } catch (error) {
+    console.error("PATCH /api/organizations error:", error);
     return handleApiError(error);
   }
 }

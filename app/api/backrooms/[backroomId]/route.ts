@@ -30,6 +30,9 @@ export async function DELETE(
 
     await BackroomsService.deleteById(user.id, backroomId);
 
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/dashboard", "layout");
+
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     return handleApiError(error);
@@ -48,6 +51,9 @@ export async function PATCH(
     const input = updateBackroomSchema.parse(body);
 
     const backroom = await BackroomsService.updateById(user.id, backroomId, input);
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/dashboard", "layout");
 
     return NextResponse.json(backroom, { status: 200 });
   } catch (error) {

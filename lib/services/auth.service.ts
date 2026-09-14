@@ -48,6 +48,42 @@ export class AuthService {
       throw new ApiError(500, "No se pudo completar el registro");
     }
 
+    // Buscar invitaciones pendientes existentes para este correo y crear notificaciones in-app
+    try {
+      const emailLower = input.email.toLowerCase().trim();
+      const { data: pendingInvites } = await supabaseAdmin
+        .from("organization_invitations")
+        .select("id, token, role, organization_id, organizations(name)")
+        .eq("email", emailLower)
+        .eq("status", "pending")
+        .gt("expires_at", new Date().toISOString());
+
+      if (pendingInvites && pendingInvites.length > 0) {
+        const { NotificationService } = await import("@/lib/services/notification.service");
+        for (const invite of pendingInvites) {
+          const orgName = (invite.organizations as any)?.name || "la organización";
+          const roleText = invite.role === "admin" ? "Administrador" : "Miembro";
+          await NotificationService.send({
+            userId: authData.user.id,
+            organizationId: invite.organization_id,
+            type: "INVITATION",
+            title: `Invitación a ${orgName}`,
+            message: `Tienes una invitación pendiente para unirte a ${orgName} como ${roleText}.`,
+            actionUrl: `/invitaciones/${invite.token}`,
+            actionData: {
+              invitation_id: invite.id,
+              token: invite.token,
+              organization_id: invite.organization_id,
+              org_name: orgName,
+              role: invite.role,
+            },
+          });
+        }
+      }
+    } catch (notifErr) {
+      console.error("[AuthService.register] Error generating notifications for pending invites:", notifErr);
+    }
+
     return { id: authData.user.id, username: input.username, email: input.email };
   }
 

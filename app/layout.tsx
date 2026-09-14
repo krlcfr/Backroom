@@ -13,10 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BackRoom — Espacios colaborativos de estudio",
+  title: {
+    template: '%s | BackRoom',
+    default: 'BackRoom | Sistema de Gestión',
+  },
   description:
-    "Plataforma web colaborativa para organizar, compartir y gestionar material de estudio en espacios llamados BackRooms.",
+    "Plataforma web colaborativa para organizar, compartir y gestionar material en espacios llamados BackRooms.",
 };
+
+import { AuthProvider } from "@/components/providers/auth-provider";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -31,9 +37,26 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Toaster 
+          theme="dark" 
+          position="top-center"
+          duration={10000}
+          toastOptions={{
+            style: {
+              background: '#18181b',
+              color: '#e2e2e2',
+              border: '1px solid #3f3f46',
+            }
+          }}
+        />
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

@@ -21,6 +21,15 @@ export async function POST(request: NextRequest) {
 
     const usuario = await AuthService.register(input);
 
+    if (input.invitationToken) {
+      try {
+        const { InvitationsService } = await import("@/lib/services/invitations.service");
+        await InvitationsService.acceptInvitation(usuario.id, input.invitationToken);
+      } catch (err) {
+        console.error("Error auto-aceptando invitación durante registro:", err);
+      }
+    }
+
     return NextResponse.json(usuario, { status: 201 });
   } catch (error) {
     return handleApiError(error);
