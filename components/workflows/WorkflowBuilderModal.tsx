@@ -497,7 +497,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
                       >
                         <option value="">Por defecto (Última persona del flujo)</option>
                         {members.map((m, idx) => (
-                          <option key={m.userId || m.id || idx} value={m.userId || m.id}>{m.nombre} {m.apellidos}</option>
+                          <option key={m.userId || m.id || idx} value={m.userId || m.id}>{m.fullName || m.email || 'Usuario Desconocido'}</option>
                         ))}
                       </select>
                       <p className="text-[10px] text-[#958da1] mt-1 leading-tight">
