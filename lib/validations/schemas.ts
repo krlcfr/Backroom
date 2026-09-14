@@ -5,6 +5,7 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   captchaToken: z.string().min(1),
+  invitationToken: z.string().optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

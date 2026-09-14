@@ -342,6 +342,19 @@ export default function MiembrosTable({
                                     : "Hacer Admin"}
                               </button>
                             )}
+                            {isInvite && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const url = `${window.location.origin}/invitaciones/${(m as any).token}`;
+                                  navigator.clipboard.writeText(url);
+                                  alert("Enlace copiado al portapapeles");
+                                }}
+                                className="rounded-lg bg-[#7c3aed] px-3 py-1.5 text-[12px] text-white hover:bg-[#6d28d9]"
+                              >
+                                Copiar Enlace
+                              </button>
+                            )}
                             <button
                               type="button"
                               disabled={busy}

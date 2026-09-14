@@ -87,7 +87,7 @@ export default async function InvitationLandingPage({ params }: { params: Promis
                   Iniciar sesión para aceptar
                 </Link>
                 <Link
-                  href={`/registro?redirect=/invitaciones/${token}&email=${encodeURIComponent(invitation.email)}`}
+                  href={`/registro?invitationToken=${token}&email=${encodeURIComponent(invitation.email)}`}
                   className="block w-full rounded-lg border border-[#3f3f46] bg-transparent px-4 py-2.5 text-sm font-medium text-[#e4e4e7] hover:bg-[#27272a] transition-colors"
                 >
                   Crear una cuenta nueva

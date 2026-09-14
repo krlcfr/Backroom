@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useRef, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import OAuthButtons from "@/components/oauth-buttons"
 import LegalModal from "@/components/legal-modal"
@@ -51,8 +51,12 @@ const inputNormal = "border-[#4a4455]"
 
 export default function RegistroPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const invitationToken = searchParams.get("invitationToken") || undefined
+  const prefillEmail = searchParams.get("email") || ""
+
   const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(prefillEmail)
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -92,7 +96,7 @@ export default function RegistroPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, captchaToken }),
+        body: JSON.stringify({ username, email, password, captchaToken, invitationToken }),
       })
 
       const data = await res.json()
