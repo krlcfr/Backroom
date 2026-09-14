@@ -15,7 +15,7 @@ import FinalResourcesTab from "@/components/salas/resources/final-resources-tab"
 import { useLimits } from "@/components/providers/limits-provider"
 import { DocumentCreationWizardModal } from "@/components/documents/DocumentCreationWizardModal"
 import ActiveWorkflowsModal from "@/components/workflows/ActiveWorkflowsModal"
-import { SalaPermissions } from "@/components/salas/permissions/sala-permissions"
+import { SalaPermissionsModal } from "@/components/salas/permissions/sala-permissions-modal"
 
 interface Backroom {
   id: string
@@ -59,8 +59,10 @@ export default function BackRoomPage() {
 
 
 
-  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos' | 'finalizados'>('subsalas')
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'finalizados'>('subsalas')
   const [error, setError] = useState<string | null>(null)
+  
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false)
 
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -356,17 +358,6 @@ export default function BackRoomPage() {
             >
               Salas Principales
             </button>
-            {(esPropietario || canCreateSala(0)) && (
-              <button
-                onClick={() => setActiveTab('permisos')}
-                className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                  activeTab === 'permisos' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-                Permisos de Sala
-              </button>
-            )}
           </div>
         )}
 
@@ -410,12 +401,7 @@ export default function BackRoomPage() {
           </div>
         )}
 
-        {rootRoomId && activeTab === 'permisos' && (
-          <div className="mt-4">
-            <SalaPermissions salaId={rootRoomId} salaParentId={null} />
-          </div>
-        )}
-      </main>
+        </main>
 
       <RightPanel 
         backroom={backroom} 
@@ -424,7 +410,17 @@ export default function BackRoomPage() {
         activeRoomId={rootRoomId || backroom.id}
         rootRoomId={rootRoomId ?? undefined}
         onUploadClick={canUpload ? () => setShowCreateDocument(true) : undefined}
+        onPermissionsClick={(esPropietario || canCreateSala(0)) && rootRoomId ? () => setShowPermissionsModal(true) : undefined}
       />
+
+      {rootRoomId && (
+        <SalaPermissionsModal
+          isOpen={showPermissionsModal}
+          onClose={() => setShowPermissionsModal(false)}
+          salaId={rootRoomId}
+          salaParentId={null}
+        />
+      )}
 
       {showCreateRoom && (
         <CreateRoomModal

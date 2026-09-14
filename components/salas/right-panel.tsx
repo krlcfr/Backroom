@@ -27,9 +27,10 @@ interface RightPanelProps {
   activeRoomId?: string
   rootRoomId?: string
   onUploadClick?: () => void
+  onPermissionsClick?: () => void
 }
 
-export default function RightPanel({ backroom, esPropietario, tree, activeRoomId, rootRoomId, onUploadClick }: RightPanelProps) {
+export default function RightPanel({ backroom, esPropietario, tree, activeRoomId, rootRoomId, onUploadClick, onPermissionsClick }: RightPanelProps) {
   const [isTreeExpanded, setIsTreeExpanded] = useState(true)
   const [showGraph, setShowGraph] = useState(false)
 
@@ -50,6 +51,16 @@ export default function RightPanel({ backroom, esPropietario, tree, activeRoomId
           >
             <span className="material-symbols-outlined text-[20px]">upload</span>
             Subir recurso
+          </button>
+        )}
+        
+        {onPermissionsClick && (
+          <button
+            onClick={onPermissionsClick}
+            className="w-full bg-[#3f3f46] text-[#e2e2e2] hover:bg-[#4a4455] transition-colors text-[12px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+            Matriz de Permisos
           </button>
         )}
       </div>

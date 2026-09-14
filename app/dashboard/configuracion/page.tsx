@@ -100,30 +100,6 @@ export default async function ConfiguracionPage() {
           />
         )}
       </section>
-
-      <section>
-        <div className="mb-6 flex items-center justify-between border-b border-[#3f3f46] pb-2">
-          <div>
-            <h2 className="text-xl font-bold text-[#e2e2e2]">Miembros y Permisos</h2>
-            <p className="text-sm text-[#ccc3d8]">
-              {miembros.length} miembro{miembros.length !== 1 ? "s" : ""} activo{miembros.length !== 1 ? "s" : ""} y {pendingInvitations.length} invitación{pendingInvitations.length !== 1 ? "es" : ""} pendiente{pendingInvitations.length !== 1 ? "s" : ""}.
-            </p>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <InviteButton orgId={org.id} />
-        </div>
-
-        <MiembrosTable
-          orgId={org.id}
-          ownerUserId={org.ownerId}
-          currentUserId={usuarioInternoId}
-          esPropietario={esPropietario}
-          miembros={allMembers}
-          cargos={cargos}
-        />
-      </section>
     </div>
   )
 }

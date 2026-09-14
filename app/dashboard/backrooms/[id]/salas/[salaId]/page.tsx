@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import ResourcesGrid, { Resource } from "@/components/salas/resources/resources-grid"
 import FinalResourcesTab from "@/components/salas/resources/final-resources-tab"
 import AddResourceModal from "@/components/salas/resources/add-resource-modal"
-import { SalaPermissions } from "@/components/salas/permissions/sala-permissions"
+import { SalaPermissionsModal } from "@/components/salas/permissions/sala-permissions-modal"
 import { useParams, useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import RoomTree from "@/components/salas/room-tree"
@@ -76,7 +76,8 @@ export default function SalaPage() {
   const [showCreateDocument, setShowCreateDocument] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'permisos' | 'finalizados'>('subsalas')
+  const [activeTab, setActiveTab] = useState<'recursos' | 'subsalas' | 'finalizados'>('subsalas')
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false)
 
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -356,15 +357,6 @@ export default function SalaPage() {
           >
             Sub-Salas
           </button>
-          <button
-            onClick={() => setActiveTab('permisos')}
-            className={`px-4 py-3 text-[14px] font-medium border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === 'permisos' ? 'border-[#a78bfa] text-[#a78bfa]' : 'border-transparent text-[#958da1] hover:text-[#ccc3d8]'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-            Permisos de Sala
-          </button>
         </div>
 
         {activeTab === 'subsalas' && (
@@ -421,11 +413,6 @@ export default function SalaPage() {
           </div>
         )}
 
-        {activeTab === 'permisos' && (
-          <div className="mt-4">
-            <SalaPermissions salaId={salaId} salaParentId={sala.parent_id} />
-          </div>
-        )}
       </main>
 
       {workflowResource && backroom && currentOrgId && (
@@ -441,7 +428,21 @@ export default function SalaPage() {
         />
       )}
 
+      <SalaPermissionsModal
+        isOpen={showPermissionsModal}
+        onClose={() => setShowPermissionsModal(false)}
+        salaId={salaId}
+        salaParentId={sala?.parent_id || null}
+      />
+
       <aside className="w-80 flex flex-col gap-6 hidden md:flex">
+        <button
+          onClick={() => setShowPermissionsModal(true)}
+          className="w-full bg-[#3f3f46] text-[#e2e2e2] hover:bg-[#4a4455] transition-colors text-[12px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+          Matriz de Permisos
+        </button>
         {tree && tree.length > 0 && (
           <div className="bg-[#27272a] border border-[#3f3f46] rounded-xl p-4">
             <div
