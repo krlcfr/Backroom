@@ -35,6 +35,7 @@ interface Member {
   cargoId: string;
   userId: string;
   fullName: string;
+  email?: string;
 }
 
 interface WorkflowBuilderModalProps {

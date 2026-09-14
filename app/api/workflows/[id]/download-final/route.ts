@@ -6,38 +6,41 @@ import { handleApiError, ApiError } from "@/lib/api-error";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ resourceId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth();
     const supabaseAdmin = createAdminClient();
-    const { resourceId } = await params;
+    const { id } = await params;
 
-    // Obtener info del recurso
-    const { data: resource, error } = await supabaseAdmin
-      .from("recursos")
-      .select("*")
-      .eq("id", resourceId)
+    const { data: wf, error } = await supabaseAdmin
+      .from("document_workflows")
+      .select("*, recursos(nombre)")
+      .eq("id", id)
       .single();
 
-    if (error || !resource) {
-      console.error(error);
-      throw new ApiError(404, "Recurso no encontrado");
+    if (error || !wf) throw new ApiError(404, "Flujo no encontrado");
+
+    let storagePath = wf.traveling_file_path;
+    if (!storagePath) {
+      const { data: rec } = await supabaseAdmin.from("recursos").select("url").eq("id", wf.document_id).single();
+      if (rec) storagePath = rec.url;
     }
 
-    // Descargar el PDF del Storage
+    if (!storagePath) throw new ApiError(404, "Archivo no encontrado");
+
     const { data: fileData, error: fileError } = await supabaseAdmin.storage
       .from("recursos")
-      .download(resource.url);
+      .download(storagePath);
 
     if (fileError || !fileData) {
-      throw new ApiError(500, "Error leyendo PDF del storage");
+      throw new ApiError(500, "Error descargando documento final");
     }
 
     const buffer = await fileData.arrayBuffer();
-
+    
     // Obtener nombre base quitando la extensión si existe
-    let baseName = resource.nombre || "documento";
+    let baseName = (wf.recursos as any)?.nombre || "documento_final";
     if (baseName.toLowerCase().endsWith('.pdf')) {
       baseName = baseName.slice(0, -4);
     }
