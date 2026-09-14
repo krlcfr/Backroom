@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner";
 
 interface OrgProps {
   id: string
@@ -300,13 +301,13 @@ export default function ConfiguracionForm({ org }: { org: OrgProps }) {
 
                 if (!res.ok) {
                   const err = await res.json();
-                  alert(err.error || "Error al subir certificado");
+                  toast(err.error || "Error al subir certificado");
                 } else {
-                  alert("Certificado guardado con éxito.");
+                  toast("Certificado guardado con éxito.");
                   form.reset();
                 }
               } catch (error) {
-                alert("Error de conexión");
+                toast("Error de conexión");
               } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Guardar Certificado";
@@ -352,10 +353,10 @@ export default function ConfiguracionForm({ org }: { org: OrgProps }) {
                     try {
                       const res = await fetch(`/api/organizations/${org.id}/certificate/generate`, { method: 'POST' });
                       if (!res.ok) throw new Error((await res.json()).error);
-                      alert("Certificado generado y guardado con éxito.");
+                      toast("Certificado generado y guardado con éxito.");
                       window.location.reload();
                     } catch (e: any) {
-                      alert(e.message || "Error al generar");
+                      toast(e.message || "Error al generar");
                     } finally {
                       btn.disabled = false;
                       btn.textContent = originalText;

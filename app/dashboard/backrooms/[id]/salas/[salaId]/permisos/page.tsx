@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Breadcrumb from "@/components/ui/breadcrumb"
 import { createBrowserClient } from "@supabase/ssr"
+import { toast } from "sonner";
 
 interface Permisos {
   salas_ver: boolean
@@ -111,7 +112,7 @@ export default function PermisosSalaPage() {
       if (res.ok) {
         setMatriz(prev => prev.map(m => m.usuario_id === usuario_id ? { ...m, permisos_especificos: newPerms } : m))
       } else {
-        alert("Error al actualizar permiso")
+        toast("Error al actualizar permiso")
       }
     } catch (err) {
       console.error(err)
@@ -139,7 +140,7 @@ export default function PermisosSalaPage() {
         const { data } = await res.json()
         setMatriz(prev => prev.map(m => m.usuario_id === usuario_id ? { ...m, permisos_especificos: data } : m))
       } else {
-        alert("Error al heredar permisos")
+        toast("Error al heredar permisos")
       }
     } catch (err) {
       console.error(err)

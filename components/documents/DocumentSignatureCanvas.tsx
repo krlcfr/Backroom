@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
+import { toast } from "sonner";
 
 // Initialize pdfjs worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
@@ -147,10 +148,10 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
         throw new Error("Error iniciando flujo")
       }
 
-      alert("¡Flujo iniciado y posiciones guardadas con éxito!")
+      toast("¡Flujo iniciado y posiciones guardadas con éxito!")
       onFinish()
     } catch (e: any) {
-      alert("Error: " + e.message)
+      toast("Error: " + e.message)
     } finally {
       setSaving(false)
     }

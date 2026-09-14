@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { createBrowserClient } from "@supabase/ssr"
+import { toast } from "sonner";
 
 interface WorkflowNode {
   id: string
@@ -89,7 +90,7 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
       setSelectedWorkflow(null);
       loadWorkflows();
     } catch (e: any) {
-      alert("Error: " + e.message);
+      toast("Error: " + e.message);
     } finally {
       setDeleting(false);
     }
@@ -104,9 +105,9 @@ export default function ActiveWorkflowsModal({ orgId, onClose }: ActiveWorkflows
       if (!res.ok) {
         throw new Error("No se pudo enviar el aviso");
       }
-      alert(`Se ha enviado un recordatorio a ${node.usuarios?.nombre_completo || 'el usuario'}.`);
+      toast(`Se ha enviado un recordatorio a ${node.usuarios?.nombre_completo || 'el usuario'}.`);
     } catch (e: any) {
-      alert("Error: " + e.message);
+      toast("Error: " + e.message);
     } finally {
       setPinging(null)
     }

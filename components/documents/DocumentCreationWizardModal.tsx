@@ -5,6 +5,7 @@ import { PDFService } from "@/lib/services/pdf.service";
 import { WorkflowBuilderModal } from "@/components/workflows/WorkflowBuilderModal";
 import { SignersSummaryModal } from "@/components/workflows/SignersSummaryModal";
 import dynamic from 'next/dynamic';
+import { toast } from "sonner";
 
 const DocumentSignatureCanvas = dynamic(
   () => import('@/components/documents/DocumentSignatureCanvas').then(mod => mod.DocumentSignatureCanvas),
@@ -86,7 +87,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
     const uploadedIds: string[] = [];
 
     // Optional: show loading state
-    const loadingToastId = alert("Subiendo documentos...");
+    const loadingToastId = toast("Subiendo documentos...");
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -111,7 +112,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
 
     if (uploadedIds.length > 0) {
       setSelectedDocumentIds(prev => [...prev, ...uploadedIds]);
-      alert("¡Archivos subidos exitosamente!");
+      toast("¡Archivos subidos exitosamente!");
       // Optionally trigger a re-fetch of resources if needed, though they will be pre-selected.
     }
   };
@@ -158,7 +159,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
   const handleAddCommentClick = () => {
     if (!selectionRange) return;
     if (!savedDocumentId) {
-      alert("Primero debes guardar el documento antes de añadir comentarios.");
+      toast("Primero debes guardar el documento antes de añadir comentarios.");
       return;
     }
     
@@ -173,7 +174,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
       selectionRange.surroundContents(mark);
     } catch (e) {
       console.error(e);
-      alert("Selección demasiado compleja. Intenta seleccionar texto sin saltos de línea ni otros formatos cruzados.");
+      toast("Selección demasiado compleja. Intenta seleccionar texto sin saltos de línea ni otros formatos cruzados.");
       return;
     }
     
@@ -210,7 +211,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
         setAnnotations([...annotations, data.data]);
         setDraftAnnotation(null);
       } else {
-        alert("Error al guardar anotación");
+        toast("Error al guardar anotación");
       }
     } catch (error) {
       console.error(error);
@@ -219,7 +220,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
 
   const handleSaveDB = async (showAlert = true) => {
     if (!roomId) {
-      alert("Error: No se encontró la sala.");
+      toast("Error: No se encontró la sala.");
       return;
     }
     
@@ -258,18 +259,18 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
           // create-document API might return data.data.id
           setSavedDocumentId(data.data.id);
         }
-        if (showAlert) alert("Documento guardado exitosamente en Backroom.");
+        if (showAlert) toast("Documento guardado exitosamente en Backroom.");
         return true;
       } else {
         if (showAlert) {
           const err = await res.json();
-          alert("Error al guardar: " + (err.error || "Desconocido"));
+          toast("Error al guardar: " + (err.error || "Desconocido"));
         }
         return false;
       }
     } catch (error) {
       console.error(error);
-      if (showAlert) alert("Error al guardar en BD");
+      if (showAlert) toast("Error al guardar en BD");
       return false;
     }
   };
@@ -279,7 +280,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
       await PDFService.exportElementToPDF('document-editor-container', 'Nuevo_Documento.pdf');
     } catch (error) {
       console.error(error);
-      alert("Error al exportar PDF");
+      toast("Error al exportar PDF");
     }
   };
 
@@ -568,7 +569,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
                         if (success) {
                           setStep('workflow');
                         } else {
-                          alert("No se pudo guardar automáticamente el documento para asignarle un flujo.");
+                          toast("No se pudo guardar automáticamente el documento para asignarle un flujo.");
                         }
                       }
                     }}

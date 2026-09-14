@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface Notification {
   id: string;
@@ -117,7 +118,7 @@ export function NotificationBell() {
     const token = notif.action_data?.token || (notif.action_url?.startsWith("/invitaciones/") ? notif.action_url.replace("/invitaciones/", "") : null);
     
     if (!token) {
-      alert("No se encontró el token de la invitación.");
+      toast("No se encontró el token de la invitación.");
       return;
     }
 
@@ -142,7 +143,7 @@ export function NotificationBell() {
       // Redirigir o refrescar contexto para cargar la organización
       window.location.href = "/dashboard";
     } catch (err: any) {
-      alert(err.message || "Error al procesar la invitación");
+      toast(err.message || "Error al procesar la invitación");
     } finally {
       setActionLoadingId(null);
     }

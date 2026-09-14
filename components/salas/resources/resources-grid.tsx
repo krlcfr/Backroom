@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
 import dynamic from "next/dynamic"
 import FloatingViewer from "./floating-viewer"
+import { toast } from "sonner";
 
 export interface Resource {
   id: string
@@ -55,7 +56,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
       onResourceDeleted()
     } catch (error) {
       console.error(error)
-      alert("No se pudo eliminar el recurso")
+      toast("No se pudo eliminar el recurso")
     } finally {
       setDeleting(null)
     }
@@ -63,7 +64,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
 
   const handleResourceClick = (resource: Resource) => {
     if (resource.is_blind) {
-      alert("Este documento está bajo custodia estricta. Su gestión depende del flujo de firmas.");
+      toast("Este documento está bajo custodia estricta. Su gestión depende del flujo de firmas.");
       return;
     }
     if (resource.tipo === "youtube" || resource.tipo === "video" || resource.tipo === "image" || resource.tipo === "pdf" || resource.tipo === "archivo") {

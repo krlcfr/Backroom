@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { toast } from "sonner";
 
 interface Permisos {
   salas_ver: boolean
@@ -84,7 +85,7 @@ export function SalaPermissions({ salaId, salaParentId }: SalaPermissionsProps) 
       if (res.ok) {
         setMatriz(prev => prev.map(m => m.usuario_id === usuario_id ? { ...m, permisos_especificos: newPerms } : m))
       } else {
-        alert("Error al actualizar permiso")
+        toast("Error al actualizar permiso")
       }
     } catch (err) {
       console.error(err)
@@ -112,7 +113,7 @@ export function SalaPermissions({ salaId, salaParentId }: SalaPermissionsProps) 
         const { data } = await res.json()
         setMatriz(prev => prev.map(m => m.usuario_id === usuario_id ? { ...m, permisos_especificos: data } : m))
       } else {
-        alert("Error al heredar permisos")
+        toast("Error al heredar permisos")
       }
     } catch (err) {
       console.error(err)

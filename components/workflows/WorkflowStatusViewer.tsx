@@ -76,6 +76,7 @@ const StatusNode = ({ data }: any) => {
 };
 
 import { WorkflowHistoryTimeline } from "./WorkflowHistoryTimeline";
+import { toast } from "sonner";
 
 const nodeTypes = { circle: StatusNode, statusCircle: StatusNode };
 
@@ -310,7 +311,7 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Error al firmar");
-        alert(data.message);
+        toast(data.message);
       } else {
         // Aprobación simple o rechazo
         let rejectionReason = "";
@@ -331,7 +332,7 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Error al procesar la acción");
         
-        alert(action === 'approved' ? "Aprobado con éxito." : "Rechazado con éxito.");
+        toast(action === 'approved' ? "Aprobado con éxito." : "Rechazado con éxito.");
       }
       onActionComplete();
     } catch (e: any) {

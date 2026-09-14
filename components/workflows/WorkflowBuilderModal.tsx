@@ -21,6 +21,7 @@ import { CustomWorkflowEdge } from "./edges/CustomWorkflowEdge";
 import WorkflowSidebar, { Cargo } from "./WorkflowSidebar";
 import { SignersSummaryModal } from "./SignersSummaryModal";
 import dynamic from 'next/dynamic';
+import { toast } from "sonner";
 
 const DocumentSignatureCanvas = dynamic(
   () => import('../documents/DocumentSignatureCanvas').then(mod => mod.DocumentSignatureCanvas),
@@ -243,7 +244,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
     const { parsedNodes, errors } = parseFlowToSteps(nodes, edges);
 
     if (errors.length > 0) {
-      alert("Errores en el flujo:\n- " + errors.join("\n- "));
+      toast("Errores en el flujo:\n- " + errors.join("\n- "));
       return;
     }
 
@@ -270,7 +271,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
 
       if (!res.ok) {
         const err = await res.json();
-        alert("Error al guardar: " + (err.error || "Desconocido"));
+        toast("Error al guardar: " + (err.error || "Desconocido"));
         setIsSaving(false);
         return;
       }
@@ -294,7 +295,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
            throw new Error("Error iniciando flujo (submit)");
         }
 
-        alert("¡Flujo guardado y asignado con éxito!");
+        toast("¡Flujo guardado y asignado con éxito!");
         setIsSaving(false);
         if (onSaveWorkflow) {
           onSaveWorkflow(respData);
@@ -302,7 +303,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
       }
     } catch (e) {
       console.error(e);
-      alert("Error inesperado al guardar el flujo");
+      toast("Error inesperado al guardar el flujo");
       setIsSaving(false);
     }
   };

@@ -99,7 +99,7 @@ export async function GET(
         
       if (data) {
         data.forEach(item => {
-          if (item.signedUrl) signedUrlsMap[item.path] = item.signedUrl;
+          if (item.path && item.signedUrl) signedUrlsMap[item.path] = item.signedUrl;
         });
       }
     }

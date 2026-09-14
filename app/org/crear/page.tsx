@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { toast } from "sonner";
 
 export default function CrearOrganizacionPage() {
   const router = useRouter()
@@ -69,7 +70,7 @@ export default function CrearOrganizacionPage() {
         setInvitations(invitations.filter(inv => inv.token !== token))
       }
     } catch (err: any) {
-      alert(err.message)
+      toast(err.message)
     } finally {
       setActionLoading(null)
     }

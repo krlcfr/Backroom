@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -40,6 +41,18 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col">
+        <Toaster 
+          theme="dark" 
+          position="top-center"
+          duration={10000}
+          toastOptions={{
+            style: {
+              background: '#18181b',
+              color: '#e2e2e2',
+              border: '1px solid #3f3f46',
+            }
+          }}
+        />
         <AuthProvider>
           {children}
         </AuthProvider>

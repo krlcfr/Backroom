@@ -8,6 +8,7 @@ import { createBrowserClient } from "@supabase/ssr"
 import RoomGraphModal from "@/components/salas/room-graph-modal"
 import InviteBackroomModal from "@/components/modals/invite-backroom-modal"
 import AddBackroomMemberModal from "@/components/modals/add-backroom-member-modal"
+import { toast } from "sonner";
 
 interface RoomNode {
   id: string;
@@ -102,7 +103,7 @@ export default function MiembrosPage() {
       if (res.ok) {
         setMembers(prev => prev.map(m => m.usuario_id === userId ? { ...m, permiso: newRole as any } : m))
       } else {
-        alert("Error al cambiar rol")
+        toast("Error al cambiar rol")
       }
     } catch (error) {
       console.error(error)
@@ -116,7 +117,7 @@ export default function MiembrosPage() {
       if (res.ok) {
         setMembers(prev => prev.filter(m => m.usuario_id !== userId))
       } else {
-        alert("Error al remover miembro")
+        toast("Error al remover miembro")
       }
     } catch (error) {
       console.error(error)
@@ -327,7 +328,7 @@ export default function MiembrosPage() {
           onClose={() => setShowInviteModal(false)}
           onSuccess={(invitationData) => {
             setShowInviteModal(false)
-            alert(`Invitación generada con éxito. El enlace será enviado a ${invitationData.email}`)
+            toast(`Invitación generada con éxito. El enlace será enviado a ${invitationData.email}`)
           }}
         />
       )}

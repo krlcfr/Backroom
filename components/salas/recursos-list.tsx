@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner";
 
 interface Recurso {
   id: string
@@ -42,7 +43,7 @@ export default function RecursosList({ salaId }: { salaId: string }) {
         <h3 className="text-lg font-semibold text-[#e2e2e2]">Documentos y Recursos</h3>
         <button 
           className="flex items-center gap-2 bg-[#7c3aed] text-white hover:bg-[#8b5cf6] transition-colors text-[13px] font-medium px-4 py-2 rounded-lg"
-          onClick={() => alert("Próximamente: Modal para subir o arrastrar archivos PDF/Word")}
+          onClick={() => toast("Próximamente: Modal para subir o arrastrar archivos PDF/Word")}
         >
           <span className="material-symbols-outlined text-[18px]">upload</span>
           Subir Documento

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner";
 
 interface PerfilConfigClientProps {
   userId: string;
@@ -136,7 +137,7 @@ export default function PerfilConfigClient({ userId, initialSignatureUrl, authId
       if (dbError) throw dbError;
 
       setSignatureUrl(filePath);
-      alert("Firma guardada correctamente.");
+      toast("Firma guardada correctamente.");
       router.refresh();
 
     } catch (err: any) {

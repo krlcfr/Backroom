@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { toast } from "sonner";
 
 interface AuditLog {
   id: string;
@@ -95,7 +96,7 @@ export default function AuditTable({ initialLogs, orgId }: { initialLogs: AuditL
       a.click();
       a.remove();
     } catch (error) {
-      alert("Hubo un error exportando el PDF.");
+      toast("Hubo un error exportando el PDF.");
     } finally {
       setIsExporting(false);
     }
