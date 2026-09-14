@@ -5,11 +5,13 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { getIconAndColor, formatSize } from "@/lib/utils/formatters";
 import FloatingViewer from "@/components/salas/resources/floating-viewer";
+import { WorkflowHistoryModal } from "@/components/workflows/WorkflowHistoryModal";
 
-export default function DocumentosFinalesPage() {
+export default function DocumentosFinalizadosPage() {
   const [docs, setDocs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState<any | null>(null);
+  const [historyDocId, setHistoryDocId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/user/documentos-finales`)
@@ -63,13 +65,20 @@ export default function DocumentosFinalesPage() {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2 mt-2 pt-3 border-t border-[#3f3f46]">
+                <div className="flex items-center gap-2 mt-1 pt-3 border-t border-[#3f3f46]">
                   <button 
                     onClick={() => setSelectedDoc(res)}
-                    className="flex-1 bg-[#27272a] hover:bg-[#333535] text-[#ccc3d8] hover:text-white px-3 py-2 rounded-lg text-[13px] font-medium transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 bg-[#27272a] hover:bg-[#333535] text-[#ccc3d8] hover:text-white px-3 py-2 rounded-lg text-[12px] font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[16px]">visibility</span>
                     Ver Documento
+                  </button>
+                  <button 
+                    onClick={() => setHistoryDocId(res.workflow_id)}
+                    className="w-9 h-9 bg-[#27272a] hover:bg-[#333535] text-[#958da1] hover:text-white rounded-lg flex items-center justify-center transition-colors shrink-0"
+                    title="Ver Bitácora"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">history</span>
                   </button>
                   <a 
                     href={`/api/workflows/${res.workflow_id}/download-final`}
@@ -77,7 +86,7 @@ export default function DocumentosFinalesPage() {
                     className="w-9 h-9 bg-[#27272a] hover:bg-[#333535] text-[#958da1] hover:text-white rounded-lg flex items-center justify-center transition-colors shrink-0"
                     title="Descargar"
                   >
-                    <span className="material-symbols-outlined text-[18px]">download</span>
+                    <span className="material-symbols-outlined text-[16px]">download</span>
                   </a>
                 </div>
               </div>
@@ -92,6 +101,13 @@ export default function DocumentosFinalesPage() {
           tipo={selectedDoc.tipo}
           nombre={selectedDoc.nombre}
           onClose={() => setSelectedDoc(null)}
+        />
+      )}
+
+      {historyDocId && (
+        <WorkflowHistoryModal 
+          workflowId={historyDocId} 
+          onClose={() => setHistoryDocId(null)} 
         />
       )}
     </div>

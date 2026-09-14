@@ -4,11 +4,13 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { getIconAndColor, formatSize } from "@/lib/utils/formatters";
 import FloatingViewer from "@/components/salas/resources/floating-viewer";
+import { WorkflowHistoryModal } from "@/components/workflows/WorkflowHistoryModal";
 
 export default function FinalResourcesTab({ roomId }: { roomId: string }) {
   const [docs, setDocs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState<any | null>(null);
+  const [historyDocId, setHistoryDocId] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -76,8 +78,15 @@ export default function FinalResourcesTab({ roomId }: { roomId: string }) {
                   <span className="material-symbols-outlined text-[16px]">visibility</span>
                   Ver Documento
                 </button>
+                <button 
+                  onClick={() => setHistoryDocId(res.workflow_id)}
+                  className="w-8 h-8 bg-[#27272a] hover:bg-[#333535] text-[#958da1] hover:text-white rounded-lg flex items-center justify-center transition-colors shrink-0"
+                  title="Ver Bitácora"
+                >
+                  <span className="material-symbols-outlined text-[16px]">history</span>
+                </button>
                 <a 
-                  href={`/api/resources/${res.id}/download`}
+                  href={`/api/workflows/${res.workflow_id}/download-final`}
                   download
                   className="w-8 h-8 bg-[#27272a] hover:bg-[#333535] text-[#958da1] hover:text-white rounded-lg flex items-center justify-center transition-colors shrink-0"
                   title="Descargar"
@@ -92,10 +101,17 @@ export default function FinalResourcesTab({ roomId }: { roomId: string }) {
 
       {selectedDoc && (
         <FloatingViewer
-          url={selectedDoc.url}
+          url={`/api/workflows/${selectedDoc.workflow_id}/download-final`}
           tipo={selectedDoc.tipo}
           nombre={selectedDoc.nombre}
           onClose={() => setSelectedDoc(null)}
+        />
+      )}
+
+      {historyDocId && (
+        <WorkflowHistoryModal 
+          workflowId={historyDocId} 
+          onClose={() => setHistoryDocId(null)} 
         />
       )}
     </div>
