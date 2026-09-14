@@ -49,7 +49,9 @@ const inputBase =
 const inputError = "border-[#ffb4ab]/60"
 const inputNormal = "border-[#4a4455]"
 
-export default function RegistroPage() {
+import { Suspense } from "react"
+
+function RegistroForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const invitationToken = searchParams.get("invitationToken") || undefined
@@ -344,3 +346,12 @@ function ArrowIcon({ className = "" }: { className?: string }) {
     </svg>
   )
 }
+
+export default function RegistroPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <RegistroForm />
+    </Suspense>
+  )
+}
+

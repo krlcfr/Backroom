@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const id = resolvedParams.id;
   const supabase = await createClient();
-  const { data } = await supabase.from('backrooms').select('nombre').eq('id', id).single();
+  const { data } = await supabase.from('backrooms').select('nombre').eq('id', id).maybeSingle();
 
   return {
     title: data?.nombre || 'BackRoom',
