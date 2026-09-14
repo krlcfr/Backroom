@@ -13,8 +13,8 @@ import SidebarWrapper from "@/components/layout/sidebar-wrapper"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
-  const { data: sessionData } = await supabase.auth.getSession()
-  const authId = sessionData.session?.user?.id ?? null
+  const { data: { user } } = await supabase.auth.getUser()
+  const authId = user?.id ?? null
 
   let org: { id: string; ownerId: string; name: string; description: string | null; logoUrl: string | null; updatedAt: string } | null = null
   let usuarioInternoId: string | null = null

@@ -3,13 +3,13 @@ import { ApiError } from "@/lib/api-error";
 
 export async function getSession() {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getSession();
+  const { data, error } = await supabase.auth.getUser();
 
-  if (error || !data.session) {
+  if (error || !data.user) {
     return null;
   }
 
-  return data.session.user;
+  return data.user;
 }
 
 export async function requireAuth() {
