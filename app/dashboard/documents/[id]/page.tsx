@@ -45,6 +45,6 @@ export default async function DocumentRedirectPage({
   // Preserve workflow parameter if present (Phase 3: Copia Fantasma)
   const workflowId = search.workflow;
   
-  const destUrl = `/dashboard/backrooms/${backroomId}/salas/${salaId}/recursos/${id}${workflowId ? `?workflow=${workflowId}` : ''}`;
+  const destUrl = `/dashboard/backrooms/${backroomId}/salas/${salaId}/recursos/${id}${(workflowId && workflowId !== "undefined") ? `?workflow=${workflowId}` : ''}`;
   redirect(destUrl);
 }

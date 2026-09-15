@@ -25,10 +25,9 @@ export async function POST(
     const user = await requireAuth();
     const supabaseAdmin = createAdminClient();
 
-    // Obtener los nodos del flujo para mapearlos
     const { data: nodes, error: nodesError } = await supabaseAdmin
       .from('workflow_nodes')
-      .select('id, assigned_user_id, usuarios!workflow_nodes_assigned_user_id_fkey(auth_id)')
+      .select('id, assigned_user_id')
       .eq('workflow_id', workflowId);
 
     if (nodesError || !nodes) {
@@ -49,7 +48,7 @@ export async function POST(
     // Preparar registros a insertar
     const positionsToInsert = positions.map(pos => {
       const node = nodes.find(n => n.id === pos.nodeId);
-      const targetAuthId = (node?.usuarios as any)?.auth_id || (Array.isArray(node?.usuarios) ? (node?.usuarios as any)[0]?.auth_id : null) || user.id;
+      const targetAuthId = node?.assigned_user_id || user.id;
 
       return {
         workflow_id: workflowId,
