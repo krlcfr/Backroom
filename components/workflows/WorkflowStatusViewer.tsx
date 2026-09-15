@@ -51,7 +51,7 @@ const StatusNode = ({ data }: any) => {
 
   return (
     <div className={`px-4 py-2 shadow-xl rounded-xl border-2 transition-colors ${borderColor} ${bgColor}`}>
-      <Handle type="target" position={Position.Left} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
+      <Handle type="target" position={Position.Top} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
       <div className="flex items-center gap-3">
         <div className="flex flex-col">
           <span className="text-xs font-semibold text-[#e2e2e2]">{data.label}</span>
@@ -70,7 +70,7 @@ const StatusNode = ({ data }: any) => {
           </div>
         </div>
       </div>
-      <Handle type="source" position={Position.Right} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
+      <Handle type="source" position={Position.Bottom} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
     </div>
   );
 };
