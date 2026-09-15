@@ -51,7 +51,10 @@ export async function GET(
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${finalFileName}"`
+        "Content-Disposition": `inline; filename="${finalFileName}"`,
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
       }
     });
   } catch (error) {

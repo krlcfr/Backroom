@@ -128,12 +128,14 @@ export async function POST(
             
             const pdfBytes = await pdfDoc.save();
             buffer = Buffer.from(pdfBytes);
-            
             // Sobrescribir el PDF en Supabase con la nueva versión visual
-            await supabaseAdmin.storage.from('recursos').upload(filePath, buffer, {
+            const { error: uploadError } = await supabaseAdmin.storage.from('recursos').upload(filePath, buffer, {
               contentType: 'application/pdf',
               upsert: true
             });
+            if (uploadError) {
+              console.error("Error overwriting PDF in storage:", uploadError);
+            }
           }
         }
       } catch (e) {
