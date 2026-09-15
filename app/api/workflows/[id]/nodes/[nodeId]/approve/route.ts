@@ -11,12 +11,13 @@ export async function POST(
     const body = await req.json();
     const action = body.action; // 'approved' o 'rejected'
     const rejectionReason = body.rejection_reason;
+    const returnToNodeId = body.return_to_node_id;
 
     if (action !== 'approved' && action !== 'rejected') {
       throw new ApiError(400, "Acción inválida. Debe ser 'approved' o 'rejected'.");
     }
 
-    const result = await WorkflowsService.approveNode(id, nodeId, action, rejectionReason);
+    const result = await WorkflowsService.approveNode(id, nodeId, action, rejectionReason, returnToNodeId);
     
     return NextResponse.json(result, { status: 200 });
   } catch (error: any) {
