@@ -23,8 +23,7 @@ const eslintConfig = defineConfig([
       "prefer-const": "warn",
       "@next/next/no-html-link-for-pages": "warn",
       "react/no-unescaped-entities": "warn",
-      "@typescript-eslint/no-require-imports": "warn",
-      "react-compiler/react-compiler": "warn"
+      "@typescript-eslint/no-require-imports": "warn"
     }
   }
 ]);
