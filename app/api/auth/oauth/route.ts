@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, "Proveedor no válido. Use 'google' o 'github'.");
     }
 
+    const { origin } = new URL(request.url);
     const supabase = await createClient();
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
+        redirectTo: `${origin}/api/auth/callback`,
       },
     });
 
