@@ -41,16 +41,6 @@ export default function DashboardHeader({ userName, userAvatar, esPropietario, i
           <Link href="/dashboard" className="text-[#d2bbff] font-medium border-b-2 border-[#d2bbff] pb-1">
             Dashboard
           </Link>
-          {(esPropietario || isOrgAdmin) && (
-            <Link href="/dashboard/auditoria" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
-              Registros
-            </Link>
-          )}
-          {esPropietario && (
-            <Link href="/dashboard/configuracion" className="text-[#ccc3d8] text-[14px] hover:text-[#d2bbff] transition-colors pb-1">
-              Configuración
-            </Link>
-          )}
         </nav>
       </div>
       <div className="flex items-center gap-2 md:gap-4">
