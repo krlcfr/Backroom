@@ -4,6 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAuth } from "@/lib/auth/session";
 import { handleApiError, ApiError } from "@/lib/api-error";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
