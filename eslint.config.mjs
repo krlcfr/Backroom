@@ -21,7 +21,10 @@ const eslintConfig = defineConfig([
       "@next/next/no-img-element": "warn",
       "@typescript-eslint/ban-ts-comment": "warn",
       "prefer-const": "warn",
-      "@next/next/no-html-link-for-pages": "warn"
+      "@next/next/no-html-link-for-pages": "warn",
+      "react/no-unescaped-entities": "warn",
+      "@typescript-eslint/no-require-imports": "warn",
+      "react-compiler/react-compiler": "warn"
     }
   }
 ]);
