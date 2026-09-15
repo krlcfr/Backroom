@@ -78,6 +78,7 @@ const StatusNode = ({ data }: any) => {
 import { WorkflowHistoryTimeline } from "./WorkflowHistoryTimeline";
 import { toast } from "sonner";
 import { RejectionReasonModal } from "./RejectionReasonModal";
+import dagre from 'dagre';
 
 const nodeTypes = { circle: StatusNode, statusCircle: StatusNode };
 
@@ -141,8 +142,39 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
             };
           });
 
-          setNodes(visualNodes);
           const rawEdges = graphJson.edges || [];
+          
+          const dagreGraph = new dagre.graphlib.Graph();
+          dagreGraph.setDefaultEdgeLabel(() => ({}));
+          
+          // Ajusta la dirección: TB = Top to Bottom
+          dagreGraph.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 100 });
+
+          visualNodes.forEach((node) => {
+            // Dimensiones aproximadas de tus nodos StatusCircle
+            dagreGraph.setNode(node.id, { width: 250, height: 80 });
+          });
+
+          rawEdges.forEach((edge: any) => {
+            dagreGraph.setEdge(edge.source, edge.target);
+          });
+
+          dagre.layout(dagreGraph);
+
+          const layoutedNodes = visualNodes.map((node) => {
+            const nodeWithPosition = dagreGraph.node(node.id);
+            return {
+              ...node,
+              targetPosition: Position.Top,
+              sourcePosition: Position.Bottom,
+              position: {
+                x: nodeWithPosition.x - 250 / 2, // Centrar
+                y: nodeWithPosition.y - 80 / 2,
+              },
+            };
+          });
+
+          setNodes(layoutedNodes);
           setEdges(rawEdges.map((e: any) => ({
             ...e,
             type: 'straight',
