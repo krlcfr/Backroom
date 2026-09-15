@@ -5,17 +5,20 @@ import { useState } from "react";
 interface RejectionReasonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (reason: string) => Promise<void>;
+  onSubmit: (reason: string, returnToNodeId?: string) => Promise<void>;
   documentName?: string;
+  previousNodes?: any[];
 }
 
 export function RejectionReasonModal({
   isOpen,
   onClose,
   onSubmit,
-  documentName
+  documentName,
+  previousNodes = []
 }: RejectionReasonModalProps) {
   const [reason, setReason] = useState("");
+  const [returnToNodeId, setReturnToNodeId] = useState("definitivo");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -37,7 +40,7 @@ export function RejectionReasonModal({
 
     try {
       setIsSubmitting(true);
-      await onSubmit(reason.trim());
+      await onSubmit(reason.trim(), returnToNodeId === "definitivo" ? undefined : returnToNodeId);
       setReason(""); // Reset on success
     } catch (err: any) {
       setError(err.message || "Ocurrió un error al rechazar el documento.");
@@ -79,6 +82,25 @@ export function RejectionReasonModal({
                 Esto detendrá el flujo de aprobación actual.
               </p>
             )}
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-[#e2e2e2]">
+                Tipo de Rechazo
+              </label>
+              <select
+                value={returnToNodeId}
+                onChange={(e) => setReturnToNodeId(e.target.value)}
+                disabled={isSubmitting}
+                className="w-full px-3 py-2 bg-[#1a1c1c] border border-[#3f3f46] rounded-lg text-sm text-[#e2e2e2] focus:outline-none focus:border-[#7c3aed]"
+              >
+                <option value="definitivo">Rechazo Definitivo (Cancelar Flujo)</option>
+                {previousNodes.map(n => (
+                  <option key={n.id} value={n.id}>
+                    Devolver a: {n.cargo?.nombre || n.assigned_user_name || 'Nodo'} (Paso {n.step_order})
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="flex flex-col gap-2">
               <label htmlFor="reason" className="text-sm font-medium text-[#e2e2e2]">

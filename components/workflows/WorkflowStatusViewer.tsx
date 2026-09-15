@@ -77,6 +77,7 @@ const StatusNode = ({ data }: any) => {
 
 import { WorkflowHistoryTimeline } from "./WorkflowHistoryTimeline";
 import { toast } from "sonner";
+import { RejectionReasonModal } from "./RejectionReasonModal";
 
 const nodeTypes = { circle: StatusNode, statusCircle: StatusNode };
 
@@ -247,6 +248,7 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.json()).then(data => {
@@ -298,7 +300,7 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
     );
   }
 
-  const handleAction = async (action: 'approved' | 'rejected', nodeId: string, pwd?: string) => {
+  const handleAction = async (action: 'approved' | 'rejected', nodeId: string, pwd?: string, rejectionReason?: string, returnToNodeId?: string) => {
     setLoading(true);
     setError("");
     try {
@@ -313,20 +315,14 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
         if (!res.ok) throw new Error(data.error || "Error al firmar");
         toast(data.message);
       } else {
-        // Aprobación simple o rechazo
-        let rejectionReason = "";
-        if (action === 'rejected') {
-          rejectionReason = window.prompt("Razón del rechazo (opcional):") || "";
-          if (rejectionReason === null) {
-            setLoading(false);
-            return; // El usuario canceló el prompt
-          }
-        }
-
         const res = await fetch(`/api/workflows/${workflowId}/nodes/${nodeId}/approve`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action, rejection_reason: rejectionReason })
+          body: JSON.stringify({ 
+            action, 
+            rejection_reason: rejectionReason,
+            return_to_node_id: returnToNodeId
+          })
         });
         
         const data = await res.json();
@@ -337,10 +333,16 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
       onActionComplete();
     } catch (e: any) {
       setError(e.message);
+      throw e; // Lanza el error para que el modal no se cierre en caso de fallar
     } finally {
       setLoading(false);
       setPasswordModal(null);
     }
+  };
+
+  const handleRejectSubmit = async (reason: string, returnToNodeId?: string) => {
+    await handleAction('rejected', myActiveNode.id, undefined, reason, returnToNodeId);
+    setIsRejectModalOpen(false);
   };
 
   return (
@@ -354,7 +356,7 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
       
       <div className="flex gap-3">
         <button 
-          onClick={() => handleAction('rejected', myActiveNode.id)}
+          onClick={() => setIsRejectModalOpen(true)}
           disabled={loading}
           className="px-4 py-2 bg-[#27272a] hover:bg-[#3f3f46] text-[#ef4444] text-xs font-semibold rounded-lg transition-colors border border-[#ef4444]/20 disabled:opacity-50"
         >
@@ -381,6 +383,13 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
           </button>
         )}
       </div>
+
+      <RejectionReasonModal
+        isOpen={isRejectModalOpen}
+        onClose={() => setIsRejectModalOpen(false)}
+        onSubmit={handleRejectSubmit}
+        previousNodes={nodes.filter(n => n.step_order < currentStepOrder)}
+      />
 
       {passwordModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[150] backdrop-blur-sm">
