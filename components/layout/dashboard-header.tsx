@@ -17,6 +17,7 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({ userName, userAvatar, esPropietario, isOrgAdmin }: DashboardHeaderProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
   const { mobileOpen, setMobileOpen } = useSidebar()
 
   async function handleLogout() {
@@ -56,44 +57,65 @@ export default function DashboardHeader({ userName, userAvatar, esPropietario, i
         
         <NotificationBell />
 
-        <Link 
-          href="/dashboard/perfil" 
-          className="relative p-2 rounded-full text-[#ccc3d8] hover:text-[#e2e2e2] hover:bg-[#27272a] transition-colors flex items-center justify-center hidden sm:flex"
-          title="Mi Perfil"
-        >
-          <span className="material-symbols-outlined text-[20px]">person</span>
-        </Link>
+        <div className="relative">
+          <button 
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="w-9 h-9 rounded-full border border-[#4a4455] bg-[#282a2b] flex items-center justify-center overflow-hidden relative ml-1 hover:border-[#d2bbff] transition-colors focus:outline-none focus:ring-2 focus:ring-[#7c3aed] focus:ring-offset-2 focus:ring-offset-[#121414]"
+            title="Opciones de perfil"
+          >
+            {userAvatar ? (
+              <Image src={userAvatar} alt={userName} width={36} height={36} className="object-cover w-full h-full" />
+            ) : (
+              <span className="text-[14px] font-medium text-[#d2bbff]">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </button>
 
-        <Link 
-          href="/dashboard/support" 
-          className="relative p-2 rounded-full text-[#ccc3d8] hover:text-[#e2e2e2] hover:bg-[#27272a] transition-colors flex items-center justify-center hidden sm:flex"
-        >
-          <span className="material-symbols-outlined text-[20px]">help_outline</span>
-        </Link>
-        
-        <button
-          onClick={handleLogout}
-          disabled={loading}
-          className="text-[13px] text-[#ccc3d8] hover:text-[#d2bbff] transition-colors disabled:opacity-50 hidden sm:block"
-        >
-          {loading ? "Saliendo…" : "Cerrar sesión"}
-        </button>
-        <button
-          onClick={handleLogout}
-          disabled={loading}
-          className="p-2 text-[#ccc3d8] hover:text-[#d2bbff] transition-colors disabled:opacity-50 sm:hidden flex items-center justify-center"
-          title="Cerrar sesión"
-        >
-          <span className="material-symbols-outlined text-[20px]">logout</span>
-        </button>
-        
-        <div className="w-8 h-8 rounded-full border border-[#4a4455] bg-[#282a2b] flex items-center justify-center overflow-hidden relative ml-1">
-          {userAvatar ? (
-            <Image src={userAvatar} alt={userName} width={32} height={32} className="object-cover w-full h-full" />
-          ) : (
-            <span className="text-[12px] font-medium text-[#d2bbff]">
-              {userName.charAt(0).toUpperCase()}
-            </span>
+          {dropdownOpen && (
+            <>
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setDropdownOpen(false)}
+              ></div>
+              <div className="absolute right-0 mt-2 w-52 rounded-xl border border-[#4a4455] bg-[#1a1c1c] shadow-[0_8px_30px_rgb(0,0,0,0.5)] z-50 overflow-hidden py-1 origin-top-right animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-4 py-3 border-b border-[#4a4455]/50 mb-1">
+                  <p className="text-[13px] font-medium text-[#e2e2e2] truncate">{userName}</p>
+                </div>
+                
+                <Link 
+                  href="/dashboard/perfil" 
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ccc3d8] hover:text-[#e2e2e2] hover:bg-[#27272a] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">person</span>
+                  Mi Perfil
+                </Link>
+                
+                <Link 
+                  href="/dashboard/support" 
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ccc3d8] hover:text-[#e2e2e2] hover:bg-[#27272a] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">help_outline</span>
+                  Soporte y Ayuda
+                </Link>
+                
+                <div className="border-t border-[#4a4455]/50 mt-1 pt-1">
+                  <button
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      handleLogout();
+                    }}
+                    disabled={loading}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-[13px] text-[#ffb4ab] hover:bg-[#93000a]/20 hover:text-[#ffdad6] transition-colors disabled:opacity-50 text-left"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">logout</span>
+                    {loading ? "Saliendo…" : "Cerrar sesión"}
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
