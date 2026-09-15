@@ -135,7 +135,8 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
       })
 
       if (!resPos.ok) {
-        throw new Error("Error guardando posiciones")
+        const errData = await resPos.json().catch(() => ({}));
+        throw new Error(errData.error || "Error guardando posiciones");
       }
 
       // 2. Hacer Submit de la Transacción (Cambia a in_progress)
