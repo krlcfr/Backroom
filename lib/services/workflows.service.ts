@@ -141,7 +141,7 @@ export class WorkflowsService {
   /**
    * Aprueba o rechaza un nodo del flujo y ejecuta el "efecto dominó"
    */
-  static async approveNode(workflowId: string, nodeId: string, action: 'approved' | 'rejected', rejectionReason?: string) {
+  static async approveNode(workflowId: string, nodeId: string, action: 'approved' | 'rejected', rejectionReason?: string, returnToNodeId?: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new ApiError(401, "No autorizado");
@@ -182,13 +182,42 @@ export class WorkflowsService {
       action: action === 'approved' ? 'WORKFLOW_STEP_APPROVED' : 'WORKFLOW_REJECTED',
       targetType: 'workflow',
       targetId: workflow.document_id,
-      details: { workflow_id: workflowId, node_id: nodeId, step_order: updatedNode.step_order }
+      details: { workflow_id: workflowId, node_id: nodeId, step_order: updatedNode.step_order, return_to_node_id: returnToNodeId }
     });
 
-    // Si fue rechazado, se marca todo el workflow como rechazado.
+    // Si fue rechazado, verificar si es definitivo o devolución parcial
     if (action === 'rejected') {
-       await supabase.from("document_workflows").update({ status: 'rejected' }).eq("id", workflowId);
-       return { success: true, nextStep: null, workflowStatus: 'rejected' };
+      if (!returnToNodeId) {
+        // Rechazo Definitivo
+        await supabase.from("document_workflows").update({ status: 'rejected' }).eq("id", workflowId);
+        return { success: true, nextStep: null, workflowStatus: 'rejected' };
+      } else {
+        // Devolución Parcial (Partial Return)
+        // 1. Obtener el nodo al que vamos a regresar
+        const { data: targetNode } = await supabase.from("workflow_nodes").select("step_order").eq("id", returnToNodeId).single();
+        if (!targetNode) throw new ApiError(404, "Nodo destino no encontrado");
+
+        // 2. Todos los nodos desde el target_step_order hasta el actual pasan a 'pending' (para que se repitan)
+        await supabase.from("workflow_nodes")
+          .update({ status: 'pending' })
+          .eq("workflow_id", workflowId)
+          .gte("step_order", targetNode.step_order)
+          .lte("step_order", updatedNode.step_order);
+        
+        // 3. Poner en 'in_turn' los nodos del target_step_order
+        await supabase.from("workflow_nodes")
+          .update({ status: 'in_turn' })
+          .eq("workflow_id", workflowId)
+          .eq("step_order", targetNode.step_order);
+
+        // Notificar a los del nuevo step_order
+        const { data: newTurnNodes } = await supabase.from("workflow_nodes").select("*").eq("workflow_id", workflowId).eq("step_order", targetNode.step_order);
+        if (newTurnNodes && newTurnNodes.length > 0) {
+          await NotificationService.notifyNextStep(workflowId, newTurnNodes);
+        }
+
+        return { success: true, nextStep: targetNode.step_order, workflowStatus: 'in_progress' };
+      }
     }
 
     // 2. Obtener todos los nodos del flujo para analizar el "efecto dominó"
