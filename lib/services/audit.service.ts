@@ -96,6 +96,26 @@ export class AuditService {
       throw new ApiError(500, "Error obteniendo logs del documento");
     }
 
+    if (data && data.length > 0) {
+      const missingActorIds = data.filter(log => !log.actor && log.actor_id).map(log => log.actor_id);
+      if (missingActorIds.length > 0) {
+        const adminSupabase = createAdminClient();
+        const { data: missingUsers } = await adminSupabase
+          .from("usuarios")
+          .select("id, username, nombre_completo, correo")
+          .in("id", missingActorIds);
+        
+        if (missingUsers) {
+          const userMap = new Map(missingUsers.map(u => [u.id, u]));
+          for (const log of data) {
+            if (!log.actor && log.actor_id && userMap.has(log.actor_id)) {
+              log.actor = userMap.get(log.actor_id);
+            }
+          }
+        }
+      }
+    }
+
     return data;
   }
 
@@ -112,7 +132,6 @@ export class AuditService {
     }
 
     // El RLS ya protege la lectura (solo administradores y propietarios ven los logs de su org)
-    // Sin embargo, para extraer detalles (como nombres de usuarios), podemos traer los datos relacionales.
     const { data, error, count } = await supabase
       .from("audit_logs")
       .select("*, actor:usuarios!actor_id(username, nombre_completo, correo)", { count: 'exact' })
@@ -123,6 +142,28 @@ export class AuditService {
     if (error) {
       console.error("[AuditService] listLogs Error:", error);
       throw new ApiError(500, "Error obteniendo logs de auditoría");
+    }
+
+    // Si RLS bloquea la lectura de la tabla usuarios, `actor` vendrá nulo.
+    // Buscamos los usuarios manualmente con admin para los logs obtenidos.
+    if (data && data.length > 0) {
+      const missingActorIds = data.filter(log => !log.actor && log.actor_id).map(log => log.actor_id);
+      if (missingActorIds.length > 0) {
+        const adminSupabase = createAdminClient();
+        const { data: missingUsers } = await adminSupabase
+          .from("usuarios")
+          .select("id, username, nombre_completo, correo")
+          .in("id", missingActorIds);
+        
+        if (missingUsers) {
+          const userMap = new Map(missingUsers.map(u => [u.id, u]));
+          for (const log of data) {
+            if (!log.actor && log.actor_id && userMap.has(log.actor_id)) {
+              log.actor = userMap.get(log.actor_id);
+            }
+          }
+        }
+      }
     }
 
     return {
