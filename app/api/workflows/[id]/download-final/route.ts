@@ -22,8 +22,37 @@ export async function GET(
     if (error || !wf) throw new ApiError(404, "Flujo no encontrado");
 
     let storagePath = wf.traveling_file_path;
-    if (!storagePath) {
-      const { data: rec } = await supabaseAdmin.from("recursos").select("url").eq("id", wf.document_id).single();
+    let isSigner = false;
+
+    // Check if the user is currently an active signer (blind signing rule)
+    const { data: perfil } = await supabaseAdmin.from('usuarios').select('id').eq('auth_id', user.id).single();
+    if (perfil) {
+      const { data: memberRows } = await supabaseAdmin.from('miembros_organizacion').select('cargo_id').eq('usuario_id', perfil.id);
+      const cargoIds = memberRows?.map(m => m.cargo_id).filter(Boolean) || [];
+      
+      let query = supabaseAdmin
+        .from('workflow_nodes')
+        .select('id')
+        .eq('workflow_id', id)
+        .eq('status', 'in_turn')
+        .eq('action_required', 'sign');
+        
+      if (cargoIds.length > 0) {
+        query = query.or(`assigned_user_id.eq.${perfil.id},and(assigned_user_id.is.null,cargo_id.in.(${cargoIds.join(',')}))`);
+      } else {
+        query = query.eq('assigned_user_id', perfil.id);
+      }
+      
+      const { data: activeSignNodes } = await query;
+      if (activeSignNodes && activeSignNodes.length > 0) {
+        isSigner = true;
+      }
+    }
+
+    // Get original URL
+    const { data: rec } = await supabaseAdmin.from("recursos").select("url").eq("id", wf.document_id).single();
+
+    if (!storagePath || isSigner) {
       if (rec) storagePath = rec.url;
     }
 
