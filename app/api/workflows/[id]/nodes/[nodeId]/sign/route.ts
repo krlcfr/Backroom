@@ -78,14 +78,20 @@ export async function POST(
       .eq('workflow_node_id', nodeId)
       .single();
 
-    // 4. Descargar el PDF del Storage (Copia Viajera)
-    const { data: fileData, error: fileError } = await supabaseAdmin.storage
+    // 4. Descargar el PDF del Storage (Copia Viajera) - BYPASS NEXTJS CACHE
+    const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
       .from("recursos")
-      .download(filePath);
+      .createSignedUrl(filePath, 60, { transform: { format: 'origin' } });
 
-    if (fileError || !fileData) {
+    if (signedUrlError || !signedUrlData) {
+      throw new ApiError(500, "Error obteniendo URL del PDF para la firma.");
+    }
+
+    const fileRes = await fetch(signedUrlData.signedUrl + (signedUrlData.signedUrl.includes('?') ? '&' : '?') + 't=' + Date.now(), { cache: 'no-store' });
+    if (!fileRes.ok) {
       throw new ApiError(500, "Error descargando el PDF para la firma.");
     }
+    const fileData = await fileRes.blob();
 
     let buffer = Buffer.from(await fileData.arrayBuffer());
 

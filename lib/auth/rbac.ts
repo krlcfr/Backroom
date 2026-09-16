@@ -1,9 +1,10 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 export type Permiso = "contribuir" | "solo_visualizar" | "admin";
 export type CodigoPermiso = "salas.crear" | "salas.editar" | "salas.eliminar" | "salas.ver" | "salas.acceder" | "miembros.gestionar" | "recursos.subir" | "archivos.subir" | "recursos.eliminar" | "configuracion.editar";
 
-export async function getUsuarioInterno(authId: string) {
+export const getUsuarioInterno = cache(async (authId: string) => {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("usuarios")
@@ -12,9 +13,9 @@ export async function getUsuarioInterno(authId: string) {
     .single();
 
   return data;
-}
+});
 
-export async function isOwner(authId: string, backroomId: string) {
+export const isOwner = cache(async (authId: string, backroomId: string) => {
   const usuario = await getUsuarioInterno(authId);
   if (!usuario) return false;
 
@@ -52,7 +53,7 @@ export async function isOwner(authId: string, backroomId: string) {
   }
 
   return false;
-}
+});
 
 export async function checkPermission(authId: string, backroomId: string, permisoRequerido: Permiso) {
   const esDueno = await isOwner(authId, backroomId);
@@ -111,18 +112,22 @@ export async function checkPermission(authId: string, backroomId: string, permis
 
   return false;
 }
-export async function checkRoomPermission(authId: string, roomId: string, permisoRequerido: CodigoPermiso) {
-  const usuario = await getUsuarioInterno(authId);
-  if (!usuario) return false;
 
+export const getSalaMetadata = cache(async (roomId: string) => {
   const supabase = createAdminClient();
-
-  // Obtener la sala para saber el backroom_id usando admin para saltar RLS temporalmente
   const { data: sala } = await supabase
     .from("salas")
     .select("backroom_id")
     .eq("id", roomId)
     .single();
+  return sala;
+});
+
+export async function checkRoomPermission(authId: string, roomId: string, permisoRequerido: CodigoPermiso) {
+  const usuario = await getUsuarioInterno(authId);
+  if (!usuario) return false;
+
+  const sala = await getSalaMetadata(roomId);
 
   if (!sala) return false;
 

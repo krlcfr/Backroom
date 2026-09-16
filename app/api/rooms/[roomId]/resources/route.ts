@@ -24,12 +24,12 @@ export async function GET(
 
     if (salaError || !sala) throw new ApiError(404, "Sala no encontrada");
 
-    // Verificar permiso 'salas_acceder'
-    const hasAccess = await checkRoomPermission(user.id, roomId, "salas.acceder");
+    const [hasAccess, canUpload, canDelete] = await Promise.all([
+      checkRoomPermission(user.id, roomId, "salas.acceder"),
+      checkRoomPermission(user.id, roomId, "recursos.subir"),
+      checkRoomPermission(user.id, roomId, "recursos.eliminar")
+    ]);
     if (!hasAccess) throw new ApiError(403, "No tienes acceso a esta sala");
-
-    const canUpload = await checkRoomPermission(user.id, roomId, "recursos.subir");
-    const canDelete = await checkRoomPermission(user.id, roomId, "recursos.eliminar");
 
     // Obtener recursos (usamos admin para evitar problemas de RLS de lectura temporalmente, o supabase si hay RLS en recursos)
     // El schema dice que la tabla recursos existe. Asumiremos que supabase normal sirve,

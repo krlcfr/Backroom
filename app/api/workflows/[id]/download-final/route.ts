@@ -60,15 +60,21 @@ export async function GET(
 
     if (!storagePath) throw new ApiError(404, "Archivo no encontrado");
 
-    const { data: fileData, error: fileError } = await supabaseAdmin.storage
+    // BYPASS NEXTJS CACHE
+    const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
       .from("recursos")
-      .download(storagePath);
+      .createSignedUrl(storagePath, 60, { transform: { format: 'origin' } });
 
-    if (fileError || !fileData) {
+    if (signedUrlError || !signedUrlData) {
+      throw new ApiError(500, "Error obteniendo URL del documento final");
+    }
+
+    const fileRes = await fetch(signedUrlData.signedUrl + (signedUrlData.signedUrl.includes('?') ? '&' : '?') + 't=' + Date.now(), { cache: 'no-store' });
+    if (!fileRes.ok) {
       throw new ApiError(500, "Error descargando documento final");
     }
 
-    const buffer = await fileData.arrayBuffer();
+    const buffer = await fileRes.arrayBuffer();
     
     // Obtener nombre base quitando la extensión si existe
     let baseName = (wf.recursos as any)?.nombre || "documento_final";

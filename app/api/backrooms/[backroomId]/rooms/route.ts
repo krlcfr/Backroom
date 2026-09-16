@@ -26,7 +26,7 @@ export async function GET(
 
     const isOwner = backroom?.propietario_id === usuario.id
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from("salas")
       .select("id, nombre, descripcion, depth, created_at, parent_id, icono")
       .eq("backroom_id", backroomId)
@@ -38,14 +38,14 @@ export async function GET(
     let memberPermiso: string | null = null
 
     if (!isOwner) {
-      const { data: permisos } = await supabase
+      const { data: permisos } = await adminSupabase
         .from("sala_permisos")
         .select("sala_id, salas_ver, salas_acceder, salas_crear")
         .eq("usuario_id", usuario.id)
 
       ;(permisos ?? []).forEach(p => userPermissions.set(p.sala_id, p))
 
-      const { data: miembro } = await supabase
+      const { data: miembro } = await adminSupabase
         .from("backroom_miembros")
         .select("permiso")
         .eq("backroom_id", backroomId)
