@@ -48,7 +48,7 @@ export default function FinalResourcesTab({ roomId }: { roomId: string }) {
           const { icon, color, bg } = getIconAndColor(res.tipo);
           const size = formatSize(res.tamano_bytes);
           return (
-            <div key={res.id} className="bg-[#1e2020] border border-[#3f3f46] rounded-xl p-3 flex flex-col gap-3 hover:border-[#a78bfa]/50 transition-colors group">
+            <div key={res.workflow_id} className="bg-[#1e2020] border border-[#3f3f46] rounded-xl p-3 flex flex-col gap-3 hover:border-[#a78bfa]/50 transition-colors group">
               <div className="flex items-start gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${bg} ${color}`}>
                   <span className="material-symbols-outlined text-[18px]">{icon}</span>
