@@ -120,10 +120,8 @@ function TreeNode({
 export default function RoomTree({ rooms, backroomId, activeRoomId }: RoomTreeProps) {
   if (rooms.length === 0) return null
 
-  // Si rooms contiene la sala raíz de depth 0, mostrar directamente sus sub-salas
-  const effectiveRooms = (rooms.length === 1 && rooms[0].depth === 0)
-    ? (rooms[0].children ?? [])
-    : rooms.flatMap((r) => (r.depth === 0 ? (r.children ?? []) : [r]))
+  // Mostramos todas las salas raíz tal cual
+  const effectiveRooms = rooms
 
   if (effectiveRooms.length === 0) {
     return (

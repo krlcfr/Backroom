@@ -32,6 +32,7 @@ interface ResourcesGridProps {
 
 export default function ResourcesGrid({ resources, roomId, canDelete, onResourceDeleted, onEditDoc, onAssignWorkflow }: ResourcesGridProps) {
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [activeResource, setActiveResource] = useState<Resource | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
@@ -47,11 +48,12 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
     }
   }, [openMenuId]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Seguro que deseas eliminar este recurso?")) return;
-    setDeleting(id)
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    setDeleting(deleteConfirmId)
+    setDeleteConfirmId(null)
     try {
-      const res = await fetch(`/api/rooms/${roomId}/resources/${id}`, { method: "DELETE" })
+      const res = await fetch(`/api/rooms/${roomId}/resources/${deleteConfirmId}`, { method: "DELETE" })
       if (!res.ok) throw new Error("Error deleting resource")
       onResourceDeleted()
     } catch (error) {
@@ -133,11 +135,6 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
                   <h4 className="text-[#e2e2e2] font-medium text-[13px] break-words cursor-pointer hover:text-[#a78bfa] transition-colors" title={res.nombre}>
                     {res.nombre}
                   </h4>
-                  {(res as any).pending_signature && (
-                    <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold bg-green-500/20 text-green-400 border border-green-500/30" title="Requiere tu firma">
-                      FIRMAR
-                    </span>
-                  )}
                 </div>
                 <div className="flex items-center text-[11px] text-[#958da1] flex-wrap gap-x-1.5 gap-y-1">
                   <span className="truncate max-w-[120px]">{res.usuarios?.nombre_completo}</span>
@@ -195,7 +192,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
                     
                     {canDelete && (
                       <button
-                        onClick={() => { setOpenMenuId(null); handleDelete(res.id); }}
+                        onClick={() => { setOpenMenuId(null); setDeleteConfirmId(res.id); }}
                         disabled={deleting === res.id}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-[#ffb4ab] hover:bg-[#ffb4ab]/10 transition-colors disabled:opacity-50"
                       >
@@ -210,6 +207,34 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
           )
         })}
       </div>
+
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#18181b] border border-[#3f3f46] rounded-xl shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-semibold text-[#e2e2e2] flex items-center gap-2 mb-3">
+              <span className="material-symbols-outlined text-red-500">warning</span>
+              Eliminar recurso
+            </h3>
+            <p className="text-sm text-[#958da1] mb-6">
+              ¿Estás seguro de que deseas eliminar este recurso? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 text-sm text-[#ccc3d8] hover:text-white transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeResource && (
         <FloatingViewer

@@ -46,11 +46,11 @@ export default async function RecursoViewerPage({
   let finalUrl = recurso.url;
   if (recurso.tipo !== "enlace" && recurso.tipo !== "youtube") {
     // Es mejor usar nuestra ruta de descarga que funciona de forma consistente para iframes
-    if (workflowId) {
+    if (workflowId && workflowId !== "undefined") {
       // PHASE 3: Si estamos viendo el documento en el contexto de un flujo (Copia Fantasma)
-      finalUrl = `/api/workflows/${workflowId}/download-final`;
+      finalUrl = `/api/workflows/${workflowId}/download-final?t=${Date.now()}`;
     } else {
-      finalUrl = `/api/resources/${recurso.id}/download`;
+      finalUrl = `/api/resources/${recurso.id}/download?t=${Date.now()}`;
     }
   }
 

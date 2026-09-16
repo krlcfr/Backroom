@@ -68,3 +68,54 @@ export async function getLimitsForOrg(orgId: string) {
   const plan = await getOrganizationPlan(orgId);
   return PLAN_LIMITS[plan];
 }
+export async function getOrganizationUsageMetrics(orgId: string, ownerId: string) {
+  const adminSupabase = createAdminClient();
+  
+  // 1. Members count
+  const { count: membersCount } = await adminSupabase
+    .from("organization_members")
+    .select("*", { count: "exact", head: true })
+    .eq("organization_id", orgId)
+    .eq("status", "active");
+    
+  // 2. Storage bytes (approx for MVP: getting recent resources from org's backrooms)
+  const { data: backrooms } = await adminSupabase
+    .from("backrooms")
+    .select("id")
+    .eq("propietario_id", ownerId);
+    
+  let totalBytes = 0;
+  let maxDepth = 0;
+  let totalResources = 0;
+  
+  if (backrooms && backrooms.length > 0) {
+    const backroomIds = backrooms.map(b => b.id);
+    
+    const { data: salas } = await adminSupabase
+      .from("salas")
+      .select("id, depth")
+      .in("backroom_id", backroomIds);
+      
+    if (salas && salas.length > 0) {
+      maxDepth = Math.max(...salas.map(s => s.depth));
+      const salaIds = salas.map(s => s.id);
+      
+      const { data: recursos } = await adminSupabase
+        .from("recursos")
+        .select("tamano_bytes")
+        .in("sala_id", salaIds);
+        
+      if (recursos) {
+        totalResources = recursos.length;
+        totalBytes = recursos.reduce((acc, curr) => acc + (curr.tamano_bytes || 0), 0);
+      }
+    }
+  }
+
+  return {
+    storage_bytes: totalBytes,
+    members: (membersCount || 0) + 1, // +1 for owner
+    max_depth: maxDepth,
+    resources: totalResources,
+  };
+}

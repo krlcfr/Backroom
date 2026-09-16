@@ -51,7 +51,7 @@ const StatusNode = ({ data }: any) => {
 
   return (
     <div className={`px-4 py-2 shadow-xl rounded-xl border-2 transition-colors ${borderColor} ${bgColor}`}>
-      <Handle type="target" position={Position.Left} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
+      <Handle type="target" position={Position.Top} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
       <div className="flex items-center gap-3">
         <div className="flex flex-col">
           <span className="text-xs font-semibold text-[#e2e2e2]">{data.label}</span>
@@ -70,7 +70,7 @@ const StatusNode = ({ data }: any) => {
           </div>
         </div>
       </div>
-      <Handle type="source" position={Position.Right} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
+      <Handle type="source" position={Position.Bottom} className={`w-2 h-2 ${isApproved ? '!bg-[#10b981]' : isRejected ? '!bg-[#ef4444]' : '!bg-[#7c3aed]'} !border-none`} />
     </div>
   );
 };
@@ -78,6 +78,7 @@ const StatusNode = ({ data }: any) => {
 import { WorkflowHistoryTimeline } from "./WorkflowHistoryTimeline";
 import { toast } from "sonner";
 import { RejectionReasonModal } from "./RejectionReasonModal";
+import dagre from 'dagre';
 
 const nodeTypes = { circle: StatusNode, statusCircle: StatusNode };
 
@@ -141,8 +142,39 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
             };
           });
 
-          setNodes(visualNodes);
           const rawEdges = graphJson.edges || [];
+          
+          const dagreGraph = new dagre.graphlib.Graph();
+          dagreGraph.setDefaultEdgeLabel(() => ({}));
+          
+          // Ajusta la dirección: TB = Top to Bottom
+          dagreGraph.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 100 });
+
+          visualNodes.forEach((node) => {
+            // Dimensiones aproximadas de tus nodos StatusCircle
+            dagreGraph.setNode(node.id, { width: 250, height: 80 });
+          });
+
+          rawEdges.forEach((edge: any) => {
+            dagreGraph.setEdge(edge.source, edge.target);
+          });
+
+          dagre.layout(dagreGraph);
+
+          const layoutedNodes = visualNodes.map((node) => {
+            const nodeWithPosition = dagreGraph.node(node.id);
+            return {
+              ...node,
+              targetPosition: Position.Top,
+              sourcePosition: Position.Bottom,
+              position: {
+                x: nodeWithPosition.x - 250 / 2, // Centrar
+                y: nodeWithPosition.y - 80 / 2,
+              },
+            };
+          });
+
+          setNodes(layoutedNodes);
           setEdges(rawEdges.map((e: any) => ({
             ...e,
             type: 'straight',

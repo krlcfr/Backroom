@@ -1,0 +1,37 @@
+﻿"use client"
+
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import IconPicker from "@/components/ui/icon-picker"
+import { formatBytes } from "@/lib/demo"
+
+interface Backroom {
+  id: string
+  ownerId: string
+  ownerName: string | null
+  name: string
+  description: string | null
+  coverUrl: string | null
+  createdAt: string
+  icono?: string
+}
+
+interface Org {
+  id: string
+  ownerId: string
+  name: string
+  description: string | null
+  logoUrl: string | null
+}
+
+interface DashboardContentProps {
+  backrooms: Backroom[]
+  org: Org | null
+  currentUserId: string | null
+  esPropietario: boolean
+  limits?: any
+  currentUsage?: any
+}
+
+export default function DashboardContent({ backrooms: initialBackrooms, org, currentUserId, esPropietario, limits, currentUsage }: DashboardContentProps) {

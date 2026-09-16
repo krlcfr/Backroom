@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import IconPicker from "@/components/ui/icon-picker"
+import { formatBytes } from "@/lib/demo"
 
 interface Backroom {
   id: string
@@ -29,9 +30,11 @@ interface DashboardContentProps {
   org: Org | null
   currentUserId: string | null
   esPropietario: boolean
+  limits?: any
+  currentUsage?: any
 }
 
-export default function DashboardContent({ backrooms: initialBackrooms, org, currentUserId, esPropietario }: DashboardContentProps) {
+export default function DashboardContent({ backrooms: initialBackrooms, org, currentUserId, esPropietario, limits, currentUsage }: DashboardContentProps) {
   const router = useRouter()
   
   const [backrooms, setBackrooms] = useState<Backroom[]>(initialBackrooms)
@@ -359,17 +362,24 @@ export default function DashboardContent({ backrooms: initialBackrooms, org, cur
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-[#e2e2e2] text-[14px]">Almacenamiento</span>
-                  <span className="text-[13px] text-[#ccc3d8]">--- / 10 GB</span>
+                  <span className="text-[13px] text-[#ccc3d8]">
+                    {limits && currentUsage ? `${formatBytes(currentUsage.storage_bytes)} / ${formatBytes(limits.storage_bytes)}` : "--- / ---"}
+                  </span>
                 </div>
                 <div className="w-full bg-[#333535] rounded-full h-1.5">
-                  <div className="bg-[#d2bbff] h-1.5 rounded-full" style={{ width: "0%" }} />
+                  <div 
+                    className="bg-[#d2bbff] h-1.5 rounded-full" 
+                    style={{ width: `${limits && currentUsage ? Math.min((currentUsage.storage_bytes / limits.storage_bytes) * 100, 100) : 0}%` }} 
+                  />
                 </div>
               </div>
 
               <div className="pt-4 border-t border-[#4a4455]">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-[#e2e2e2] text-[14px]">Miembros Activos</span>
-                  <span className="bg-[#333535] text-[#ccc3d8] text-xs px-2 py-0.5 rounded-full">0</span>
+                  <span className="bg-[#333535] text-[#ccc3d8] text-xs px-2 py-0.5 rounded-full">
+                    {currentUsage?.members || 1}
+                  </span>
                 </div>
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3">
@@ -377,8 +387,8 @@ export default function DashboardContent({ backrooms: initialBackrooms, org, cur
                       <span className="material-symbols-outlined text-[#958da1] text-[16px]">person</span>
                     </div>
                     <div>
-                      <p className="text-[14px] text-[#e2e2e2]">---</p>
-                      <p className="text-[12px] text-[#ccc3d8]">---</p>
+                      <p className="text-[14px] text-[#e2e2e2]">{org ? `Equipo de ${org.name}` : "Propietario"}</p>
+                      <p className="text-[12px] text-[#ccc3d8]">{currentUsage?.members || 1} miembro(s)</p>
                     </div>
                   </div>
                 </div>

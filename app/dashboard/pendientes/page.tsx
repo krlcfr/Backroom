@@ -102,7 +102,7 @@ export default async function PendientesPage() {
                   const doc = wf.recursos;
                   
                   // Para abrir el recurso en modo workflow, pasamos el ID del flujo
-                  const viewerUrl = `/dashboard/documents/${doc.id}?workflow=${task.workflow_id}`;
+                  const viewerUrl = `/dashboard/documents/${doc.id}?workflow=${wf.id}`;
 
                   return (
                     <tr key={task.id} className="hover:bg-[#27272a]/30 transition-colors">

@@ -31,7 +31,7 @@ export async function GET(
     const isOwner = (rootSala.backrooms as any)?.propietario_id === usuario.id;
 
     // Traer todas las salas del mismo backroom
-    const { data: allSalas, error } = await supabase
+    const { data: allSalas, error } = await adminSupabase
       .from("salas")
       .select("id, nombre, descripcion, depth, parent_id, created_at, icono")
       .eq("backroom_id", rootSala.backroom_id);
@@ -43,7 +43,7 @@ export async function GET(
 
     if (!isOwner) {
       // Obtener permisos granulares de la tabla sala_permisos
-      const { data: permisos } = await supabase
+      const { data: permisos } = await adminSupabase
         .from("sala_permisos")
         .select("sala_id, salas_acceder")
         .eq("usuario_id", usuario.id);
@@ -51,7 +51,7 @@ export async function GET(
       (permisos ?? []).forEach(p => userPermissions.set(p.sala_id, p));
 
       // Obtener el permiso general del miembro como fallback (contribuir / solo_visualizar)
-      const { data: miembro } = await supabase
+      const { data: miembro } = await adminSupabase
         .from("backroom_miembros")
         .select("permiso")
         .eq("backroom_id", rootSala.backroom_id)
