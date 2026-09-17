@@ -13,7 +13,7 @@ export const createInvitationSchema = z.object({
 export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
 
 export class InvitationsService {
-  static async createInvitation(authId: string, orgId: string, input: CreateInvitationInput) {
+  static async createInvitation(authId: string, orgId: string, input: CreateInvitationInput, origin?: string) {
     const usuario = await getUsuarioInterno(authId);
     if (!usuario) throw new ApiError(404, "Perfil no encontrado");
 
@@ -149,7 +149,7 @@ export class InvitationsService {
     if (process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        const baseUrl = origin || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
         const inviteLink = `${baseUrl}/invitaciones/${token}`;
         
         // En entorno local, siempre imprimimos el link por si no llega el correo
