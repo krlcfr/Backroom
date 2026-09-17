@@ -231,11 +231,17 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
       setDocumentContent(currentHtml);
     }
 
-    const docName = documentTitle.trim();
+    let docName = documentTitle.trim();
 
     if (!docName || docName === "Nuevo_Documento" || docName === "Título del Documento") {
-      toast("Por favor, ingresa un nombre válido para el documento en la barra superior.");
-      return false;
+      const titleElement = document.querySelector('#document-editor-container h1');
+      if (titleElement?.textContent && titleElement.textContent.trim() !== "Título del Documento") {
+        docName = titleElement.textContent.trim();
+        setDocumentTitle(docName);
+      } else {
+        toast("Por favor, ingresa un nombre válido para el documento en la barra superior o en el título.");
+        return false;
+      }
     }
     
     const pdfName = docName.endsWith('.pdf') ? docName : `${docName}.pdf`;
@@ -299,7 +305,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[110] backdrop-blur-sm">
-      <div className={`bg-[#121414] ${showAnnotations ? 'w-[95vw]' : 'w-full max-w-4xl'} h-[85vh] rounded-2xl border border-[#3f3f46] shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}>
+      <div className={`bg-[#121414] ${showAnnotations ? 'w-[95vw]' : 'w-full max-w-6xl'} h-[85vh] rounded-2xl border border-[#3f3f46] shadow-2xl flex flex-col overflow-hidden transition-all duration-300`}>
         
         {/* Header */}
         <div className="h-16 px-6 border-b border-[#3f3f46] flex items-center justify-between shrink-0 bg-[#1a1c1c]">
@@ -492,7 +498,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
           )}
 
           {step === 'editor' && (
-            <div className="flex-1 flex flex-col p-8 overflow-y-auto" onMouseUp={handleSelection}>
+            <div className="flex-1 flex flex-col p-8 overflow-y-auto custom-scrollbar" onMouseUp={handleSelection}>
               <div className="flex flex-wrap justify-between gap-3 mb-4 sticky top-0 z-10 bg-[#121414] pb-2">
                 
                 {/* Toolbar */}
@@ -626,7 +632,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
 
           {/* Sidebar de Anotaciones */}
           {step === 'editor' && showAnnotations && (
-            <aside className="w-80 border-l border-[#3f3f46] bg-[#18181b] p-4 flex flex-col gap-4 overflow-y-auto shrink-0 animate-in slide-in-from-right-4 duration-300">
+            <aside className="w-80 border-l border-[#3f3f46] bg-[#18181b] p-4 flex flex-col gap-4 overflow-y-auto custom-scrollbar shrink-0 animate-in slide-in-from-right-4 duration-300">
               <div className="flex items-center justify-between pb-2 border-b border-[#3f3f46]">
                 <h3 className="text-sm font-semibold text-[#e2e2e2] flex items-center gap-2">
                   <span className="material-symbols-outlined text-[#7c3aed] text-[18px]">forum</span>
