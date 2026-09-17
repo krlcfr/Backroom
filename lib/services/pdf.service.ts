@@ -29,5 +29,28 @@ export const PDFService = {
 
     // Generar y guardar
     return html2pdf().set(opt).from(element).save();
+  },
+
+  /**
+   * Genera el contenido de un elemento HTML a PDF como un Blob.
+   * @param elementId El ID del contenedor HTML a exportar.
+   */
+  generatePdfBlob: async (elementId: string): Promise<Blob> => {
+    const element = document.getElementById(elementId);
+    
+    if (!element) {
+      throw new Error("Elemento no encontrado para exportar a PDF.");
+    }
+
+    const opt = {
+      margin:       1,
+      image:        { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in' as const, format: 'letter' as const, orientation: 'portrait' as const }
+    };
+
+    const html2pdf = (await import('html2pdf.js')).default;
+
+    return await html2pdf().set(opt).from(element).output('blob');
   }
 };

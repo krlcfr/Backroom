@@ -78,9 +78,11 @@ export async function PUT(
     const hasUploadPerm = await checkRoomPermission(user.id, roomId, "recursos.subir");
     if (!hasUploadPerm) throw new ApiError(403, "No tienes permiso para editar recursos");
 
-    const { content, isHTML } = await request.json();
-    if (!content || !isHTML) {
-      throw new ApiError(400, "Contenido inválido para actualización");
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+    
+    if (!file) {
+      throw new ApiError(400, "Contenido inválido para actualización. Se requiere un archivo.");
     }
 
     const supabaseAdmin = createAdminClient();
@@ -93,34 +95,14 @@ export async function PUT(
       
     if (fetchError || !recurso) throw new ApiError(404, "Recurso no encontrado");
 
-    if (recurso.tipo !== "doc") {
-      throw new ApiError(400, "Solo se pueden editar documentos HTML directamente");
-    }
-
-    const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 40px; max-width: 800px; margin: 0 auto; }</style></head><body>${content}</body></html>`;
-    
-    // Regenerar el PDF usando Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    });
-    const page = await browser.newPage();
-    await page.setContent(fullHtml, { waitUntil: "domcontentloaded" });
-    
-    const fileBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "20mm", right: "20mm", bottom: "20mm", left: "20mm" },
-    });
-    await browser.close();
-
-    const newSizeBytes = fileBuffer.length;
+    const fileBuffer = await file.arrayBuffer();
+    const newSizeBytes = file.size;
 
     // We skip limits check for edit to keep it simple
     const { error: storageError } = await supabaseAdmin.storage
       .from("recursos")
       .upload(recurso.url, fileBuffer, {
-        contentType: "application/pdf",
+        contentType: file.type || "application/pdf",
         upsert: true
       });
 

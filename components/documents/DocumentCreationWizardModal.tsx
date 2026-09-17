@@ -221,7 +221,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
   const handleSaveDB = async (showAlert = true) => {
     if (!roomId) {
       toast("Error: No se encontró la sala.");
-      return;
+      return false;
     }
     
     let currentHtml = documentContent;
@@ -233,44 +233,53 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
 
     const titleElement = document.querySelector('#document-editor-container h1');
     const docName = titleElement?.textContent || "Nuevo_Documento";
+    const pdfName = docName.endsWith('.pdf') ? docName : `${docName}.pdf`;
     setDocumentTitle(docName);
 
     try {
+      toast("Generando PDF...", { id: 'pdf-toast' });
+      
+      const pdfBlob = await PDFService.generatePdfBlob('document-editor-container');
+      const pdfFile = new File([pdfBlob], pdfName, { type: 'application/pdf' });
+
+      toast.loading("Guardando en servidor...", { id: 'pdf-toast' });
+      
+      const formData = new FormData();
+      formData.append("file", pdfFile);
+
       let res;
       if (savedDocumentId) {
+        // Enviar como FormData al endpoint PUT para actualizar el archivo PDF
         res = await fetch(`/api/rooms/${roomId}/resources/${savedDocumentId}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: currentHtml, isHTML: true, nombre: docName })
+          body: formData,
         });
       } else {
-        res = await fetch(`/api/rooms/${roomId}/resources/create-document`, {
+        res = await fetch(`/api/rooms/${roomId}/resources/upload`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nombre: docName, content: currentHtml, isHTML: true })
+          body: formData,
         });
       }
       
       if (res.ok) {
-        const data = await res.json();
-        if (!savedDocumentId && data.resource?.id) {
-          setSavedDocumentId(data.resource.id);
-        } else if (!savedDocumentId && data.data?.id) {
-          // create-document API might return data.data.id
-          setSavedDocumentId(data.data.id);
+        if (!savedDocumentId) {
+          const result = await res.json();
+          const newId = result.data?.id;
+          if (newId) {
+            setSavedDocumentId(newId);
+          }
         }
-        if (showAlert) toast("Documento guardado exitosamente en Backroom.");
+        
+        toast.success("Documento guardado exitosamente en Backroom.", { id: 'pdf-toast' });
         return true;
       } else {
-        if (showAlert) {
-          const err = await res.json();
-          toast("Error al guardar: " + (err.error || "Desconocido"));
-        }
+        const err = await res.json();
+        toast.error("Error al guardar: " + (err.error || "Desconocido"), { id: 'pdf-toast' });
         return false;
       }
     } catch (error) {
-      console.error(error);
-      if (showAlert) toast("Error al guardar en BD");
+      console.error("Error guardando documento:", error);
+      toast.error("Error al conectarse con el servidor.", { id: 'pdf-toast' });
       return false;
     }
   };
