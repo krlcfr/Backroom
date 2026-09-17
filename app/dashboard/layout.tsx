@@ -10,11 +10,16 @@ import { LimitsProvider } from "@/components/providers/limits-provider"
 
 import { SidebarProvider } from "@/components/providers/sidebar-provider"
 import SidebarWrapper from "@/components/layout/sidebar-wrapper"
+import { redirect } from "next/navigation"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const authId = user?.id ?? null
+  
+  if (!authId) {
+    redirect("/login")
+  }
 
   let org: { id: string; ownerId: string; name: string; description: string | null; logoUrl: string | null; updatedAt: string } | null = null
   let usuarioInternoId: string | null = null
