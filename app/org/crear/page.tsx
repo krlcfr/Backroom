@@ -15,6 +15,13 @@ export default function CrearOrganizacionPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  useEffect(() => {
+    // Basic client-side check if user is somewhat authenticated via API
+    fetch('/api/auth/me').then(res => {
+      if (!res.ok) router.replace('/login')
+    }).catch(() => router.replace('/login'))
+  }, [router])
+
   const [invitations, setInvitations] = useState<any[]>([])
   const [loadingInvites, setLoadingInvites] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)

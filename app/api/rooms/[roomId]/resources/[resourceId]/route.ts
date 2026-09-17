@@ -80,6 +80,7 @@ export async function PUT(
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const nombre = formData.get("nombre") as string | null;
     
     if (!file) {
       throw new ApiError(400, "Contenido inválido para actualización. Se requiere un archivo.");
@@ -89,7 +90,6 @@ export async function PUT(
     
     const { data: recurso, error: fetchError } = await supabaseAdmin
       .from("recursos")
-      .select("*")
       .eq("id", resourceId)
       .single();
       
@@ -110,9 +110,14 @@ export async function PUT(
       throw new ApiError(500, "Error al guardar el archivo en la nube: " + storageError.message);
     }
 
+    const updateData: any = { tamano_bytes: newSizeBytes };
+    if (nombre) {
+      updateData.nombre = nombre.endsWith(".pdf") ? nombre : `${nombre}.pdf`;
+    }
+
     const { error: dbError } = await supabaseAdmin
       .from("recursos")
-      .update({ tamano_bytes: newSizeBytes })
+      .update(updateData)
       .eq("id", resourceId);
 
     if (dbError) {

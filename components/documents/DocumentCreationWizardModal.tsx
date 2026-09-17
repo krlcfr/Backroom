@@ -231,10 +231,14 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
       setDocumentContent(currentHtml);
     }
 
-    const titleElement = document.querySelector('#document-editor-container h1');
-    const docName = titleElement?.textContent || "Nuevo_Documento";
+    const docName = documentTitle.trim();
+
+    if (!docName || docName === "Nuevo_Documento" || docName === "Título del Documento") {
+      toast("Por favor, ingresa un nombre válido para el documento en la barra superior.");
+      return false;
+    }
+    
     const pdfName = docName.endsWith('.pdf') ? docName : `${docName}.pdf`;
-    setDocumentTitle(docName);
 
     try {
       toast("Generando PDF...", { id: 'pdf-toast' });
@@ -530,6 +534,16 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
                     <option value="6">20px</option>
                     <option value="7">24px</option>
                   </select>
+
+                  <div className="w-px h-5 bg-[#3f3f46] mx-1"></div>
+
+                  <input
+                    type="text"
+                    value={documentTitle}
+                    onChange={(e) => setDocumentTitle(e.target.value)}
+                    placeholder="Nombre del documento..."
+                    className="bg-[#18181b] text-[#e2e2e2] text-sm rounded border border-[#3f3f46] px-3 py-1 outline-none focus:border-[#7c3aed] w-48"
+                  />
                 </div>
 
                 <div className="flex gap-2">
