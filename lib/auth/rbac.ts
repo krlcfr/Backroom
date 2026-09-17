@@ -136,6 +136,7 @@ export async function checkRoomPermission(authId: string, roomId: string, permis
   if (esDueno) return true;
 
   // Consultar permisos específicos de la sala
+  const supabase = createAdminClient();
   const { data: permiso } = await supabase
     .from("sala_permisos")
     .select(permisoRequerido.replace(".", "_"))
