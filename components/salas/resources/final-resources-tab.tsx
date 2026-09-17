@@ -43,7 +43,7 @@ export default function FinalResourcesTab({ roomId }: { roomId: string }) {
 
   return (
     <div className="mt-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
         {docs.map(res => {
           const { icon, color, bg } = getIconAndColor(res.tipo);
           const size = formatSize(res.tamano_bytes);
@@ -54,7 +54,7 @@ export default function FinalResourcesTab({ roomId }: { roomId: string }) {
                   <span className="material-symbols-outlined text-[18px]">{icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-[#e2e2e2] font-medium text-[13px] break-words line-clamp-2 cursor-pointer hover:text-[#a78bfa] transition-colors" title={res.nombre} onClick={() => setSelectedDoc(res)}>
+                  <h4 className="text-[#e2e2e2] font-medium text-[13px] truncate cursor-pointer hover:text-[#a78bfa] transition-colors" title={res.nombre} onClick={() => setSelectedDoc(res)}>
                     {res.nombre}
                   </h4>
                   <p className="text-[#958da1] text-[11px] mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1">
