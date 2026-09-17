@@ -90,6 +90,7 @@ export async function PUT(
     
     const { data: recurso, error: fetchError } = await supabaseAdmin
       .from("recursos")
+      .select("*")
       .eq("id", resourceId)
       .single();
       
