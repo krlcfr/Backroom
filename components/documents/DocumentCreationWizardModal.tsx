@@ -493,7 +493,7 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
 
           {step === 'editor' && (
             <div className="flex-1 flex flex-col p-8 overflow-y-auto" onMouseUp={handleSelection}>
-              <div className="flex justify-between gap-3 mb-4 sticky top-0 z-10 bg-[#121414] pb-2">
+              <div className="flex flex-wrap justify-between gap-3 mb-4 sticky top-0 z-10 bg-[#121414] pb-2">
                 
                 {/* Toolbar */}
                 <div className="flex items-center gap-1 bg-[#27272a] p-1.5 rounded-lg border border-[#3f3f46]">
@@ -534,16 +534,6 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
                     <option value="6">20px</option>
                     <option value="7">24px</option>
                   </select>
-
-                  <div className="w-px h-5 bg-[#3f3f46] mx-1"></div>
-
-                  <input
-                    type="text"
-                    value={documentTitle}
-                    onChange={(e) => setDocumentTitle(e.target.value)}
-                    placeholder="Nombre del documento..."
-                    className="bg-[#18181b] text-[#e2e2e2] text-sm rounded border border-[#3f3f46] px-3 py-1 outline-none focus:border-[#7c3aed] w-48"
-                  />
                 </div>
 
                 <div className="flex gap-2">
@@ -606,7 +596,14 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
               </div>
 
               {/* Contenedor del Editor */}
-              <div className="flex-1 flex justify-center">
+              <div className="flex-1 flex flex-col items-center">
+                <input
+                  type="text"
+                  value={documentTitle}
+                  onChange={(e) => setDocumentTitle(e.target.value)}
+                  placeholder="Nombre del documento..."
+                  className="bg-transparent text-[#e2e2e2] text-xl font-bold border-b border-[#3f3f46] focus:border-[#7c3aed] px-4 py-3 outline-none w-full max-w-3xl mb-4 transition-colors placeholder:text-[#958da1]"
+                />
                 <div 
                   id="document-editor-container" 
                   className="bg-white rounded-lg p-12 text-black shadow-inner min-h-[700px] w-full max-w-3xl"
