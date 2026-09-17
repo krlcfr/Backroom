@@ -25,14 +25,29 @@ export async function POST(
     const user = await requireAuth();
     const supabaseAdmin = createAdminClient();
 
-    // Obtener los nodos del flujo para mapearlos
     const { data: nodes, error: nodesError } = await supabaseAdmin
       .from('workflow_nodes')
-      .select('id, assigned_user_id, usuarios!workflow_nodes_assigned_user_id_fkey(auth_id)')
+      .select('id, assigned_user_id')
       .eq('workflow_id', workflowId);
 
     if (nodesError || !nodes) {
       return NextResponse.json({ error: 'No se encontraron nodos del flujo' }, { status: 404 });
+    }
+
+    // Map public.usuarios(id) to auth_id for nodes that have an assigned_user_id
+    const assignedUserIds = nodes.map(n => n.assigned_user_id).filter(Boolean);
+    let usuariosAuthMap: Record<string, string> = {};
+    if (assignedUserIds.length > 0) {
+      const { data: usuariosData } = await supabaseAdmin
+        .from('usuarios')
+        .select('id, auth_id')
+        .in('id', assignedUserIds);
+      
+      if (usuariosData) {
+        usuariosData.forEach(u => {
+          usuariosAuthMap[u.id] = u.auth_id;
+        });
+      }
     }
 
     // Obtener el document_id
@@ -49,7 +64,12 @@ export async function POST(
     // Preparar registros a insertar
     const positionsToInsert = positions.map(pos => {
       const node = nodes.find(n => n.id === pos.nodeId);
-      const targetAuthId = (node?.usuarios as any)?.auth_id || (Array.isArray(node?.usuarios) ? (node?.usuarios as any)[0]?.auth_id : null) || user.id;
+      let targetAuthId = user.id; // fallback a auth.users.id actual
+      
+      if (node?.assigned_user_id) {
+        // node.assigned_user_id es de public.usuarios, mapeamos a auth.users(id)
+        targetAuthId = usuariosAuthMap[node.assigned_user_id] || user.id;
+      }
 
       return {
         workflow_id: workflowId,

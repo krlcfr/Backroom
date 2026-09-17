@@ -107,13 +107,8 @@ export default function RoomGraphModal({ tree, backroomId, backroomName, activeR
 
     const RADIUS_STEP = 200; // Distancia entre anillos (profundidades)
 
-    // Desenvolver la sala raíz si existe para que el BackRoom se conecte directamente a las sub-salas reales
-    let directSalas: RoomNode[] = []
-    if (tree.length === 1 && tree[0].depth === 0) {
-      directSalas = tree[0].children ?? []
-    } else {
-      directSalas = tree.flatMap((node) => (node.depth === 0 ? (node.children ?? []) : [node]))
-    }
+    // Conectar el nodo sintético del Backroom directamente a las salas raíz (depth 0)
+    let directSalas: RoomNode[] = tree
 
     // Nodo sintético de la BackRoom que actuará como centro absoluto
     const syntheticBackroom: RoomNode = {

@@ -24,8 +24,21 @@ export class NotificationService {
     try {
       const adminSupabase = createAdminClient();
       
+      let finalUserId = params.userId;
+      
+      // Auto-resolve usuarios.id to auth.users.id if needed
+      const { data: uData } = await adminSupabase
+        .from("usuarios")
+        .select("auth_id")
+        .eq("id", params.userId)
+        .maybeSingle();
+        
+      if (uData && uData.auth_id) {
+        finalUserId = uData.auth_id;
+      }
+      
       const { error } = await adminSupabase.from("notifications").insert({
-        user_id: params.userId,
+        user_id: finalUserId,
         organization_id: params.organizationId || null,
         type: params.type,
         title: params.title,
@@ -107,23 +120,15 @@ export class NotificationService {
 
     for (const node of nextNodes) {
       if (node.assigned_user_id) {
-        // node.assigned_user_id is `usuarios.id`, but notifications need `auth.users.id`
-        const { data: usuarioData } = await adminSupabase
-          .from("usuarios")
-          .select("auth_id")
-          .eq("id", node.assigned_user_id)
-          .single();
-
-        if (usuarioData?.auth_id) {
-          await this.send({
-            userId: usuarioData.auth_id,
-            organizationId: orgId,
-            type: 'WORKFLOW_ACTION_REQUIRED',
-            title: "Acción Requerida en Flujo de Aprobación",
-            message: "Se requiere su revisión y acción para el documento " + docTitle,
-            actionData: { workflow_id: workflowId, node_id: node.id, document_id: workflow?.document_id }
-          });
-        }
+        // node.assigned_user_id in workflow_nodes is ALREADY auth.users.id
+        await this.send({
+          userId: node.assigned_user_id,
+          organizationId: orgId,
+          type: 'WORKFLOW_ACTION_REQUIRED',
+          title: "Acción Requerida en Flujo de Aprobación",
+          message: "Se requiere su revisión y acción para el documento " + docTitle,
+          actionData: { workflow_id: workflowId, node_id: node.id, document_id: workflow?.document_id }
+        });
       } else {
         // Si no hay usuario asignado, buscar a todos los usuarios con ese cargo_id y notificarles
         console.warn("[NotificationService] No hay usuario asignado explícitamente para el cargo");

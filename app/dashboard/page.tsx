@@ -1,6 +1,7 @@
-import { createClient } from "@/lib/supabase/server"
+﻿import { createClient } from "@/lib/supabase/server"
 import { BackroomsService } from "@/lib/services/backrooms.service"
 import { OrganizationsService } from "@/lib/services/organizations.service"
+import { getLimitsForOrg, getOrganizationPlan, getOrganizationUsageMetrics } from "@/lib/limits"
 import { redirect } from "next/navigation"
 import DashboardContent from "./dashboard-content"
 import type { Metadata } from "next"
@@ -17,6 +18,7 @@ interface Backroom {
   description: string | null
   coverUrl: string | null
   createdAt: string
+  icono?: string
 }
 
 interface Org {
@@ -61,12 +63,17 @@ export default async function DashboardPage() {
     }
   }
 
+  const limits = await getLimitsForOrg(org.id)
+  const current_usage = await getOrganizationUsageMetrics(org.id, org.ownerId)
+
   return (
     <DashboardContent
       backrooms={backrooms}
       org={org}
       currentUserId={authId}
       esPropietario={esPropietario}
+      limits={limits}
+      currentUsage={current_usage}
     />
   )
 }

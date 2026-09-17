@@ -40,3 +40,5 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: "https://ejemplo.supabase.co"
           NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.falso"
           NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+          STRIPE_SECRET_KEY: "sk_test_falso"
+          SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.falso"
