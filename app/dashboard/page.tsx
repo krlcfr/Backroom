@@ -1,4 +1,4 @@
-﻿import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server"
 import { BackroomsService } from "@/lib/services/backrooms.service"
 import { OrganizationsService } from "@/lib/services/organizations.service"
 import { getLimitsForOrg, getOrganizationPlan, getOrganizationUsageMetrics } from "@/lib/limits"
@@ -34,13 +34,15 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   const authId = user?.id ?? null
 
+  if (!authId) {
+    redirect("/login")
+  }
+
   let org: Org | null = null
-  if (authId) {
-    try {
-      org = await OrganizationsService.getOrgForUser(authId)
-    } catch {
-      org = null
-    }
+  try {
+    org = await OrganizationsService.getOrgForUser(authId)
+  } catch {
+    org = null
   }
 
   if (!org) {
