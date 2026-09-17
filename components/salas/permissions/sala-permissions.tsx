@@ -72,6 +72,17 @@ export function SalaPermissions({ salaId, salaParentId }: SalaPermissionsProps) 
       [field]: !currentValue
     }
 
+    if (field === 'salas_acceder' && !newPerms.salas_acceder) {
+      newPerms.salas_crear = false;
+      newPerms.salas_editar = false;
+      newPerms.salas_eliminar = false;
+      newPerms.archivos_subir = false;
+      newPerms.archivos_editar = false;
+      newPerms.archivos_eliminar = false;
+    } else if (newPerms[field] && field !== 'salas_ver' && field !== 'salas_acceder') {
+      newPerms.salas_acceder = true;
+    }
+
     try {
       const res = await fetch(`/api/rooms/${salaId}/permissions`, {
         method: "PATCH",
@@ -202,11 +213,11 @@ export function SalaPermissions({ salaId, salaParentId }: SalaPermissionsProps) 
                       <td key={perm.key} className="px-4 py-4 text-center border-r border-[#3f3f46]/50 last:border-0">
                         <button
                           onClick={() => handleToggle(member.usuario_id, perm.key, p[perm.key])}
-                          disabled={saving !== null}
+                          disabled={saving !== null || (!p.salas_acceder && perm.key !== 'salas_acceder' && perm.key !== 'salas_ver')}
                           aria-label={`${perm.label} para ${displayName}`}
                           className={`w-10 h-6 rounded-full transition-colors relative inline-flex items-center justify-center ${
                             p[perm.key] ? 'bg-[#7c3aed]' : 'bg-[#4a4455]'
-                          } ${saving !== null ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                          } ${(saving !== null || (!p.salas_acceder && perm.key !== 'salas_acceder' && perm.key !== 'salas_ver')) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                           <span className={`w-4 h-4 bg-white rounded-full transition-transform absolute shadow-sm ${
                             p[perm.key] ? 'translate-x-2' : '-translate-x-2'

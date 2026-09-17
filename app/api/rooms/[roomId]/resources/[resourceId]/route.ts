@@ -78,7 +78,7 @@ export async function PUT(
     const hasUploadPerm = await checkRoomPermission(user.id, roomId, "recursos.subir");
     if (!hasUploadPerm) throw new ApiError(403, "No tienes permiso para editar recursos");
 
-    const { content, isHTML } = await request.json();
+    const { content, isHTML, nombre } = await request.json();
     if (!content || !isHTML) {
       throw new ApiError(400, "Contenido inválido para actualización");
     }
@@ -93,8 +93,8 @@ export async function PUT(
       
     if (fetchError || !recurso) throw new ApiError(404, "Recurso no encontrado");
 
-    if (recurso.tipo !== "doc") {
-      throw new ApiError(400, "Solo se pueden editar documentos HTML directamente");
+    if (recurso.tipo !== "doc" && recurso.tipo !== "pdf") {
+      throw new ApiError(400, "Solo se pueden editar documentos");
     }
 
     const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 40px; max-width: 800px; margin: 0 auto; }</style></head><body>${content}</body></html>`;
@@ -128,9 +128,14 @@ export async function PUT(
       throw new ApiError(500, "Error al guardar el archivo en la nube: " + storageError.message);
     }
 
+    const updateData: any = { tamano_bytes: newSizeBytes };
+    if (nombre) {
+      updateData.nombre = nombre.endsWith(".pdf") ? nombre : `${nombre}.pdf`;
+    }
+
     const { error: dbError } = await supabaseAdmin
       .from("recursos")
-      .update({ tamano_bytes: newSizeBytes })
+      .update(updateData)
       .eq("id", resourceId);
 
     if (dbError) {
