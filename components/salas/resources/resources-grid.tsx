@@ -115,7 +115,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 mt-4">
         {resources.map((res) => {
           const { icon, color, bg } = getIconAndColor(res.tipo)
           const size = formatSize(res.tamano_bytes)
@@ -132,7 +132,7 @@ export default function ResourcesGrid({ resources, roomId, canDelete, onResource
               
               <div className="flex-1 min-w-0" onClick={() => handleResourceClick(res)}>
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <h4 className="text-[#e2e2e2] font-medium text-[13px] break-words cursor-pointer hover:text-[#a78bfa] transition-colors" title={res.nombre}>
+                  <h4 className="text-[#e2e2e2] font-medium text-[13px] truncate cursor-pointer hover:text-[#a78bfa] transition-colors" title={res.nombre}>
                     {res.nombre}
                   </h4>
                 </div>
