@@ -14,7 +14,8 @@ export async function POST(
     const body = await request.json();
     const input = createInvitationSchema.parse(body);
 
-    const invitation = await InvitationsService.createInvitation(user.id, orgId, input);
+    const origin = request.headers.get("origin") ?? undefined;
+    const invitation = await InvitationsService.createInvitation(user.id, orgId, input, origin);
 
     // Auditoría
     const { AuditService } = await import("@/lib/services/audit.service");

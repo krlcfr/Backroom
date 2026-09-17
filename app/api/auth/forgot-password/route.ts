@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const input = forgotPasswordSchema.parse(body);
 
-    await AuthService.forgotPassword(input);
+    const origin = request.headers.get("origin") ?? undefined;
+    await AuthService.forgotPassword(input, origin);
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

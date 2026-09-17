@@ -126,10 +126,13 @@ export class AuthService {
     return data;
   }
 
-  static async forgotPassword(input: ForgotPasswordInput) {
+  static async forgotPassword(input: ForgotPasswordInput, origin?: string) {
     const supabase = await createClient();
 
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL}/recuperar/confirmar`;
+    const baseUrl = origin || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    // Usamos el endpoint de callback intermedio (api/auth/confirm) si es necesario, 
+    // pero Supabase soporta redirigir directamente al sitio si está en los Redirect URLs.
+    const redirectTo = `${baseUrl}/recuperar/confirmar`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(input.email, { redirectTo });
 
