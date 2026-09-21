@@ -10,6 +10,8 @@ const positionsSchema = z.object({
     pageNumber: z.number().int().min(1),
     xPercent: z.number().min(0).max(100),
     yPercent: z.number().min(0).max(100),
+    width: z.number().min(50).max(1000).optional().default(150),
+    height: z.number().min(20).max(500).optional().default(60),
   }))
 });
 
@@ -79,8 +81,8 @@ export async function POST(
         page_number: pos.pageNumber,
         pos_x_percent: pos.xPercent,
         pos_y_percent: pos.yPercent,
-        width_px: 150,
-        height_px: 60,
+        width_px: pos.width,
+        height_px: pos.height,
         is_signed: false
       };
     });

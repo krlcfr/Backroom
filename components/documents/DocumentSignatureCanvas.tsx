@@ -36,6 +36,8 @@ interface SignatureBox {
   pageNumber: number;
   xPercent: number;
   yPercent: number;
+  width: number;
+  height: number;
 }
 
 export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: DocumentSignatureCanvasProps) {
@@ -90,16 +92,20 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
 
     const rect = containerRef.current.getBoundingClientRect()
     // Calculate percentage relative to the page container
-    // Center the 150x60 box on the cursor
-    const boxWidthPercent = (150 / rect.width) * 100;
-    const boxHeightPercent = (60 / rect.height) * 100;
+    // Encontrar si ya existe la caja para mantener su tamaño
+    const existingBox = boxes.find(b => b.nodeId === node.id)
+    const boxW = existingBox ? existingBox.width : 150
+    const boxH = existingBox ? existingBox.height : 60
+
+    const boxWidthPercent = (boxW / rect.width) * 100;
+    const boxHeightPercent = (boxH / rect.height) * 100;
 
     let xPercent = ((e.clientX - rect.left) / rect.width) * 100 - (boxWidthPercent / 2);
     let yPercent = ((e.clientY - rect.top) / rect.height) * 100 - (boxHeightPercent / 2);
 
     // Constrain
-    xPercent = Math.max(0, Math.min(xPercent, 90))
-    yPercent = Math.max(0, Math.min(yPercent, 95))
+    xPercent = Math.max(0, Math.min(xPercent, 100 - boxWidthPercent))
+    yPercent = Math.max(0, Math.min(yPercent, 100 - boxHeightPercent))
 
     setBoxes(prev => {
       // Remove if this node was already placed somewhere else
@@ -108,10 +114,12 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
         nodeId: node.id,
         pageNumber: currentPage,
         xPercent,
-        yPercent
+        yPercent,
+        width: boxW,
+        height: boxH
       }]
     })
-  }, [currentPage])
+  }, [currentPage, boxes])
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -277,6 +285,40 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
               {/* Render placed signature boxes for this page */}
               {boxes.filter(b => b.pageNumber === currentPage).map(box => {
                 const node = signNodes.find(n => n.id === box.nodeId)
+                
+                const handleResize = (e: React.MouseEvent) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  
+                  const startX = e.clientX;
+                  const startY = e.clientY;
+                  const startWidth = box.width;
+                  const startHeight = box.height;
+
+                  const onMouseMove = (moveEvent: MouseEvent) => {
+                    if (!containerRef.current) return;
+                    const dx = moveEvent.clientX - startX;
+                    
+                    // Maintain aspect ratio (approx 2.5 : 1)
+                    let newWidth = Math.max(100, Math.min(400, startWidth + dx));
+                    let newHeight = newWidth / 2.5;
+
+                    setBoxes(prev => prev.map(b => 
+                      b.nodeId === box.nodeId 
+                        ? { ...b, width: newWidth, height: newHeight } 
+                        : b
+                    ));
+                  };
+
+                  const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                  };
+
+                  document.addEventListener('mousemove', onMouseMove);
+                  document.addEventListener('mouseup', onMouseUp);
+                };
+
                   return (
                     <div 
                       key={box.nodeId}
@@ -289,22 +331,31 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
                       style={{
                         left: `${box.xPercent}%`,
                         top: `${box.yPercent}%`,
-                        width: '150px',
-                        height: '60px'
+                        width: `${box.width}px`,
+                        height: `${box.height}px`
                       }}
                     >
+                    {/* Línea fantasma guía de firma */}
+                    <div className="absolute w-full h-[2px] bg-black/40 bottom-[25%] pointer-events-none" />
+
                     <button 
                       onClick={() => removeBox(box.nodeId)}
-                      className="absolute -top-3 -right-3 w-6 h-6 bg-red-500 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      className="absolute -top-3 -right-3 w-6 h-6 bg-red-500 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
                     >
                       <span className="material-symbols-outlined text-[14px]">close</span>
                     </button>
-                    <span className="material-symbols-outlined text-[#7c3aed] mb-1">draw</span>
-                    <span className="text-[10px] text-[#6d28d9] font-bold truncate w-full px-2 text-center">
+                    
+                    {/* Resize handle */}
+                    <div 
+                      onMouseDown={handleResize}
+                      className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#7c3aed] rounded-full cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    />
+
+                    <p className="text-xs font-semibold text-[#7c3aed] text-center px-1 pointer-events-none truncate w-full">
                       {node?.assigned_user?.nombre_completo || node?.cargo?.nombre || 'Firma'}
-                    </span>
+                    </p>
                   </div>
-                )
+                  )
               })}
             </div>
           ) : (

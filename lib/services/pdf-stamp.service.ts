@@ -130,17 +130,29 @@ export class PdfStampService {
           ? await pdfDoc.embedPng(imageBytes) 
           : await pdfDoc.embedJpg(imageBytes);
 
-        // pdf-lib maneja el (0,0) en la esquina inferior izquierda (Bottom-Left)
-        // La web maneja (0,0) en la esquina superior izquierda (Top-Left)
+        // La web (React-PDF) está renderizando a un ancho fijo de 800px.
+        // Convertimos el tamaño 'px' del frontend a porcentaje, y luego a puntos del PDF (PDF points).
+        const scaleFactor = pageWidth / 800.0;
+        
+        const pdfSigWidth = pos.width_px * scaleFactor;
+        const pdfSigHeight = pos.height_px * scaleFactor;
+
+        // absX, absYWeb representan la esquina SUPERIOR-IZQUIERDA de la caja en puntos del PDF.
         const absX = (pos.pos_x_percent / 100) * pageWidth;
         const absYWeb = (pos.pos_y_percent / 100) * pageHeight;
-        const absYPdfLib = pageHeight - absYWeb - pos.height_px;
+        
+        // pdf-lib usa la esquina INFERIOR-IZQUIERDA como origen (0,0) y coord Y hacia arriba.
+        const absYPdfLib = pageHeight - absYWeb - pdfSigHeight;
+
+        // Añadimos un pequeño offset hacia abajo (por ejemplo 25% del height de la firma)
+        // para alinear la "línea fantasma" del frontend exactamente con el texto.
+        const precisionOffsetY = pdfSigHeight * 0.25;
 
         page.drawImage(pdfImage, {
           x: absX,
-          y: absYPdfLib,
-          width: pos.width_px,
-          height: pos.height_px,
+          y: absYPdfLib - precisionOffsetY,
+          width: pdfSigWidth,
+          height: pdfSigHeight,
         });
       } catch (err) {
         console.error(`Error incrustando firma para nodo ${pos.workflow_node_id}:`, err);
