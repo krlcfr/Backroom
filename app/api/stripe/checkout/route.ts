@@ -63,7 +63,8 @@ export async function POST(request: NextRequest) {
         .eq("id", org.id);
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const origin = request.headers.get("origin");
+    const siteUrl = origin || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     // Map frontend keys to real Stripe Price IDs from ENV
     let realPriceId = priceId;

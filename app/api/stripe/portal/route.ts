@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, "Esta organización no tiene información de facturación");
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const origin = request.headers.get("origin");
+    const siteUrl = origin || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     // Create Stripe Customer Portal Session
     const portalSession = await stripe.billingPortal.sessions.create({
