@@ -202,6 +202,8 @@ export default function PerfilConfigClient({ userId, initialSignatureUrl, authId
           {mode === 'draw' && (
             <div className="space-y-2">
               <div className="w-full max-w-sm h-48 bg-white rounded-lg border-2 border-dashed border-[#7c3aed]/50 overflow-hidden relative cursor-crosshair">
+                {/* Línea guía visual para la firma */}
+                <div className="absolute w-full h-[2px] bg-black/20 bottom-12 pointer-events-none" />
                 <canvas 
                   ref={canvasRef}
                   width={384} // max-w-sm is 384px
@@ -213,7 +215,7 @@ export default function PerfilConfigClient({ userId, initialSignatureUrl, authId
                   onTouchStart={startDrawing}
                   onTouchMove={draw}
                   onTouchEnd={stopDrawing}
-                  className="w-full h-full touch-none"
+                  className="w-full h-full touch-none relative z-10"
                 />
               </div>
               <button 
