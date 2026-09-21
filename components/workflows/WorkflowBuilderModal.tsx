@@ -544,6 +544,7 @@ export function WorkflowBuilderModal({ orgId, documentId, documentTitle, onClose
               if (onSaveWorkflow) onSaveWorkflow(workflowData);
               onClose();
             }}
+            onBack={() => setStep('builder')}
           />
         )}
       </div>

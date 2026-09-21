@@ -29,6 +29,7 @@ interface DocumentSignatureCanvasProps {
   workflowData: WorkflowData;
   onFinish: () => void;
   onClose: () => void;
+  onBack?: () => void;
 }
 
 interface SignatureBox {
@@ -40,7 +41,7 @@ interface SignatureBox {
   height: number;
 }
 
-export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: DocumentSignatureCanvasProps) {
+export function DocumentSignatureCanvas({ workflowData, onFinish, onClose, onBack }: DocumentSignatureCanvasProps) {
   const [numPages, setNumPages] = useState<number>(0)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [boxes, setBoxes] = useState<SignatureBox[]>([])
@@ -176,6 +177,13 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
         </h2>
         <div className="flex items-center gap-4">
           <button 
+            onClick={onBack}
+            className="px-3 py-2 bg-[#27272a] hover:bg-[#3f3f46] text-[#e2e2e2] rounded-lg text-sm transition-colors border border-[#3f3f46] flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+            Volver a Editar
+          </button>
+          <button 
             onClick={handleFinalize}
             disabled={!isComplete || saving}
             className="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:bg-[#3f3f46] disabled:text-[#a1a1aa] disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"
@@ -300,8 +308,8 @@ export function DocumentSignatureCanvas({ workflowData, onFinish, onClose }: Doc
                     const dx = moveEvent.clientX - startX;
                     
                     // Maintain aspect ratio (approx 2.5 : 1)
-                    let newWidth = Math.max(100, Math.min(400, startWidth + dx));
-                    let newHeight = newWidth / 2.5;
+                    let newWidth = Math.round(Math.max(100, Math.min(400, startWidth + dx)));
+                    let newHeight = Math.round(newWidth / 2.5);
 
                     setBoxes(prev => prev.map(b => 
                       b.nodeId === box.nodeId 

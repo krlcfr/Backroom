@@ -79,10 +79,10 @@ export async function POST(
         workflow_node_id: pos.nodeId,
         assigned_user_id: targetAuthId,
         page_number: pos.pageNumber,
-        pos_x_percent: pos.xPercent,
-        pos_y_percent: pos.yPercent,
-        width_px: pos.width,
-        height_px: pos.height,
+        pos_x_percent: Math.round(pos.xPercent * 100) / 100, // keep 2 decimals if it's a float column, or use Math.round if integer
+        pos_y_percent: Math.round(pos.yPercent * 100) / 100,
+        width_px: Math.round(pos.width),
+        height_px: Math.round(pos.height),
         is_signed: false
       };
     });
