@@ -207,23 +207,7 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
     }
   }, [documentId]);
 
-  const handleResetToDraft = async () => {
-    if (!confirm('¿Estás seguro de anular y editar el flujo? Se eliminarán las posiciones de firma y deberás volver a iniciar el proceso.')) return;
-    
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/workflows/${workflowId}/reset-to-draft`, {
-        method: 'POST'
-      });
-      if (!res.ok) throw new Error('Error al revertir a borrador');
-      
-      toast.success('Flujo revertido a borrador exitosamente.');
-      window.location.reload();
-    } catch (e: any) {
-      toast.error(e.message);
-      setLoading(false);
-    }
-  };
+
 
   if (loading) return <div className="p-4 text-[#958da1] text-sm flex items-center gap-2"><span className="material-symbols-outlined animate-spin">refresh</span> Cargando estado del flujo...</div>;
   if (error) return <div className="p-4 text-[#958da1] text-sm">{error}</div>;
@@ -254,15 +238,7 @@ export function WorkflowStatusViewer({ documentId, hideActions = false }: Workfl
               <span className="flex items-center gap-1 text-[#ef4444]"><span className="w-2 h-2 rounded-full bg-[#ef4444]"></span> Rechazado</span>
             </div>
             
-            {workflowStatus === 'in_progress' && (
-              <button 
-                onClick={handleResetToDraft}
-                className="px-3 py-1.5 bg-[#ef4444]/10 hover:bg-[#ef4444]/20 text-[#ef4444] rounded-lg transition-colors border border-[#ef4444]/30 flex items-center gap-2"
-              >
-                <span className="material-symbols-outlined text-[16px]">edit_document</span>
-                Anular y Editar
-              </button>
-            )}
+
 
             <button 
               onClick={() => setShowHistory(!showHistory)}
