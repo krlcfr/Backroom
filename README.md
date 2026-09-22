@@ -1,81 +1,123 @@
-# BackRoom
+﻿# BackRoom - Plataforma Organizacional
 
-Plataforma web colaborativa de estudio y organización del conocimiento. Crea espacios (BackRooms), organiza salas temáticas, comparte recursos académicos y controla permisos de acceso.
-
-**Mockup en Stitch:** [https://stitch.withgoogle.com/projects/7610019985253129332?pli=1](https://stitch.withgoogle.com/projects/7610019985253129332?pli=1)
-**Repositorio de Documentación Institucional:** [https://github.com/cxcristian/BackRomm](https://github.com/cxcristian/BackRomm)
-
----
-
-## 1. Identificación y Propósito del Proyecto
-
-* **Nombre del Producto:** BackRoom.
-* **Código del Proyecto:** PRJ-ADSO-BR-2026.
-* **Problema Abordado:** Gestión descentralizada e insegura de recursos digitales en organizaciones y carencia de una estructura jerárquica con permisos granulares.
-* **Objetivo General:** Plataforma web para la gestión de espacios privados orientada a organizaciones, con almacenamiento seguro, permisos granulares por sala y auditoría.
-* **Equipo Responsable:** Santiago Pinzón (Líder y Responsable Técnico) y Cristian Giraldo (Responsable Funcional).
-* **Licencia:** Privada / Uso Académico SENA (Proyecto de Grado - ADSO Ficha 3114227).
+**Estado del Proyecto:** Versión Final v9.3.0 (Aprobado)
+**Enlace de Despliegue:** [BackRoom en Vercel](https://backroom.vercel.app)
+**Organización:** SENA - CTMA - ADSO Ficha 3114227
 
 ---
 
-## 2. Stack Tecnológico y Arquitectura
+## 1. Problema y Solución
 
-Arquitectura Monolítica Modular sobre Next.js:
-
-* **Frontend:** Next.js 16 (React 19) y Tailwind CSS v4.
-* **Backend / API:** Next.js Route Handlers con endpoints asegurados mediante JWT y validación con Zod.
-* **Base de Datos y Seguridad:** Supabase (PostgreSQL 15+) implementando Políticas de Seguridad a Nivel de Fila (RLS) para el aislamiento de datos y logs de auditoría (org_audit_logs).
-* **Pagos / Facturación:** Stripe SDK para la gestión de suscripciones y webhooks.
-* **Correo transaccional:** Resend (SMTP).
+* **Problema:** Gestión descentralizada, carencia de estructura jerárquica con permisos granulares y falta de flujos de aprobación seguros con firmas digitales (PKI) en organizaciones.
+* **Solución:** Plataforma web (BackRoom) que centraliza recursos, implementa un motor de flujos de trabajo (Workflows) con arrastrar y soltar (React Flow), firmas criptográficas inmutables (node-forge/pdf-lib), y control de acceso basado en roles (RBAC).
 
 ---
 
-## 3. Estado del Alcance Entregado (MVP v9.0)
+## 2. Características
 
-Este archivo declara explícitamente los componentes operativos y las limitaciones actuales del repositorio, de acuerdo al Principio de Transparencia y la versión actual real (v9.0).
-
-**Módulos Completos:**
-* Autenticación segura vía OAuth2 (Supabase Auth) y credenciales tradicionales.
-* Configuración y autoservicio de perfiles organizacionales, junto con la gestión de cargos (M-17).
-* Roles fijos (Propietario, Administrador, Miembro).
-* Gestión de BackRooms y árbol recursivo de salas (limitado a 3 niveles en Demo) apoyado por un Mapa de Flujo de Salas Radial.
-* Carga de recursos multiformato (docx, pptx, multimedia y links) con visores inmersivos.
-* Control de accesos mediante matriz de permisos granulares (RBAC).
-* Módulo de invitaciones y control de límites para cuentas Demo (100MB / 4 usuarios).
-* Pasarela de pagos funcional integrada con Stripe (pp/api/stripe).
-* Notificaciones in-app y alertas de sistema (M-16).
-
-**Deuda Técnica e Implementaciones Parciales:**
-* **Auditoría de Seguridad:** Las políticas SQL y RLS están configuradas en la base de datos, y los eventos se registran correctamente en org_audit_logs, pero el módulo no está construido completamente de forma visual en la interfaz de usuario con todos sus filtros avanzados.
-* **Flujos de Trabajo (Workflows / Firmas):** Aunque la lógica backend (rutas /api/workflows y /api/documents/*/signatures) está implementada y es capaz de gestionar aprobaciones y firmas de documentos, el lienzo canvas en React para dibujar diagramas es funcional e interactivo pero está catalogado como inestable debido a problemas parciales de conexión con el motor de ejecución y de persistencia directa desde la interfaz a la base de datos.
+* **Jerarquía Organizacional:** Estructura de "BackRooms" y "Salas" infinitas y recursivas.
+* **Gestor Documental:** Visores inmersivos para PDF, Office, imágenes, video y enlaces.
+* **Control de Acceso RBAC:** Políticas granulares y RLS en base de datos.
+* **Workflows y Firmas (Acta 72):** Motor de ejecución, diagramación visual, y firmas PKI inmutables generadas en el servidor.
+* **Pasarela de Pagos:** Integración con Stripe (Modo de prueba) manejando webhooks y límites de almacenamiento.
+* **Auditoría:** Registro de eventos del sistema e histórico de aprobaciones.
 
 ---
 
-## 4. Requisitos para Despliegue y Configuración Local
+## 3. Tecnologías
 
-El siguiente manual de operación rápida guía al evaluador a reconstruir el entorno local:
-
-1. **Requisitos Previos:** Node.js 20+, npm, cuentas en Supabase y Resend.
-2. **Clonar e Instalar:**
-   `ash
-   git clone <repo-url>
-   cd backroom
-   npm install
-   `
-3. **Variables de Entorno Mínimas:** Proveer un archivo .env.local creado a partir de .env.example (libre de secretos reales), que detalle los campos requeridos para conectar las instancias locales de Supabase, Stripe y Resend.
-4. **Comando de Arranque:** 
-pm run dev para levantar el entorno de desarrollo local (servidor en http://localhost:3000).
-5. **Ambiente de Demostración Inicial:** Al iniciar sesión por primera vez sin organización, el usuario accede a una Cuenta Demo local sin organización habilitada por defecto.
-6. **Estrategia de Datos Semilla:** Uso del script seeds/superadmin.ts para levantar el primer administrador del sistema mediante 
-pm run seed:superadmin.
+* **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS v4, React Flow (@xyflow/react).
+* **Backend:** Server Actions, API Routes, pdf-lib, node-forge, Zod.
+* **Base de Datos:** Supabase (PostgreSQL 15+ con RLS).
+* **Pagos:** Stripe SDK Node.js.
+* **Despliegue:** Vercel Edge Network.
 
 ---
 
-## 5. Advertencias y Defectos Conocidos (Sección de Alerta)
+## 4. Requisitos Previos
 
-> **Puntos Críticos de Atención Técnica:**
->
-> * **[DEF-01]** El lienzo visual de flujos no almacena datos de forma robusta debido a la falta de conexión estable entre el botón de guardar del Frontend y el Backend.
-> * **[DEF-02]** Existe un problema de experiencia de usuario (UX) que permite dibujar diagramas sin haber creado o guardado previamente un documento asociado.
-> * **[DEF-03]** El sistema carece actualmente de transacciones con soporte "Rollback" en la base de datos ante fallos en la inserción de múltiples nodos de flujos de trabajo.
-> * **[DEF-04]** Limitación conocida de pruebas automatizadas y CI/CD pendientes por configurar en el futuro despliegue sobre entornos standalone (Railway/Render).
+* Node.js v20+ y npm.
+* Cuenta en [Supabase](https://supabase.com).
+* Cuenta en [Stripe](https://stripe.com) (Test Mode).
+* Claves de Google reCAPTCHA v2.
+
+---
+
+## 5. Instalación
+
+Clonar el repositorio e instalar dependencias:
+`ash
+git clone <repo-url>
+cd backroom
+npm install
+`
+
+---
+
+## 6. Configuración
+
+1. Duplicar el archivo .env.example y renombrarlo a .env.local.
+2. Llenar las variables de Supabase (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY).
+3. Llenar las variables de Stripe y reCAPTCHA.
+*Asegúrese de no incluir variables reales de producción.*
+
+---
+
+## 7. Migraciones y Semillas
+
+Para preparar la base de datos desde cero, ejecute en el panel SQL de Supabase los archivos ubicados en /supabase/migrations en orden cronológico.
+Para inyectar el primer administrador:
+`ash
+npm run seed:superadmin
+`
+
+---
+
+## 8. Ejecución
+
+* **Desarrollo:** 
+pm run dev (Disponible en http://localhost:3000)
+* **Producción (Build Local):** 
+pm run build y luego 
+pm start.
+
+---
+
+## 9. Pruebas
+
+El repositorio incluye soporte para pruebas automatizadas utilizando Vitest.
+`ash
+npm run test
+`
+
+---
+
+## 10. Despliegue
+
+La infraestructura ha sido migrada a **Vercel** (Ver ADR-002 en /docs/adr).
+El despliegue es automático (CI/CD) al realizar un merge hacia la rama main.
+
+---
+
+## 11. Estructura
+
+* /app: Código fuente principal (App Router, API Webhooks).
+* /components: Interfaz de usuario (UI), modales y lienzos React Flow.
+* /lib: Lógica de negocio (Supabase, criptografía PKI con node-forge).
+* /docs: Documentación viva (ADRs, arquitectura, diccionario de datos).
+* /supabase/migrations: Evolución del esquema de base de datos.
+* /public: Recursos estáticos no confidenciales.
+
+---
+
+## 12. Autores y Contribuciones
+
+* **Santiago Pinzón:** Líder Técnico, Arquitectura Vercel, Workflows, Infraestructura PKI.
+* **Cristian Giraldo:** Responsable de Calidad (QA), Base de Datos, Frontend UI, Documentación Funcional.
+
+---
+
+## 13. Licencia
+
+Privada / Uso Académico SENA (Proyecto de Grado - ADSO Ficha 3114227).
+Incluye atribuciones de copyright para React, Next.js, Supabase, Stripe y librerías de terceros (MIT / BSD).
