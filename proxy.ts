@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import { updateSession } from "@/lib/supabase/session";
 import { checkRateLimit, rateLimitResponse } from "@/lib/auth/rate-limit";
 
 export async function proxy(request: NextRequest) {
