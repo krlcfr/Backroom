@@ -272,16 +272,18 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
       }
       
       if (res.ok) {
+        let finalId = savedDocumentId;
         if (!savedDocumentId) {
           const result = await res.json();
           const newId = result.data?.id;
           if (newId) {
             setSavedDocumentId(newId);
+            finalId = newId;
           }
         }
         
         toast.success("Documento guardado exitosamente en Backroom.", { id: 'pdf-toast' });
-        return true;
+        return finalId;
       } else {
         const err = await res.json();
         toast.error("Error al guardar: " + (err.error || "Desconocido"), { id: 'pdf-toast' });
@@ -581,15 +583,12 @@ export function DocumentCreationWizardModal({ onClose, orgId, roomId, onAddResou
 
                   <button 
                     onClick={async () => {
-                      if (savedDocumentId) {
+                      const savedId = await handleSaveDB(false);
+                      if (savedId) {
+                        // Si es la primera vez, el ID devuelto asegurará que el modal se abra 
+                        // aunque React no haya renderizado el estado todavía.
+                        setSavedDocumentId(savedId as string);
                         setStep('workflow');
-                      } else {
-                        const success = await handleSaveDB(false);
-                        if (success) {
-                          setStep('workflow');
-                        } else {
-                          toast("No se pudo guardar automáticamente el documento para asignarle un flujo.");
-                        }
                       }
                     }}
                     className="px-4 py-2 text-white rounded-lg text-sm transition-colors flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9]"
