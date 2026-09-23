@@ -155,7 +155,27 @@ function RegistroForm() {
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3.5">
-          <div className="flex flex-col gap-1.5">
+          {/* Captcha requirement notice */}
+          {!captchaToken && (
+            <div className="flex items-start gap-3 rounded-lg border border-[#7c3aed]/30 bg-[#7c3aed]/10 p-3 text-[#d2bbff]">
+              <span className="material-symbols-outlined text-[18px]">info</span>
+              <p className="text-[12px] leading-relaxed">
+                Por favor, completa la prueba <strong>"No soy un robot"</strong> primero para habilitar los campos.
+              </p>
+            </div>
+          )}
+
+          {/* Captcha */}
+          <CaptchaWidget
+            ref={captchaRef}
+            onChange={(token) => {
+              setCaptchaToken(token)
+              if (token) setErrors((prev) => ({ ...prev, captcha: "" }))
+            }}
+          />
+          {errors.captcha && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.captcha}</p>}
+
+          <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${!captchaToken ? 'opacity-50' : ''}`}>
             <label htmlFor="username" className="text-xs font-medium text-[#ccc3d8]">
               Nombre de usuario
             </label>
@@ -168,31 +188,33 @@ function RegistroForm() {
               <input
                 id="username"
                 type="text"
+                disabled={!captchaToken}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="janedoe"
-                className="w-full bg-transparent px-2 py-2 text-sm font-mono text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
+                className="w-full bg-transparent px-2 py-2 text-sm font-mono text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none disabled:cursor-not-allowed"
               />
             </div>
             {errors.username && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.username}</p>}
           </div>
   
-          <div className="flex flex-col gap-1.5">
+          <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${!captchaToken ? 'opacity-50' : ''}`}>
             <label htmlFor="email" className="text-xs font-medium text-[#ccc3d8]">
               Correo electrónico
             </label>
             <input
               id="email"
               type="email"
+              disabled={!captchaToken}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="jane@example.com"
-              className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
+              className={`${inputBase} ${errors.email ? inputError : inputNormal} disabled:cursor-not-allowed`}
             />
             {errors.email && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.email}</p>}
           </div>
   
-          <div className="flex flex-col gap-1.5">
+          <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${!captchaToken ? 'opacity-50' : ''}`}>
             <label htmlFor="password" className="text-xs font-medium text-[#ccc3d8]">
               Contraseña
             </label>
@@ -204,14 +226,16 @@ function RegistroForm() {
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                disabled={!captchaToken}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-transparent px-3 py-2 text-sm tracking-widest text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
+                className="w-full bg-transparent px-3 py-2 text-sm tracking-widest text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none disabled:cursor-not-allowed"
               />
               <button
                 type="button"
+                disabled={!captchaToken}
                 onClick={() => setShowPassword((v) => !v)}
-                className="cursor-pointer p-1 text-[#ccc3d8] hover:text-[#e2e2e2]"
+                className="cursor-pointer p-1 text-[#ccc3d8] hover:text-[#e2e2e2] disabled:cursor-not-allowed"
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
@@ -220,7 +244,7 @@ function RegistroForm() {
             {errors.password && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.password}</p>}
           </div>
   
-          <div className="flex flex-col gap-1.5">
+          <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${!captchaToken ? 'opacity-50' : ''}`}>
             <label htmlFor="confirmPassword" className="text-xs font-medium text-[#ccc3d8]">
               Confirmar contraseña
             </label>
@@ -232,14 +256,16 @@ function RegistroForm() {
               <input
                 id="confirmPassword"
                 type={showConfirm ? "text" : "password"}
+                disabled={!captchaToken}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-transparent px-3 py-2 text-sm tracking-widest text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none"
+                className="w-full bg-transparent px-3 py-2 text-sm tracking-widest text-[#e2e2e2] placeholder:text-[#ccc3d8]/50 focus:outline-none disabled:cursor-not-allowed"
               />
               <button
                 type="button"
+                disabled={!captchaToken}
                 onClick={() => setShowConfirm((v) => !v)}
-                className="cursor-pointer p-1 text-[#ccc3d8] hover:text-[#e2e2e2]"
+                className="cursor-pointer p-1 text-[#ccc3d8] hover:text-[#e2e2e2] disabled:cursor-not-allowed"
                 aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {showConfirm ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
@@ -277,15 +303,7 @@ function RegistroForm() {
             </span>
           </div>
 
-          {/* Captcha */}
-          <CaptchaWidget
-            ref={captchaRef}
-            onChange={(token) => {
-              setCaptchaToken(token)
-              if (token) setErrors((prev) => ({ ...prev, captcha: "" }))
-            }}
-          />
-          {errors.captcha && <p className="text-[11px] font-medium text-[#ffb4ab]">{errors.captcha}</p>}
+
 
           <button
             type="submit"

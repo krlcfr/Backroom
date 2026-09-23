@@ -190,8 +190,27 @@ function LoginForm() {
             </p>
           )}
 
+          {/* Captcha requirement notice */}
+          {!captchaToken && (
+            <div className="flex items-start gap-3 rounded-lg border border-[#7c3aed]/30 bg-[#7c3aed]/10 p-3 text-[#d2bbff]">
+              <span className="material-symbols-outlined text-[18px]">info</span>
+              <p className="text-[12px] leading-relaxed">
+                Por favor, completa la prueba <strong>"No soy un robot"</strong> primero para habilitar los campos.
+              </p>
+            </div>
+          )}
+
+          {/* Captcha */}
+          <CaptchaWidget
+            ref={captchaRef}
+            onChange={(token) => {
+              setCaptchaToken(token)
+              if (token) setError("")
+            }}
+          />
+
           {/* Email Input */}
-          <div className="flex flex-col gap-1.5">
+          <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${!captchaToken ? 'opacity-50' : ''}`}>
             <label className="text-[12px] font-medium tracking-wide text-[#e2e2e2]" htmlFor="email">
               Correo electrónico
             </label>
@@ -203,16 +222,17 @@ function LoginForm() {
                 id="email"
                 type="email"
                 required
+                disabled={!captchaToken}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@empresa.com"
-                className="w-full bg-[#121414] border border-[#4a4455] rounded-lg py-2.5 pl-10 pr-4 text-[#e2e2e2] text-[14px] placeholder:text-[#ccc3d8]/50 focus:border-[#7c3aed] focus:ring-0 transition-colors"
+                className="w-full bg-[#121414] border border-[#4a4455] rounded-lg py-2.5 pl-10 pr-4 text-[#e2e2e2] text-[14px] placeholder:text-[#ccc3d8]/50 focus:border-[#7c3aed] focus:ring-0 transition-colors disabled:cursor-not-allowed"
               />
             </div>
           </div>
 
           {/* Password Input */}
-          <div className="flex flex-col gap-1.5">
+          <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${!captchaToken ? 'opacity-50' : ''}`}>
             <div className="flex justify-between items-center">
               <label className="text-[12px] font-medium tracking-wide text-[#e2e2e2]" htmlFor="password">
                 Contraseña
@@ -229,15 +249,17 @@ function LoginForm() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 required
+                disabled={!captchaToken}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-[#121414] border border-[#4a4455] rounded-lg py-2.5 pl-10 pr-10 text-[#e2e2e2] text-[14px] placeholder:text-[#ccc3d8]/50 focus:border-[#7c3aed] focus:ring-0 transition-colors"
+                className="w-full bg-[#121414] border border-[#4a4455] rounded-lg py-2.5 pl-10 pr-10 text-[#e2e2e2] text-[14px] placeholder:text-[#ccc3d8]/50 focus:border-[#7c3aed] focus:ring-0 transition-colors disabled:cursor-not-allowed"
               />
               <button
                 type="button"
+                disabled={!captchaToken}
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors flex items-center justify-center"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ccc3d8] hover:text-[#e2e2e2] transition-colors flex items-center justify-center disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined text-[20px]">
                   {showPassword ? "visibility" : "visibility_off"}
@@ -245,15 +267,6 @@ function LoginForm() {
               </button>
             </div>
           </div>
-
-          {/* Captcha */}
-          <CaptchaWidget
-            ref={captchaRef}
-            onChange={(token) => {
-              setCaptchaToken(token)
-              if (token) setError("")
-            }}
-          />
 
           {/* Submit Button */}
           <button

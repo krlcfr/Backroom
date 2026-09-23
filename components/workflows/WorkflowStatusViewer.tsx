@@ -404,7 +404,14 @@ export function WorkflowActionsPanel({ workflowId, nodes, onActionComplete, orgI
         
         {myActiveNode.action_required === 'sign' ? (
           <button 
-            onClick={() => setPasswordModal({ isOpen: true, nodeId: myActiveNode.id })}
+            onClick={() => {
+              if (currentUser?.providers?.includes('google')) {
+                // Si es Google, firmamos directamente enviando un password vacío (el backend lo ignorará)
+                handleAction('approved', myActiveNode.id, 'google-oauth-bypass');
+              } else {
+                setPasswordModal({ isOpen: true, nodeId: myActiveNode.id });
+              }
+            }}
             disabled={loading}
             className="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-xs font-semibold rounded-lg transition-colors shadow-lg flex items-center gap-2 disabled:opacity-50"
           >

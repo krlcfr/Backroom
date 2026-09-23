@@ -15,6 +15,7 @@ export async function GET() {
       {
         ...perfil,
         avatar_url: (user.user_metadata?.avatar_url as string) ?? null,
+        providers: user.app_metadata?.providers || [],
       },
       { status: 200 }
     );
