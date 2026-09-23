@@ -16,26 +16,29 @@ export async function POST(
     const { id, nodeId } = await params;
     const body = await req.json();
     
-    // We expect the user's login password for confirmation (2FA-like)
-    const { password } = body;
-    if (!password) {
-      throw new ApiError(400, "Debe ingresar su contraseña para firmar");
-    }
-
     const supabase = await createClient();
 
     // 1. Validate user password (re-auth check)
-    // We get the user's email from auth
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser?.email) throw new ApiError(401, "No se encontró el email del usuario");
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: authUser.email,
-      password: password
-    });
+    // Bypass password check if user logged in via Google OAuth
+    const isGoogleUser = authUser.app_metadata?.providers?.includes('google');
+    
+    if (!isGoogleUser) {
+      const { password } = body;
+      if (!password) {
+        throw new ApiError(400, "Debe ingresar su contraseña para firmar");
+      }
 
-    if (signInError) {
-      throw new ApiError(401, "Contraseña incorrecta. La firma no fue autorizada.");
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: authUser.email,
+        password: password
+      });
+
+      if (signInError) {
+        throw new ApiError(401, "Contraseña incorrecta. La firma no fue autorizada.");
+      }
     }
 
     // 2. Fetch Workflow and Document
